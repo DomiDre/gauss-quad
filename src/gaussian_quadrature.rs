@@ -1,24 +1,6 @@
 use crate::hermite;
 use crate::legendre;
 
-pub trait QuadratureRule {
-    fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>);
-}
-
-pub trait DefiniteIntegral {
-    fn argument_transformation(x: f64, a: f64, b: f64) -> f64;
-    fn scale_factor(a: f64, b: f64) -> f64;
-    fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
-    where
-        F: Fn(f64) -> f64;
-}
-
-pub trait ImproperIntegral {
-    fn integrate<F>(&self, integrand: F) -> f64
-    where
-        F: Fn(f64) -> f64;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
