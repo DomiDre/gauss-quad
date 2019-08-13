@@ -14,3 +14,4 @@ crate-type = ["cdylib", "lib"]
 
 [dependencies]
 nalgebra = "0.18"
+assert_float_eq = "1.1.3"
