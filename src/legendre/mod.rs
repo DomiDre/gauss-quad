@@ -1,4 +1,4 @@
-use crate::{DMatrixf64, DefiniteIntegral, QuadratureRule};
+use crate::{DMatrixf64};
 
 pub struct GaussLegendre {
     pub nodes: Vec<f64>,
@@ -11,9 +11,7 @@ impl GaussLegendre {
 
         GaussLegendre { nodes, weights }
     }
-}
 
-impl QuadratureRule for GaussLegendre {
     /// Apply Golub-Welsch algorithm to determine Gauss-Legendre nodes & weights
     /// construct companion matrix A for the Hermite Polynomial using the relation:
     /// (n+1)/(2n+1) P_{n+1} + n/(2n+1) P_{n-1} = x P_n
@@ -23,7 +21,7 @@ impl QuadratureRule for GaussLegendre {
     /// 0 on the diagonal & n/sqrt(4n^2 - 1) on the off-diagonal.
     /// Root & weight finding are equivalent to eigenvalue problem.
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
-    fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>) {
+    pub fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>) {
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
         // Initialize symmetric companion matrix
         for idx in 0..deg - 1 {
@@ -45,9 +43,7 @@ impl QuadratureRule for GaussLegendre {
             .clone();
         (nodes, weights)
     }
-}
 
-impl DefiniteIntegral for GaussLegendre {
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
         0.5 * ((b - a) * x + (b + a))
     }
@@ -57,7 +53,7 @@ impl DefiniteIntegral for GaussLegendre {
     }
 
     /// Perform quadrature of integrand using given nodes x and weights w
-    fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
     {

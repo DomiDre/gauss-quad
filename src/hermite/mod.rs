@@ -1,4 +1,4 @@
-use crate::{DMatrixf64, ImproperIntegral, QuadratureRule, PI};
+use crate::{DMatrixf64, PI};
 
 pub struct GaussHermite {
     pub nodes: Vec<f64>,
@@ -11,9 +11,7 @@ impl GaussHermite {
 
         GaussHermite { nodes, weights }
     }
-}
 
-impl QuadratureRule for GaussHermite {
     /// Apply Golub-Welsch algorithm to determine Gauss-Hermite nodes & weights
     /// construct companion matrix A for the Hermite Polynomial using the relation:
     /// 1/2 H_{n+1} + n H_{n-1} = x H_n
@@ -22,7 +20,7 @@ impl QuadratureRule for GaussHermite {
     /// 0 on the diagonal & sqrt(n/2) on the off-diagonal
     /// root & weight finding are equivalent to eigenvalue problem
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
-    fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>) {
+    pub fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>) {
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
         // Initialize symmetric companion matrix
         for idx in 0..deg - 1 {
@@ -44,11 +42,9 @@ impl QuadratureRule for GaussHermite {
             .clone();
         (nodes, weights)
     }
-}
 
-impl ImproperIntegral for GaussHermite {
     /// Perform quadrature of integrand using given nodes x and weights w
-    fn integrate<F>(&self, integrand: F) -> f64
+    pub fn integrate<F>(&self, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
     {
@@ -61,6 +57,7 @@ impl ImproperIntegral for GaussHermite {
         result
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;

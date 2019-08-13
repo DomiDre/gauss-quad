@@ -7,19 +7,19 @@ The ``gauss-quad`` crate is a small library to calculate integrals of the type
 
  using Gaussian quadrature.
 
- To use the crate, the desired quadrature rule and the trait whether it is a DefiniteIntegral or ImproperIntegral has to be included in the program, e.g. for a Gauss-Legendre rule
+ To use the crate, the desired quadrature rule  has to be included in the program, e.g. for a Gauss-Legendre rule
  
  ```
-  use gauss_quad::{GaussLegendre, DefiniteIntegral};
+  use gauss_quad::GaussLegendre;
  ```
  
  The general call structure is to first initialize the n-point quadrature rule setting the degree n via
 
 ```
- let quadrature = gauss_quad::QUADRATURE_RULE::init(n);
+ let quadrature = QUADRATURE_RULE::init(n);
 ```
 
-where QUADRATURE_RULE can currently be either of:
+where QUADRATURE_RULE can currently be either:
 
 ```
 GaussLegendre
