@@ -1,7 +1,7 @@
-gauss_quad
+gauss-quad
 =========
 
-The ``gauss_quad`` crate is a small library to calculate integrals of the type
+The ``gauss-quad`` crate is a small library to calculate integrals of the type
 
  ![equation](https://latex.codecogs.com/svg.latex?%5Cint_a%5Eb%20f%28x%29%20w%28x%29%20%5Cmathrm%7Bd%7Dx)
 
