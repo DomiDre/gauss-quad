@@ -9,7 +9,6 @@ pub type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dyn
 pub use std::f64::consts::PI;
 
 pub mod gaussian_quadrature;
-pub use gaussian_quadrature::{QuadratureRule, DefiniteIntegral, ImproperIntegral};
 
 pub mod hermite;
 pub use hermite::GaussHermite;
