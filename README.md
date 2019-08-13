@@ -16,7 +16,7 @@ The ``gauss-quad`` crate is a small library to calculate integrals of the type
  The general call structure is to first initialize the n-point quadrature rule setting the degree n via
 
 ```
- let quadrature = QUADRATURE_RULE::init(n);
+ let quad = QUADRATURE_RULE::init(n);
 ```
 
 where QUADRATURE_RULE can currently be either:
