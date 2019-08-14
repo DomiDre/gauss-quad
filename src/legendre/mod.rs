@@ -1,4 +1,4 @@
-use crate::{DMatrixf64};
+use crate::DMatrixf64;
 
 pub struct GaussLegendre {
     pub nodes: Vec<f64>,
