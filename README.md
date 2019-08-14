@@ -27,7 +27,7 @@ where QUADRATURE_RULE can currently be set to calculate either:
 | -------------    | ------------- |
 | GaussLegendre    | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_a%5Eb%20f%28x%29%20%5Cmathrm%7Bd%7Dx)  |
 | GaussJacobi      | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_a%5Eb%20f%28x%29%281-x%29%5E%5Calpha%20%281&plus;x%29%5E%5Cbeta%20%5Cmathrm%7Bd%7Dx)  |
-| GaussLaguerre    | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_%7B-%5Cinfty%7D%5E%5Cinfty%20f%28x%29%20e%5E%7B-x%7D%20%5Cmathrm%7Bd%7Dx)  |
+| GaussLaguerre    | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_%7B-%5Cinfty%7D%5E%5Cinfty%20f%28x%29x%5E%5Calpha%20e%5E%7B-x%7D%20%5Cmathrm%7Bd%7Dx)  |
 | GaussHermite     | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_%7B-%5Cinfty%7D%5E%5Cinfty%20f%28x%29%20e%5E%7B-x%5E2%7D%20%5Cmathrm%7Bd%7Dx)  |
 
 For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
