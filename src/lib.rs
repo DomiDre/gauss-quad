@@ -18,3 +18,6 @@ pub use legendre::GaussLegendre;
 
 pub mod laguerre;
 pub use laguerre::GaussLaguerre;
+
+pub mod jacobi;
+pub use jacobi::GaussJacobi;
