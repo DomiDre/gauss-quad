@@ -64,7 +64,7 @@ impl GaussJacobi {
         let (mut nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
 
         // TO FIX: implement correction
-        // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees 
+        // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
         // for now... manual correction seems to do the trick
         if deg & 1 == 1 {
             nodes[deg / 2] = 0.0;
@@ -72,8 +72,16 @@ impl GaussJacobi {
         (nodes, weights)
     }
 
+    fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
+        0.5 * ((b - a) * x + (b + a))
+    }
+
+    fn scale_factor(a: f64, b: f64) -> f64 {
+        0.5 * (b - a)
+    }
+
     /// Perform quadrature of integrand using given nodes x and weights w
-    pub fn integrate<F>(&self, integrand: F) -> f64
+    pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
     {
@@ -81,9 +89,11 @@ impl GaussJacobi {
             .nodes
             .iter()
             .zip(self.weights.iter())
-            .map(|(x_val, w_val)| (integrand)(x_val.clone()) * w_val)
+            .map(|(x_val, w_val)| {
+                (integrand)((GaussJacobi::argument_transformation)(x_val.clone(), a, b)) * w_val
+            })
             .sum();
-        result
+        (GaussJacobi::scale_factor)(a, b) * result
     }
 }
 
