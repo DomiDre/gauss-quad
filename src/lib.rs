@@ -15,3 +15,6 @@ pub use hermite::GaussHermite;
 
 pub mod legendre;
 pub use legendre::GaussLegendre;
+
+pub mod laguerre;
+pub use laguerre::GaussLaguerre;

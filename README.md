@@ -26,6 +26,7 @@ where QUADRATURE_RULE can currently be set to calculate either:
 | QUADRATURE_RULE  | Integral      |
 | -------------    | ------------- |
 | GaussLegendre    | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_a%5Eb%20f%28x%29%20%5Cmathrm%7Bd%7Dx)  |
+| GaussLaguerre    | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_%7B-%5Cinfty%7D%5E%5Cinfty%20f%28x%29%20e%5E%7B-x%7D%20%5Cmathrm%7Bd%7Dx)  |
 | GaussHermite     | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_%7B-%5Cinfty%7D%5E%5Cinfty%20f%28x%29%20e%5E%7B-x%5E2%7D%20%5Cmathrm%7Bd%7Dx)  |
 
 
@@ -41,7 +42,7 @@ For example to integrate a parabola from 0..1 one can use a lambda expression as
 let integral = quad.integrate(0.0, 1.0, |x| x*x);
 ```
 
-If the integral is improper, as in the case of Gauss Hermite integrals no integral bounds should be passed and the call simplifies to
+If the integral is improper, as in the case of Gauss-Laguerre and Gauss-Hermite integrals, no integral bounds should be passed and the call simplifies to
 ```
 let integral = quad.integrate(f(x));
 ```
