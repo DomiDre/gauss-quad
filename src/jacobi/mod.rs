@@ -89,11 +89,13 @@ impl GaussJacobi {
             .nodes
             .iter()
             .zip(self.weights.iter())
-            .map(|(x_val, w_val)| {
-                (integrand)((GaussJacobi::argument_transformation)(x_val.clone(), a, b)) * w_val
+            .map(|(&x_val, w_val)| {
+                integrand(
+                    GaussJacobi::argument_transformation(x_val, a, b)
+                ) * w_val
             })
             .sum();
-        (GaussJacobi::scale_factor)(a, b) * result
+        GaussJacobi::scale_factor(a, b) * result
     }
 }
 
