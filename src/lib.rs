@@ -172,3 +172,6 @@ pub use laguerre::GaussLaguerre;
 
 pub mod jacobi;
 pub use jacobi::GaussJacobi;
+
+pub mod midpoint;
+pub use midpoint::Midpoint;
