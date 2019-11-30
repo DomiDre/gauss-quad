@@ -61,15 +61,13 @@ impl GaussLegendre {
             .nodes
             .iter()
             .zip(self.weights.iter())
-            .map(|(x_val, w_val)| {
-                (integrand)((GaussLegendre::argument_transformation)(
-                    x_val.clone(),
-                    a,
-                    b,
-                )) * w_val
+            .map(|(&x_val, w_val)| {
+                integrand(
+                    GaussLegendre::argument_transformation(x_val, a, b,)
+                ) * w_val
             })
             .sum();
-        (GaussLegendre::scale_factor)(a, b) * result
+        GaussLegendre::scale_factor(a, b) * result
     }
 }
 

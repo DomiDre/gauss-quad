@@ -70,7 +70,7 @@ impl GaussLaguerre {
             .nodes
             .iter()
             .zip(self.weights.iter())
-            .map(|(x_val, w_val)| (integrand)(x_val.clone()) * w_val)
+            .map(|(&x_val, w_val)| integrand(x_val) * w_val)
             .sum();
         result
     }
