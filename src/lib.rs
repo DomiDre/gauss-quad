@@ -15,7 +15,7 @@ First, add **gauss-quad** to your `Cargo.toml`:
 
 ```text
 [dependencies]
-gauss-quad = "0.1.2"
+gauss-quad = "0.1.3"
 ```
 
 Then, you can use any of the quadrature rules in your project:
