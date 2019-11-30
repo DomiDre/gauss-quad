@@ -47,14 +47,27 @@ fn main() {
 !*/
 
 #[derive(Debug, Clone)]
+/// A midpoint rule quadrature scheme.
+/// ```
+/// # extern crate gauss_quad;
+/// # use gauss_quad::Midpoint;
+/// # fn main() {
+/// #
+/// // initialize a midpoint rule with 100 cells
+/// let quad: Midpoint = Midpoint::init(100);
+///
+/// // numerically integrate a function from -1.0 to 1.0 using the midpoint rule
+/// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
+/// # }
+/// ```
 pub struct Midpoint {
     /// The dimensionless midpoints 
     nodes: Vec<f64>, 
 }
 
 impl Midpoint {
-    
-    /// Initialize a new midpoint rule with number of rectangles `degree`. 
+
+    /// Initialize a new midpoint rule with `degree` number of cells.
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/
     pub fn init(degree: usize) -> Self {
@@ -74,8 +87,8 @@ impl Midpoint {
 
         nodes 
     }
- 
-    /// Integrate over the domain [a, b] 
+
+    /// Integrate over the domain [a, b].
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
@@ -91,13 +104,3 @@ impl Midpoint {
         sum * rect_width 
     }
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-// 
-//     #[test]
-//     fn piecewise() { 
-//         let     
-//     }
-// }
