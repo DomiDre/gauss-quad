@@ -93,7 +93,6 @@ impl Midpoint {
     where
         F: Fn(f64) -> f64,
     {
-        assert!(a < b, "a must be smaller than b, got a = {}, b = {}", a, b);
         let rect_width = (b - a) / self.nodes.len() as f64; 
 
         let sum: f64 = self.nodes
