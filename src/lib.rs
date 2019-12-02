@@ -156,19 +156,25 @@ fn main() {
 extern crate assert_float_eq;
 
 use nalgebra::{Dynamic, Matrix, VecStorage};
+#[doc(inline)]
 pub type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dynamic>>;
+#[doc(inline)]
 pub use std::f64::consts::PI;
 
 pub mod gaussian_quadrature;
-
 pub mod hermite;
-pub use hermite::GaussHermite;
-
 pub mod legendre;
-pub use legendre::GaussLegendre;
-
 pub mod laguerre;
-pub use laguerre::GaussLaguerre;
-
 pub mod jacobi;
+pub mod midpoint;
+
+#[doc(inline)]
+pub use hermite::GaussHermite;
+#[doc(inline)]
+pub use legendre::GaussLegendre;
+#[doc(inline)]
+pub use laguerre::GaussLaguerre;
+#[doc(inline)]
 pub use jacobi::GaussJacobi;
+#[doc(inline)]
+pub use midpoint::Midpoint;
