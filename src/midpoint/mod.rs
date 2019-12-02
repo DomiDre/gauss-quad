@@ -71,7 +71,7 @@ impl Midpoint {
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/
     pub fn init(degree: usize) -> Self {
-        assert!(degree > 1, "Degree of Midpoint rule needs to be >= 1");
+        assert!(degree >= 1, "Degree of Midpoint rule needs to be >= 1");
         Self {   
             nodes: Self::nodes(degree), 
         }
