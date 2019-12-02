@@ -73,12 +73,12 @@ impl Midpoint {
     pub fn init(degree: usize) -> Self {
         assert!(degree > 1, "Degree of Midpoint rule needs to be >= 1");
         Self {   
-            nodes: Self::make_nodes(degree), 
+            nodes: Self::nodes(degree), 
         }
     }
     
     /// Make a set of evenly spaced nodes
-    fn make_nodes(degree: usize) -> Vec<f64> { 
+    fn nodes(degree: usize) -> Vec<f64> { 
         let mut nodes = Vec::new(); 
         nodes.reserve(degree); 
         for idx in 0..degree { 
@@ -104,3 +104,17 @@ impl Midpoint {
         sum * rect_width 
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn check_midpoint_integration() {
+        let quad = Midpoint::init(100);
+        let integral = quad.integrate(0.0, 1.0, |x| x*x);
+        assert_float_absolute_eq!(integral, 1.0/3.0, 0.0001);
+    }
+}
+
