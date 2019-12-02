@@ -9,13 +9,15 @@
 * Gauss-Jacobi
 * Gauss-Laguerre
 * Gauss-Hermite
+* Midpoint
+* Simpson
 
 ## Using **gauss-quad**
 First, add **gauss-quad** to your `Cargo.toml`:
 
 ```text
 [dependencies]
-gauss-quad = "0.1.3"
+gauss-quad = "0.1.4"
 ```
 
 Then, you can use any of the quadrature rules in your project:
@@ -167,6 +169,7 @@ pub mod legendre;
 pub mod laguerre;
 pub mod jacobi;
 pub mod midpoint;
+pub mod simpson;
 
 #[doc(inline)]
 pub use hermite::GaussHermite;
@@ -178,3 +181,5 @@ pub use laguerre::GaussLaguerre;
 pub use jacobi::GaussJacobi;
 #[doc(inline)]
 pub use midpoint::Midpoint;
+#[doc(inline)]
+pub use simpson::Simpson;

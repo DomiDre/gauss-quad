@@ -71,14 +71,14 @@ impl Midpoint {
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/
     pub fn init(degree: usize) -> Self {
-        assert!(degree > 1, "Degree of Midpoint rule needs to be >= 1");
+        assert!(degree >= 1, "Degree of Midpoint rule needs to be >= 1");
         Self {   
-            nodes: Self::make_nodes(degree), 
+            nodes: Self::nodes(degree), 
         }
     }
     
     /// Make a set of evenly spaced nodes
-    fn make_nodes(degree: usize) -> Vec<f64> { 
+    fn nodes(degree: usize) -> Vec<f64> { 
         let mut nodes = Vec::new(); 
         nodes.reserve(degree); 
         for idx in 0..degree { 
@@ -93,7 +93,6 @@ impl Midpoint {
     where
         F: Fn(f64) -> f64,
     {
-        assert!(a < b, "a must be smaller than b, got a = {}, b = {}", a, b);
         let rect_width = (b - a) / self.nodes.len() as f64; 
 
         let sum: f64 = self.nodes
@@ -104,3 +103,17 @@ impl Midpoint {
         sum * rect_width 
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn check_midpoint_integration() {
+        let quad = Midpoint::init(100);
+        let integral = quad.integrate(0.0, 1.0, |x| x*x);
+        assert_float_absolute_eq!(integral, 1.0/3.0, 0.0001);
+    }
+}
+
