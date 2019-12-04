@@ -170,6 +170,7 @@ pub mod laguerre;
 pub mod jacobi;
 pub mod midpoint;
 pub mod simpson;
+pub mod romberg;
 
 #[doc(inline)]
 pub use hermite::GaussHermite;
@@ -183,3 +184,5 @@ pub use jacobi::GaussJacobi;
 pub use midpoint::Midpoint;
 #[doc(inline)]
 pub use simpson::Simpson;
+#[doc(inline)]
+pub use romberg::Romberg;
