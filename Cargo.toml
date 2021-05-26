@@ -13,6 +13,6 @@ repository = "https://github.com/domidre/gauss-quad"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
-nalgebra = "0.18"
+nalgebra = "0.26"
 assert_float_eq = "1.1.3"
-statrs = "0.11.0"
+statrs = "0.14"
