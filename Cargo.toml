@@ -1,6 +1,6 @@
 [package]
 name = "gauss-quad"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["DomiDre <dominiquedresen@gmail.com>"]
 edition = "2018"
 description = "Library for applying Gaussian quadrature to integrate a function"
