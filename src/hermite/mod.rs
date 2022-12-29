@@ -65,7 +65,6 @@ mod tests {
     #[test]
     fn golub_welsch_3() {
         let (x, w) = GaussHermite::nodes_and_weights(3);
-        println!("{:?}", x);
         let x_should = [1.224744871391589049099, 0.0, -1.224744871391589049099];
         let w_should = [
             0.295408975150919337883,
@@ -73,10 +72,10 @@ mod tests {
             0.295408975150919337883,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
         }
     }
 }
