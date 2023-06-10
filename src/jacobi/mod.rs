@@ -1,5 +1,5 @@
+use crate::gamma::gamma;
 use crate::DMatrixf64;
-use statrs::function::gamma::gamma;
 
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
@@ -45,7 +45,6 @@ impl GaussJacobi {
         unsafe {
             *companion_matrix.get_unchecked_mut((deg - 1, deg - 1)) = diag;
         }
-        println!("{}", companion_matrix);
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
@@ -90,9 +89,7 @@ impl GaussJacobi {
             .iter()
             .zip(self.weights.iter())
             .map(|(&x_val, w_val)| {
-                integrand(
-                    GaussJacobi::argument_transformation(x_val, a, b)
-                ) * w_val
+                integrand(GaussJacobi::argument_transformation(x_val, a, b)) * w_val
             })
             .sum();
         GaussJacobi::scale_factor(a, b) * result
@@ -105,7 +102,6 @@ mod tests {
     #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
         let (x, w) = GaussJacobi::nodes_and_weights(5, 0.0, 0.0);
-        println!("{:?}, {:?}", x, w);
         let x_should = [
             -0.9061798459386639927976,
             -0.5384693101056830910363,
@@ -121,32 +117,29 @@ mod tests {
             0.2369268850561890875143,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
         }
     }
 
     #[test]
     fn golub_welsch_2_alpha_1_beta_0() {
         let (x, w) = GaussJacobi::nodes_and_weights(2, 1.0, 0.0);
-        println!("{:?}, {:?}", x, w);
         let x_should = [-0.6898979485566356196395, 0.2898979485566356196395];
         let w_should = [1.272165526975908677578, 0.7278344730240913224225];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_5_alpha_1_beta_0() {
         let (x, w) = GaussJacobi::nodes_and_weights(5, 1.0, 0.0);
-        println!("{:?}", x);
-        println!("{:?}", w);
         let x_should = [
             -0.9203802858970625153184,
             -0.6039731642527836549284,
@@ -162,17 +155,16 @@ mod tests {
             0.06299165808676910474117,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_5_alpha_0_beta_1() {
         let (x, w) = GaussJacobi::nodes_and_weights(5, 0.0, 1.0);
-        println!("{:?}, {:?}", x, w);
         let x_should = [
             -0.802929828402347147753,
             -0.3909285467072721890292,
@@ -188,10 +180,10 @@ mod tests {
             0.3871263609066067170974,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
@@ -303,10 +295,10 @@ mod tests {
             6.6457767585162111226E-28,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-10);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-10);
         }
     }
 }

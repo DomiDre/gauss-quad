@@ -62,9 +62,7 @@ impl GaussLegendre {
             .iter()
             .zip(self.weights.iter())
             .map(|(&x_val, w_val)| {
-                integrand(
-                    GaussLegendre::argument_transformation(x_val, a, b,)
-                ) * w_val
+                integrand(GaussLegendre::argument_transformation(x_val, a, b)) * w_val
             })
             .sum();
         GaussLegendre::scale_factor(a, b) * result
@@ -78,15 +76,14 @@ mod tests {
     #[test]
     fn golub_welsch_3() {
         let (x, w) = GaussLegendre::nodes_and_weights(3);
-        println!("{:?}", x);
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i]);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i]);
         }
     }
 }

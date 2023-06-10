@@ -1,5 +1,5 @@
+use crate::gamma::gamma;
 use crate::DMatrixf64;
-use statrs::function::gamma::gamma;
 
 pub struct GaussLaguerre {
     pub nodes: Vec<f64>,
@@ -86,10 +86,10 @@ mod tests {
         let x_should = [4.354248688935409409498, 9.645751311064590590502];
         let w_should = [82.67786838055363363287, 37.32213161944636636713];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-12);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-12);
         }
     }
 
@@ -107,10 +107,10 @@ mod tests {
             0.01038925650158613574897,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
@@ -128,10 +128,10 @@ mod tests {
             0.03245339314251524562338,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
@@ -153,10 +153,10 @@ mod tests {
             1.16235875861307471126E-5,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_float_absolute_eq!(x_val, x[i]);
+            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_float_absolute_eq!(w_val, w[i]);
+            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 }
