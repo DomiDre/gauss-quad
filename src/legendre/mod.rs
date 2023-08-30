@@ -102,7 +102,7 @@ mod glq_pair {
         /// The first number is the node, and the second is the weight.
         // Inlined because the function is trivial
         #[inline]
-        pub fn into_pair(self) -> (f64, f64) {
+        pub const fn into_pair(self) -> (f64, f64) {
             (self.node, self.weight)
         }
     }
