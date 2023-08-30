@@ -1,5 +1,3 @@
-use crate::DMatrixf64;
-
 use glq_pair::NodeWeightPair;
 
 pub struct GaussLegendre {
