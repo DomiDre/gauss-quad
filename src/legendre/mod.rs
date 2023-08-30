@@ -53,6 +53,7 @@ mod glq_pair {
     /// # Panic
     /// Panics if `k == 0`.
     #[rustfmt::skip]
+    // Inlined because the function is only used in a single location
     #[inline]
     #[must_use]
     fn bessel_j0_zero(k: usize) -> f64 {
@@ -71,6 +72,7 @@ mod glq_pair {
     /// # Panic
     /// Panics if `k == 0`.
     #[rustfmt::skip]
+    // Inlined because the function is only used in a single location
     #[inline]
     #[must_use]
     fn bessel_j1_squared(k: usize) -> f64 {
@@ -98,6 +100,7 @@ mod glq_pair {
 
         /// Destructure `self` into a pair of values.
         /// The first number is the node, and the second is the weight.
+        // Inlined because the function is trivial
         #[inline]
         pub fn into_pair(self) -> (f64, f64) {
             (self.node, self.weight)
@@ -105,6 +108,7 @@ mod glq_pair {
     }
 
     impl From<ThetaWeightPair> for NodeWeightPair {
+        // Inlined because the function is only used in a single location
         #[inline]
         fn from(value: ThetaWeightPair) -> Self {
             Self {
