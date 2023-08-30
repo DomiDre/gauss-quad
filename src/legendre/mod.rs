@@ -8,17 +8,17 @@ pub struct GaussLegendre {
 }
 
 impl GaussLegendre {
-    pub fn init(deg: usize) -> GaussLegendre {
-        let (nodes, weights) = GaussLegendre::nodes_and_weights(deg);
+    pub fn init(deg: usize) -> Self {
+        let (nodes, weights) = Self::nodes_and_weights(deg);
 
-        GaussLegendre { nodes, weights }
+        Self { nodes, weights }
     }
 
     /// Determine the nodes and weights of a Gauss-Legendre quadrature rule of degree `deg`
     /// through the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
     pub fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>) {
         (1..deg + 1)
-            .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+            .map(|k| NodeWeightPair::new(deg, k).into_pair())
             .unzip()
     }
 
@@ -94,7 +94,8 @@ mod glq_pair {
         }
 
         /// Destructure `self` into a pair of values.
-        pub fn into_tuple(self) -> (f64, f64) {
+        /// The first number is the node, and the second is the weight.
+        pub fn into_pair(self) -> (f64, f64) {
             (self.node, self.weight)
         }
     }
@@ -116,7 +117,7 @@ mod glq_pair {
     }
 
     impl ThetaWeightPair {
-        /// Compute a new GlqPair in theta-space.
+        /// Compute a new ThetaWeightPair.
         #[must_use]
         fn new(n: usize, k: usize) -> Self {
             assert_ne!(
@@ -126,20 +127,20 @@ mod glq_pair {
             assert!(n >= k, "`k` must not exceed `n`");
             if n <= 100 {
                 // If n is small enough we can just use tabulated values.
-                Self::gl_pair_tabulated(n, k - 1)
+                Self::tabulated_pair(n, k - 1)
             } else if 2 * k - 1 > n {
-                let mut p = Self::gl_pair_computed(n, n - k + 1);
+                let mut p = Self::compute_pair(n, n - k + 1);
                 p.theta = PI - p.theta;
                 p
             } else {
-                Self::gl_pair_computed(n, k)
+                Self::compute_pair(n, k)
             }
         }
 
         /// Compute a node-weight pair, with k limited to half the range
         #[rustfmt::skip]
         #[must_use]
-        fn gl_pair_computed(n: usize, k: usize) -> Self {
+        fn compute_pair(n: usize, k: usize) -> Self {
             // First get the j_0 zero
             let w: f64 = 1.0 / (n as f64 + 0.5);
             let nu = bessel_j0_zero(k);
@@ -174,7 +175,7 @@ mod glq_pair {
 
         /// Returns tabulated theta and weight values, valid for l <= 100
         #[must_use]
-        fn gl_pair_tabulated(l: usize, k: usize) -> Self {
+        fn tabulated_pair(l: usize, k: usize) -> Self {
             // Odd Legendre degree
             let (theta, weight) = if l % 2 == 1 {
                 let l2 = (l - 1) / 2;
@@ -228,14 +229,14 @@ mod tests {
 }
 
 #[rustfmt::skip]
-mod data {
-    /// The 21 first squared values of BesselJ(1, x) at the zeros of BesselJ(0, x)
-    pub static J1: [f64; 21] = [0.269_514_123_941_916_9, 0.115_780_138_582_203_69, 0.073_686_351_136_408_22, 0.054_037_573_198_116_28, 0.042_661_429_017_243_09, 0.035_242_103_490_996_1, 0.030_021_070_103_054_673, 0.026_147_391_495_308_09, 0.023_159_121_824_691_393, 0.020_783_829_122_267_86, 0.018_850_450_669_317_67, 0.017_246_157_569_665_008, 0.015_893_518_105_923_6, 0.014_737_626_096_472_19, 0.013_738_465_145_387_117, 0.012_866_181_737_615_133, 0.012_098_051_548_626_797, 0.011_416_471_224_491_609, 0.010_807_592_791_180_204, 0.010_260_372_926_280_762, 0.009_765_897_139_791_051];
-    /// The 20 first zeros of BesselJ(0, x)
+mod data {    
+    /// The 20 first zeros of Bessel function j_0(x).
     pub static JZ: [f64; 20] = [2.404_825_557_695_773, 5.520_078_110_286_311, 8.653_727_912_911_013, 11.791_534_439_014_281, 14.930_917_708_487_787, 18.071_063_967_910_924, 21.211_636_629_879_26, 24.352_471_530_749_302, 27.493_479_132_040_253, 30.634_606_468_431_976, 33.775_820_213_573_57, 36.917_098_353_664_045, 40.058_425_764_628_24, 43.199_791_713_176_73, 46.341_188_371_661_815, 49.482_609_897_397_815, 52.624_051_841_115, 55.765_510_755_019_98, 58.906_983_926_080_94, 62.048_469_190_227_166];
+    /// The 21 first values of Bessel function j_1(x)^2 where x are the zeros of Bessel function j_0(x).
+    pub static J1: [f64; 21] = [0.269_514_123_941_916_9, 0.115_780_138_582_203_69, 0.073_686_351_136_408_22, 0.054_037_573_198_116_28, 0.042_661_429_017_243_09, 0.035_242_103_490_996_1, 0.030_021_070_103_054_673, 0.026_147_391_495_308_09, 0.023_159_121_824_691_393, 0.020_783_829_122_267_86, 0.018_850_450_669_317_67, 0.017_246_157_569_665_008, 0.015_893_518_105_923_6, 0.014_737_626_096_472_19, 0.013_738_465_145_387_117, 0.012_866_181_737_615_133, 0.012_098_051_548_626_797, 0.011_416_471_224_491_609, 0.010_807_592_791_180_204, 0.010_260_372_926_280_762, 0.009_765_897_139_791_051];
 
     // Tabulated nodes and weights
-    // The required theta values for the Legendre nodes for l <= 100
+    // The required theta values for the Legendre nodes for n <= 100
     static EVEN_THETA_ZERO_1: [f64; 1] = [9.553_166_181_245_093e-1];
     static EVEN_THETA_ZERO_2: [f64; 2] = [1.223_899_586_470_372_6, 5.332_956_802_491_27e-1];
     static EVEN_THETA_ZERO_3: [f64; 3] = [1.329_852_612_388_110_3, 8.483_666_264_874_876e-1, 3.696_066_519_448_289_5e-1];
