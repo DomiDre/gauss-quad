@@ -46,7 +46,7 @@ impl GaussLegendre {
 }
 
 mod glq_pair {
-    use super::data::*;
+    use super::data::{CL, EVEN_THETA_ZEROS, EVEN_WEIGHTS, J1, JZ, ODD_THETA_ZEROS, ODD_WEIGHTS};
     use core::{cmp::Ordering, f64::consts::PI, num::NonZeroUsize};
 
     /// This function computes the `k`th zero of Bessel function j_0.
