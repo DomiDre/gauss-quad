@@ -174,34 +174,36 @@ mod glq_pair {
             Self { theta, weight }
         }
 
-        /// Returns tabulated theta and weight values, valid for l <= 100
+        /// Returns tabulated theta and weight values, valid for n <= 100
+        /// # Panic
+        /// Panics if `n > 100`.
         #[must_use]
-        fn tabulated_pair(l: usize, k: usize) -> Self {
+        fn tabulated_pair(n: usize, k: usize) -> Self {
             // Odd Legendre degree
-            let (theta, weight) = if l % 2 == 1 {
-                let l2 = (l - 1) / 2;
-                match k.cmp(&l2) {
-                    Ordering::Equal => (PI / 2.0, 2.0 / (CL[l] * CL[l])),
+            let (theta, weight) = if n % 2 == 1 {
+                let n2 = (n - 1) / 2;
+                match k.cmp(&n2) {
+                    Ordering::Equal => (PI / 2.0, 2.0 / (CL[n] * CL[n])),
                     Ordering::Less => (
-                        ODD_THETA_ZEROS[l2 - 1][l2 - k - 1],
-                        ODD_WEIGHTS[l2 - 1][l2 - k - 1],
+                        ODD_THETA_ZEROS[n2 - 1][n2 - k - 1],
+                        ODD_WEIGHTS[n2 - 1][n2 - k - 1],
                     ),
                     Ordering::Greater => (
-                        PI - ODD_THETA_ZEROS[l2 - 1][k - l2 - 1],
-                        ODD_WEIGHTS[l2 - 1][k - l2 - 1],
+                        PI - ODD_THETA_ZEROS[n2 - 1][k - n2 - 1],
+                        ODD_WEIGHTS[n2 - 1][k - n2 - 1],
                     ),
                 }
             // Even Legendre degree
             } else {
-                let l2 = l / 2;
-                match k.cmp(&l2) {
+                let n2 = n / 2;
+                match k.cmp(&n2) {
                     Ordering::Less => (
-                        EVEN_THETA_ZEROS[l2 - 1][l2 - k - 1],
-                        EVEN_WEIGHTS[l2 - 1][l2 - k - 1],
+                        EVEN_THETA_ZEROS[n2 - 1][n2 - k - 1],
+                        EVEN_WEIGHTS[n2 - 1][n2 - k - 1],
                     ),
                     Ordering::Equal | Ordering::Greater => (
-                        PI - EVEN_THETA_ZEROS[l2 - 1][k - l2],
-                        EVEN_WEIGHTS[l2 - 1][k - l2],
+                        PI - EVEN_THETA_ZEROS[n2 - 1][k - n2],
+                        EVEN_WEIGHTS[n2 - 1][k - n2],
                     ),
                 }
             };
