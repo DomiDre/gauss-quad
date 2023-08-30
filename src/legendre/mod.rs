@@ -1,6 +1,6 @@
 use crate::DMatrixf64;
 
-use self::glq_pair::NodeWeightPair;
+use glq_pair::NodeWeightPair;
 
 pub struct GaussLegendre {
     pub nodes: Vec<f64>,
@@ -14,8 +14,8 @@ impl GaussLegendre {
         Self { nodes, weights }
     }
 
-    /// Determine the nodes and weights of a Gauss-Legendre quadrature rule of degree `deg`
-    /// through the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
+    /// Compute the nodes and weights of a Gauss-Legendre quadrature rule of degree `deg`
+    /// with the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
     pub fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>) {
         (1..deg + 1)
             .map(|k| NodeWeightPair::new(deg, k).into_pair())
@@ -39,11 +39,9 @@ impl GaussLegendre {
             .nodes
             .iter()
             .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| {
-                integrand(GaussLegendre::argument_transformation(x_val, a, b)) * w_val
-            })
+            .map(|(&x_val, w_val)| integrand(Self::argument_transformation(x_val, a, b)) * w_val)
             .sum();
-        GaussLegendre::scale_factor(a, b) * result
+        Self::scale_factor(a, b) * result
     }
 }
 
@@ -81,7 +79,7 @@ mod glq_pair {
         }
     }
 
-    /// A struct containing a Gauss-Legendre node and the nodes associated weight.
+    /// A struct containing a Gauss-Legendre node and its associated weight.
     pub struct NodeWeightPair {
         node: f64,
         weight: f64,
@@ -229,7 +227,7 @@ mod tests {
 }
 
 #[rustfmt::skip]
-mod data {    
+mod data {
     /// The 20 first zeros of Bessel function j_0(x).
     pub static JZ: [f64; 20] = [2.404_825_557_695_773, 5.520_078_110_286_311, 8.653_727_912_911_013, 11.791_534_439_014_281, 14.930_917_708_487_787, 18.071_063_967_910_924, 21.211_636_629_879_26, 24.352_471_530_749_302, 27.493_479_132_040_253, 30.634_606_468_431_976, 33.775_820_213_573_57, 36.917_098_353_664_045, 40.058_425_764_628_24, 43.199_791_713_176_73, 46.341_188_371_661_815, 49.482_609_897_397_815, 52.624_051_841_115, 55.765_510_755_019_98, 58.906_983_926_080_94, 62.048_469_190_227_166];
     /// The 21 first values of Bessel function j_1(x)^2 where x are the zeros of Bessel function j_0(x).
