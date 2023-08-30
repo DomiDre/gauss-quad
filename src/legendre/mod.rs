@@ -97,6 +97,7 @@ mod glq_pair {
 
         /// Destructure `self` into a pair of values.
         /// The first number is the node, and the second is the weight.
+        #[inline]
         pub fn into_pair(self) -> (f64, f64) {
             (self.node, self.weight)
         }
