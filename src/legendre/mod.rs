@@ -84,6 +84,7 @@ mod glq_pair {
     }
 
     /// A struct containing a Gauss-Legendre node and its associated weight.
+    #[derive(Debug, Clone, Copy, PartialEq)]
     pub struct NodeWeightPair {
         node: f64,
         weight: f64,
@@ -114,6 +115,7 @@ mod glq_pair {
     }
 
     /// A Gauss-Legendre node-weight pair in theta-space.
+    #[derive(Debug, Clone, Copy, PartialEq)]
     struct ThetaWeightPair {
         theta: f64,
         weight: f64,
