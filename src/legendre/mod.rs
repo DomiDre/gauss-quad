@@ -124,11 +124,6 @@ mod glq_pair {
         /// Panics if `k == 0` or `k > n`.
         #[must_use]
         fn new(n: usize, k: usize) -> Self {
-            assert_ne!(
-                k, 0,
-                "gauss-legendre node-weight pairs are 1-indexed, but `k` was `0`"
-            );
-            assert!(n >= k, "`k` must not exceed `n`");
             if n <= 100 {
                 // If n is small enough we can just use tabulated values.
                 Self::tabulated_pair(n, k - 1)
