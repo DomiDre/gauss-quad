@@ -50,6 +50,8 @@ mod glq_pair {
     use core::{cmp::Ordering, f64::consts::PI, num::NonZeroUsize};
 
     /// This function computes the `k`th zero of Bessel function j_0.
+    /// # Panic
+    /// Panics if `k == 0`.
     #[rustfmt::skip]
     #[inline]
     #[must_use]
@@ -66,6 +68,8 @@ mod glq_pair {
 
     /// This function computes the square of Bessel function j_1
     /// evaluated at the `k`th zero of Bessel function j_0.
+    /// # Panic
+    /// Panics if `k == 0`.
     #[rustfmt::skip]
     #[inline]
     #[must_use]
@@ -116,6 +120,8 @@ mod glq_pair {
 
     impl ThetaWeightPair {
         /// Compute a new ThetaWeightPair.
+        /// # Panic
+        /// Panics if `k == 0` or `k > n`.
         #[must_use]
         fn new(n: usize, k: usize) -> Self {
             assert_ne!(
@@ -136,6 +142,8 @@ mod glq_pair {
         }
 
         /// Compute a node-weight pair, with k limited to half the range
+        /// # Panic
+        /// Panics if `k == 0`.
         #[rustfmt::skip]
         #[must_use]
         fn compute_pair(n: usize, k: usize) -> Self {
