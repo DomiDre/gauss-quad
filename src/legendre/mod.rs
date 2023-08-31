@@ -28,7 +28,15 @@ impl GaussLegendre {
         0.5 * (b - a)
     }
 
-    /// Perform quadrature of integrand using given nodes x and weights w
+    /// Perform quadrature integration of given integrand from `a` to `b`.
+    /// # Example
+    /// Basic usage
+    /// ```
+    /// # use gauss_quad::GaussLegendre;
+    /// # use approx::assert_abs_diff_eq;
+    /// let glq_rule = GaussLegendre::init(3);
+    /// assert_abs_diff_eq!(glq_rule.integrate(-1.0, 1.0, |x| x.powi(5)), 0.0);
+    /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
