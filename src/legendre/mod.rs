@@ -1,4 +1,4 @@
-use glq_pair::NodeWeightPair;
+use bogaert::NodeWeightPair;
 
 pub struct GaussLegendre {
     pub nodes: Vec<f64>,
@@ -43,7 +43,7 @@ impl GaussLegendre {
     }
 }
 
-mod glq_pair {
+mod bogaert {
     use super::data::{CL, EVEN_THETA_ZEROS, EVEN_WEIGHTS, J1, JZ, ODD_THETA_ZEROS, ODD_WEIGHTS};
     use core::{cmp::Ordering, f64::consts::PI};
 
