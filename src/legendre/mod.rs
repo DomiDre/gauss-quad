@@ -16,7 +16,7 @@ impl GaussLegendre {
     /// with the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
     pub fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>) {
         (1..deg + 1)
-            .map(|k| NodeWeightPair::new(deg, k).into_pair())
+            .map(|k| NodeWeightPair::new(deg, k).into_tuple())
             .unzip()
     }
 
@@ -104,11 +104,11 @@ mod bogaert {
             ThetaWeightPair::new(n, k).into()
         }
 
-        /// Destructure `self` into a pair of values.
+        /// Destructure `self` into a tuple containing the node and weight.  
         /// The first number is the node, and the second is the weight.
         // Inlined because the function is trivial
         #[inline]
-        pub const fn into_pair(self) -> (f64, f64) {
+        pub const fn into_tuple(self) -> (f64, f64) {
             (self.node, self.weight)
         }
     }
