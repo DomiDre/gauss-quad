@@ -51,6 +51,15 @@ impl GaussLegendre {
     }
 }
 
+/// This algorithm is based on an expansion of Legendre polynomials in terms of Bessel functions
+/// where for large degrees only the first terms in the expansion matter. This means that
+/// the zeros of the Legendre polynomials (the nodes in the quadrature rules) can be approximated
+/// as the zeros of an expression of Bessel functions. The weights can be computed from the nodes.
+/// The zeros of the Bessel functions are computed in terms of an expression involving only the
+/// zeros of the zero:th order Bessel function and the first order Bessel function at those zeros.
+/// For large enough degrees these expansions are accurate to within machine precision,
+/// and lookup tables with exact values are used below those degrees.
+/// For an exact derivation see the paper: https://doi.org/10.1137/140954969.
 mod bogaert {
     use super::data::{CL, EVEN_THETA_ZEROS, EVEN_WEIGHTS, J1, JZ, ODD_THETA_ZEROS, ODD_WEIGHTS};
     use core::{cmp::Ordering, f64::consts::PI};
