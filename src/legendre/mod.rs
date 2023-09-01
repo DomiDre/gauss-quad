@@ -20,29 +20,6 @@ impl GaussLegendre {
             .unzip()
     }
 
-    pub fn nodes_and_weights_old(deg: usize) -> (Vec<f64>, Vec<f64>) {
-        let mut companion_matrix = crate::DMatrixf64::from_element(deg, deg, 0.0);
-        // Initialize symmetric companion matrix
-        for idx in 0..deg - 1 {
-            let idx_f64 = 1.0 + idx as f64;
-            let element = idx_f64 / (4.0 * idx_f64 * idx_f64 - 1.0).sqrt();
-            unsafe {
-                *companion_matrix.get_unchecked_mut((idx, idx + 1)) = element;
-                *companion_matrix.get_unchecked_mut((idx + 1, idx)) = element;
-            }
-        }
-        // calculate eigenvalues & vectors
-        let eigen = companion_matrix.symmetric_eigen();
-
-        // return nodes and weights as Vec<f64>
-        let nodes = eigen.eigenvalues.data.as_vec().clone();
-        let weights = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * 2.0)
-            .data
-            .as_vec()
-            .clone();
-        (nodes, weights)
-    }
-
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
         0.5 * ((b - a) * x + (b + a))
     }
