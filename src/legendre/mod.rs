@@ -239,7 +239,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn golub_welsch_3() {
+    fn check_degree_3() {
         let (x, w) = GaussLegendre::nodes_and_weights(3);
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
