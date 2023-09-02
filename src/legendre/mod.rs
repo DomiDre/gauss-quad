@@ -59,7 +59,7 @@ impl GaussLegendre {
 /// zeros of the zero:th order Bessel function and the first order Bessel function at those zeros.
 /// For large enough degrees these expansions are accurate to within machine precision,
 /// and lookup tables with exact values are used below those degrees.
-/// For an exact derivation see the paper: https://doi.org/10.1137/140954969.
+/// For an exact derivation see the paper: `<https://doi.org/10.1137/140954969>`.
 mod bogaert {
     use super::data::{CL, EVEN_THETA_ZEROS, EVEN_WEIGHTS, J1, JZ, ODD_THETA_ZEROS, ODD_WEIGHTS};
     use core::{cmp::Ordering, f64::consts::PI};
