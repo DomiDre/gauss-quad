@@ -13,14 +13,8 @@
 * Simpson
 
 ## Using **gauss-quad**
-First, add **gauss-quad** to your `Cargo.toml`:
-
-```text
-[dependencies]
-gauss-quad = "0.1.4"
-```
-
-Then, you can use any of the quadrature rules in your project:
+To use any of the quadrature rules in your project, first initialize the rule with
+a specified degree and then you can use it for integration, e.g.:
 ```rust
 extern crate gauss_quad;
 use gauss_quad::GaussLegendre;
