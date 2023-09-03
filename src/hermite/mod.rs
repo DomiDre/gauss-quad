@@ -65,11 +65,11 @@ mod tests {
     #[test]
     fn golub_welsch_3() {
         let (x, w) = GaussHermite::nodes_and_weights(3);
-        let x_should = [1.224744871391589049099, 0.0, -1.224744871391589049099];
+        let x_should = [1.224_744_871_391_589, 0.0, -1.224_744_871_391_589];
         let w_should = [
-            0.295408975150919337883,
-            1.181635900603677351532,
-            0.295408975150919337883,
+            0.295_408_975_150_919_35,
+            1.181_635_900_603_677_4,
+            0.295_408_975_150_919_35,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
             approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
