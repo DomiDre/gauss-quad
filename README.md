@@ -5,7 +5,7 @@ gauss-quad
  
  The ``gauss-quad`` crate is a small library to calculate integrals of the type
 
- ![equation](https://latex.codecogs.com/svg.latex?%5Cint_a%5Eb%20f%28x%29%20w%28x%29%20%5Cmathrm%7Bd%7Dx)
+ $$\int_a^b f(x) w(x) \mathrm{d}x$$
  
  using Gaussian quadrature.
 
@@ -25,12 +25,12 @@ where QUADRATURE_RULE can currently be set to calculate either:
 
 | QUADRATURE_RULE  | Integral      |
 | -------------    | ------------- |
-| Midpoint         | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_a%5Eb%20f%28x%29%20%5Cmathrm%7Bd%7Dx)  |
-| Simpson          | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_a%5Eb%20f%28x%29%20%5Cmathrm%7Bd%7Dx)  |
-| GaussLegendre    | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_a%5Eb%20f%28x%29%20%5Cmathrm%7Bd%7Dx)  |
-| GaussJacobi      | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_a%5Eb%20f%28x%29%281-x%29%5E%5Calpha%20%281&plus;x%29%5E%5Cbeta%20%5Cmathrm%7Bd%7Dx)  |
-| GaussLaguerre    | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_%7B-%5Cinfty%7D%5E%5Cinfty%20f%28x%29x%5E%5Calpha%20e%5E%7B-x%7D%20%5Cmathrm%7Bd%7Dx)  |
-| GaussHermite     | ![equation](https://latex.codecogs.com/svg.latex?%5Cint_%7B-%5Cinfty%7D%5E%5Cinfty%20f%28x%29%20e%5E%7B-x%5E2%7D%20%5Cmathrm%7Bd%7Dx)  |
+| Midpoint         | $$\int_a^b f(x) \mathrm{d}x$$  |
+| Simpson          | $$\int_a^b f(x) \mathrm{d}x$$  |
+| GaussLegendre    | $$\int_a^b f(x) \mathrm{d}x$$  |
+| GaussJacobi      | $$\int_a^b f(x)(1-x)^\alpha (1&plus;x)^\beta \mathrm{d}x$$  |
+| GaussLaguerre    | $$\int_{-\infty}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$  |
+| GaussHermite     | $$\int_{-\infty}^\infty f(x) e^{-x^2} \mathrm{d}x$$  |
 
 For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
 
