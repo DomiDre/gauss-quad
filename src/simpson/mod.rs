@@ -22,20 +22,18 @@ use approx::assert_abs_diff_eq;
 
 use std::f64::consts::PI;
 
-fn main() {
+let eps = 0.001;
 
-    let eps = 0.001;
+let n = 10;
+let quad = Simpson::init(n);
 
-    let n = 10;
-    let quad = Simpson::init(n);
+// integrate some functions
+let integrate_euler = quad.integrate(0.0, 1.0, |x| x.exp());
+assert_abs_diff_eq!(integrate_euler, 1.0_f64.exp() - 1.0, epsilon = eps);
 
-    // integrate some functions
-    let integrate_euler = quad.integrate(0.0, 1.0, |x| x.exp());
-    assert_abs_diff_eq!(integrate_euler, 1.0_f64.exp() - 1.0, epsilon = eps);
+let integrate_sin = quad.integrate(-PI, PI, |x| x.sin());
+assert_abs_diff_eq!(integrate_sin, 0.0, epsilon = eps);
 
-    let integrate_sin = quad.integrate(-PI, PI, |x| x.sin());
-    assert_abs_diff_eq!(integrate_sin, 0.0, epsilon = eps);
-}
 ```
 
 !*/
