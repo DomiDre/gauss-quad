@@ -1,9 +1,7 @@
-/*!
-The gamma function provided in this module is copied directly from stats.rs:
-<https://docs.rs/statrs/latest/src/statrs/function/gamma.rs.html>
-
-The reason for this is the reduction of dependencies.
- */
+//! The gamma function provided in this module is copied directly from stats.rs:
+//! <https://docs.rs/statrs/latest/src/statrs/function/gamma.rs.html>
+//! 
+//! The reason for this is the reduction of dependencies.
 
 /// Constant value for `2 * sqrt(e / pi)`
 const TWO_SQRT_E_OVER_PI: f64 = 1.860_382_734_205_265_7;
