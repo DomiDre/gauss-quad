@@ -15,7 +15,9 @@
 //! use approx::assert_abs_diff_eq;
 //!
 //! let quad = GaussLegendre::init(10);
-//! let integral = quad.integrate(-1.0, 1.0, |x| 0.125 * (63.0 * x.powi(5) - 70.0 * x.powi(3) + 15.0 * x));
+//! let integral = quad.integrate(-1.0, 1.0,
+//!     |x| 0.125 * (63.0 * x.powi(5) - 70.0 * x.powi(3) + 15.0 * x)
+//! );
 //! assert_abs_diff_eq!(integral, 0.0);
 //! ```
 
