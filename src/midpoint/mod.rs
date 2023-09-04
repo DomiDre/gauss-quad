@@ -1,44 +1,44 @@
-/*!
-Numerical integration using the midpoint rule.
-
-This is one of the simplest integration schemes.
-
-1. Divide the domain into equally sized sections.
-2. Find the function value at the midpoint of each section.
-3. The section's integral is approximated as a rectangle as wide as the section and as tall as the function
- value at the midpoint.
-
-```
-use gauss_quad::{Midpoint};
-use approx::assert_abs_diff_eq;
-
-use std::f64::consts::PI;
-
-let eps = 0.001;
-
-let n = 30;
-let quad = Midpoint::init(n);
-
-// integrate some functions
-let two_thirds = quad.integrate(-1.0, 1.0, |x| x * x);
-assert_abs_diff_eq!(two_thirds, 0.66666, epsilon = eps);
-
-let estimate_sin = quad.integrate(-PI, PI, |x| x.sin());
-assert_abs_diff_eq!(estimate_sin, 0.0, epsilon = eps);
-
-// some functions need more steps than others
-let m = 100;
-let better_quad = Midpoint::init(m);
-
-let piecewise = better_quad.integrate(-5.0, 5.0,
-                    |x| if x > 1.0 && x < 2.0 {
-                        (-x * x).exp()
-                    } else { 0.0 });
-
-assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
-```
-
-!*/
+//! Numerical integration using the midpoint rule.
+//! 
+//! This is one of the simplest integration schemes.
+//! 
+//! 1. Divide the domain into equally sized sections.
+//! 2. Find the function value at the midpoint of each section.
+//! 3. The section's integral is approximated as a rectangle as wide as the section and as tall as the function
+//!  value at the midpoint.
+//! 
+//! ```
+//! use gauss_quad::Midpoint;
+//! use approx::assert_abs_diff_eq;
+//! 
+//! use std::f64::consts::PI;
+//! 
+//! let eps = 0.001;
+//! 
+//! let n = 30;
+//! let quad = Midpoint::init(n);
+//! 
+//! // integrate some functions
+//! let two_thirds = quad.integrate(-1.0, 1.0, |x| x * x);
+//! assert_abs_diff_eq!(two_thirds, 0.66666, epsilon = eps);
+//! 
+//! let estimate_sin = quad.integrate(-PI, PI, |x| x.sin());
+//! assert_abs_diff_eq!(estimate_sin, 0.0, epsilon = eps);
+//! 
+//! // some functions need more steps than others
+//! let m = 100;
+//! let better_quad = Midpoint::init(m);
+//! 
+//! let piecewise = better_quad.integrate(-5.0, 5.0, |x| 
+//!     if x > 1.0 && x < 2.0 {
+//!         (-x * x).exp()
+//!     } else {
+//!         0.0
+//!     }
+//! );
+//! 
+//! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
+//! ```
 
 #[derive(Debug, Clone)]
 /// A midpoint rule quadrature scheme.
