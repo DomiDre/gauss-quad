@@ -1,5 +1,45 @@
+//! Numerical integration using the Gauss-Legendre quadrature rule.
+//!
+//! In Gauss-Legendre quadrature rules the integrand is evaluated at
+//! the unique points such that a degree `n` rule can integrate
+//! degree `2n - 1` degree polynomials exactly.
+//!
+//! Evaluation point x_i of a degree n rule is the i:th root
+//! of Legendre polynomial P_n and its weight is  
+//! w = 2 / ((1 - x_i)(P'_n(x_i))^2).
+//!
+//!
+//! # Example
+//! ```
+//! use gauss_quad::GaussLegendre;
+//! use approx::assert_abs_diff_eq;
+//!
+//! let quad = GaussLegendre::init(10);
+//! let integral = quad.integrate(-1.0, 1.0, |x| 0.125 * (63.0 * x.powi(5) - 70.0 * x.powi(3) + 15.0 * x));
+//! assert_abs_diff_eq!(integral, 0.0);
+//! ```
+
 use bogaert::NodeWeightPair;
 
+/// Use this struct to integrate functions with Gauss-Legendre quadrature
+/// # Examples
+/// Basic usage:
+/// ```
+/// # use gauss_quad::GaussLegendre;
+/// # use approx::assert_abs_diff_eq;
+/// let quad = GaussLegendre::init(3);
+/// let integral = quad.integrate(0.0, 1.0, |x| x * x - 1.0 / 3.0);
+/// assert_abs_diff_eq!(integral, 0.0);
+/// ```
+/// The nodes and weights are computed in `O(n)` time,
+/// so large quadrature rules are feasible:
+/// ```
+/// # use gauss_quad::GaussLegendre;
+/// # use approx::assert_abs_diff_eq;
+/// let quad = GaussLegendre::init(1_000_000);
+/// let integral = quad.integrate(-3.0, 3.0, |x| x.sin());
+/// assert_abs_diff_eq!(integral, 0.0);
+/// ```
 pub struct GaussLegendre {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
