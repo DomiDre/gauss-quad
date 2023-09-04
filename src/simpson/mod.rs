@@ -7,7 +7,7 @@ function values at the end points a & b, as well as the Simpson m=(a+b)/2, which
 results in the integral formula
 S(f) = (b-a)/6 * [ f(a) + 4f(m) + f(b) ]
 
-Dividing the interval [a,b] into N neighboring intervals of length h = (b-a)/N and
+Dividing the interval \[a, b\] into N neighboring intervals of length h = (b-a)/N and
 applying the Simpson rule to each subinterval, the integral is given by
 
 S(f) = h/6 * [ f(a) + f(b) + 2*Sum_{k=1..N-1} f(x_k) + 4*Sum_{k=1..N} f( (x_{k-1} + x_k)/2 )]
