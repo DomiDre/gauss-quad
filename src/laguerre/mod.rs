@@ -17,7 +17,7 @@
 use crate::gamma::gamma;
 use crate::DMatrixf64;
 
-/// Use this struct to integrate functions with Gauss-Laguerre quadrature rules.
+/// A Gauss-Laguerre quadrature scheme.
 ///
 /// These rules can perform integrals with integrands of the form x^alpha * e^(-x) * f(x) over the domain [0, ∞).
 /// # Example

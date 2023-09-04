@@ -17,6 +17,7 @@
 
 use crate::{DMatrixf64, PI};
 
+/// A Gauss-Hermite quadrature scheme.
 pub struct GaussHermite {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,

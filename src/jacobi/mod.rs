@@ -6,6 +6,7 @@
 use crate::gamma::gamma;
 use crate::DMatrixf64;
 
+/// A Gauss-Jacobi quadrature scheme.
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,

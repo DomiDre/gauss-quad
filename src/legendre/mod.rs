@@ -23,7 +23,8 @@
 
 use bogaert::NodeWeightPair;
 
-/// Use this struct to integrate functions with Gauss-Legendre quadrature
+/// A Gauss-Legendre quadrature scheme.
+/// 
 /// # Examples
 /// Basic usage:
 /// ```
