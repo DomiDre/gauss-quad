@@ -1,5 +1,5 @@
 //! Numerical integration using Gauss-Jacobi quadrature rules.
-//! 
+//!
 //! These rules can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [a, b],
 //! where f(x) is a smooth function on [a, b], alpha > -1 and beta > -1.
 

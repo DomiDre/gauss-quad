@@ -1,14 +1,14 @@
 //! Numerical integration using the generalized Gauss-Laguerre quadrature rule.
-//! 
+//!
 //! A Gauss-Laguerre rule of degree `n` has nodes and weights chosen such that it
-//! can integrate polynomials of degree `2n - 1` exactly 
+//! can integrate polynomials of degree `2n - 1` exactly
 //! with the weighing function `w(x, a) = x^a * e^(-x)` over the domain `[0, ∞)`.
-//! 
+//!
 //! # Examples
 //! ```
 //! use gauss_quad::GaussLaguerre;
 //! use approx::assert_abs_diff_eq;
-//! 
+//!
 //! let quad = GaussLaguerre::init(10, 0.0);
 //! let integral = quad.integrate(|x| x.powi(2));
 //! assert_abs_diff_eq!(integral, 2.0, epsilon = 1e-14);
@@ -18,7 +18,7 @@ use crate::gamma::gamma;
 use crate::DMatrixf64;
 
 /// Use this struct to integrate functions with Gauss-Laguerre quadrature rules.
-/// 
+///
 /// These rules can perform integrals with integrands of the form x^a * e^(-x) * f(x) over the domain [0, ∞).
 /// # Example
 /// Compute the factorial of 5:
