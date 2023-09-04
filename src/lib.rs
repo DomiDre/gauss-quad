@@ -57,7 +57,7 @@
 //! let double_x = gauss_jacobi.integrate(c, d, |x| 2.0 * x);
 //!
 //! let gauss_laguerre = GaussLaguerre::init(degree, alpha);
-//! // no explicit domain, Gauss-Laguerre integration is done on the domain (-∞, ∞).
+//! // no explicit domain, Gauss-Laguerre integration is done on the domain [0, ∞).
 //! let piecewise = gauss_laguerre.integrate(|x| if x > 0.0 && x < 2.0 { x } else { 0.0 });
 //!
 //! let gauss_hermite = GaussHermite::init(degree);
@@ -71,7 +71,7 @@
 //! For example, the `GaussLaguerre` rule requires both a `degree` and an `alpha`
 //! parameter.
 //!
-//! `GaussLaguerre` is also defined as an improper integral over the domain (-∞, ∞).
+//! `GaussLaguerre` is also defined as an improper integral over the domain [0, ∞).
 //! This means no domain bounds are needed in the `integrate` call.
 //! ```
 //! # use gauss_quad::GaussLaguerre;
