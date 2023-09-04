@@ -18,6 +18,18 @@
 use crate::{DMatrixf64, PI};
 
 /// A Gauss-Hermite quadrature scheme.
+///
+/// These rules can integrate integrands of the form e^(-x^2) * f(x) over the domain (-∞, ∞).
+/// # Example
+/// Integrate e^(-x^2) * cos(x)
+/// ```
+/// # use gauss_quad::GaussHermite;
+/// # use approx::assert_abs_diff_eq;
+/// # use core::f64::consts::{E, PI};
+/// let quad = GaussHermite::init(20);
+/// let integral = quad.integrate(|x| x.cos());
+/// assert_abs_diff_eq!(integral, PI.sqrt() / E.powf(0.25), epsilon = 1e-14);
+/// ```
 pub struct GaussHermite {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
