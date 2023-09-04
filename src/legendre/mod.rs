@@ -24,7 +24,9 @@
 use bogaert::NodeWeightPair;
 
 /// A Gauss-Legendre quadrature scheme.
-/// 
+///
+/// These rules can integrate functions on the domain [a, b].
+///
 /// # Examples
 /// Basic usage:
 /// ```
