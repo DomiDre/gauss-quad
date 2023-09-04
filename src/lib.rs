@@ -125,16 +125,14 @@
 //! let integral = quad.integrate(left_bound, right_bound, |x| x * x);
 //! ```
 
-#![allow(dead_code)]
-#![allow(unused_imports)]
-
 use nalgebra::{Dynamic, Matrix, VecStorage};
 pub type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dynamic>>;
 #[doc(inline)]
 pub use std::f64::consts::PI;
 
 mod gamma;
-pub mod gaussian_quadrature;
+#[cfg(test)]
+mod gaussian_quadrature;
 pub mod hermite;
 pub mod jacobi;
 pub mod laguerre;

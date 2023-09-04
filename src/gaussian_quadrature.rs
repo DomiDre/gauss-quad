@@ -1,9 +1,5 @@
-use crate::hermite;
-use crate::legendre;
-
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::{GaussHermite, GaussLegendre, PI};
 
     #[test]
