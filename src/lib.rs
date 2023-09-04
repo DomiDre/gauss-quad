@@ -17,7 +17,8 @@
 //! ```
 //! use gauss_quad::GaussLegendre;
 //! // This macro is used in these docs to compare floats.
-//! // The assertion succeeds if the two sides are within floating point error, or an optional epsilon.
+//! // The assertion succeeds if the two sides are within floating point error,
+//! // or an optional epsilon.
 //! use approx::assert_abs_diff_eq;
 //!
 //! // initialize the quadrature rule
