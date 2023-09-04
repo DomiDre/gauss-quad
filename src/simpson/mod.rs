@@ -12,7 +12,7 @@
 //! S(f) = h/6 * [ f(a) + f(b) + 2*Sum_{k=1..N-1} f(x_k) + 4*Sum_{k=1..N} f( (x_{k-1} + x_k)/2 )]
 //!
 //! with x_k = a + k*h.
-//! 
+//!
 //! ```
 //! use gauss_quad::Simpson;
 //! use approx::assert_abs_diff_eq;
@@ -36,16 +36,12 @@
 #[derive(Debug, Clone)]
 /// A Simpson rule quadrature scheme.
 /// ```
-/// # extern crate gauss_quad;
 /// # use gauss_quad::Simpson;
-/// # fn main() {
-/// #
 /// // initialize a Simpson rule with 100 subintervals
 /// let quad: Simpson = Simpson::init(100);
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the Simpson rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
-/// # }
 /// ```
 pub struct Simpson {
     /// The dimensionless Simpsons
