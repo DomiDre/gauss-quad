@@ -11,7 +11,7 @@
 //! use gauss_quad::Midpoint;
 //! use approx::assert_abs_diff_eq;
 //!
-//! use std::f64::consts::PI;
+//! use core::f64::consts::PI;
 //!
 //! let eps = 0.001;
 //!

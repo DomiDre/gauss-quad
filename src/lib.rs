@@ -129,7 +129,7 @@
 use nalgebra::{Dynamic, Matrix, VecStorage};
 pub type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dynamic>>;
 #[doc(inline)]
-pub use std::f64::consts::PI;
+pub use core::f64::consts::PI;
 
 mod gamma;
 #[cfg(test)]
