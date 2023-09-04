@@ -1,3 +1,20 @@
+//! Numerical integration using Gauss-Hermite quadrature rules.
+//!
+//! These rules can integrate integrands of the form  
+//! e^(-x^2) * f(x)  
+//! over the domain (-∞, ∞).
+//!
+//! # Example
+//! Integrate x^2 * e^(-x^2)
+//! ```
+//! use gauss_quad::GaussHermite;
+//! use approx::assert_abs_diff_eq;
+//!
+//! let quad = GaussHermite::init(10);
+//! let integral = quad.integrate(|x| x.powi(2));
+//! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
+//! ```
+
 use crate::{DMatrixf64, PI};
 
 pub struct GaussHermite {
@@ -43,7 +60,7 @@ impl GaussHermite {
         (nodes, weights)
     }
 
-    /// Perform quadrature of integrand using given nodes x and weights w
+    /// Perform quadrature of e^(-x^2) * `integrand` over the domain (-∞, ∞).
     pub fn integrate<F>(&self, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
