@@ -25,8 +25,13 @@ use crate::DMatrixf64;
 /// ```
 /// # use gauss_quad::GaussLaguerre;
 /// # use approx::assert_abs_diff_eq;
+/// // initialize a Gauss-Laguerre rule with 10 nodes
 /// let quad = GaussLaguerre::init(10, 0.0);
+///
+/// // numerically evaluate this integral,
+/// // which is a definition of the gamma function
 /// let fact_5 = quad.integrate(|x| x.powi(5));
+///
 /// assert_abs_diff_eq!(fact_5, 1.0 * 2.0 * 3.0 * 4.0 * 5.0, epsilon = 1e-11);
 /// ```
 pub struct GaussLaguerre {
@@ -35,6 +40,8 @@ pub struct GaussLaguerre {
 }
 
 impl GaussLaguerre {
+    /// Initializes Gauss-Laguerre quadrature rule of the given degree by computing the nodes and weights
+    /// needed for the given `alpha` parameter.
     pub fn init(deg: usize, alpha: f64) -> GaussLaguerre {
         let (nodes, weights) = GaussLaguerre::nodes_and_weights(deg, alpha);
 

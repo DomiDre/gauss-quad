@@ -32,8 +32,12 @@ use bogaert::NodeWeightPair;
 /// ```
 /// # use gauss_quad::GaussLegendre;
 /// # use approx::assert_abs_diff_eq;
+/// // initialize a Gauss-Legendre rule with 3 nodes
 /// let quad = GaussLegendre::init(3);
+///
+/// // numerically integrate x^2 - 1/3 over the domain [0, 1]
 /// let integral = quad.integrate(0.0, 1.0, |x| x * x - 1.0 / 3.0);
+///
 /// assert_abs_diff_eq!(integral, 0.0);
 /// ```
 /// The nodes and weights are computed in `O(n)` time,
@@ -51,6 +55,7 @@ pub struct GaussLegendre {
 }
 
 impl GaussLegendre {
+    /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights.
     pub fn init(deg: usize) -> Self {
         let (nodes, weights) = Self::nodes_and_weights(deg);
 

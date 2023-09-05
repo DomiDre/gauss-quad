@@ -1,6 +1,6 @@
-//! Numerical integration using Gauss-Hermite quadrature rules.
+//! Numerical integration using the Gauss-Hermite quadrature rule.
 //!
-//! These rules can integrate integrands of the form  
+//! This rule can integrate integrands of the form  
 //! e^(-x^2) * f(x)  
 //! over the domain (-∞, ∞).
 //!
@@ -26,8 +26,12 @@ use crate::{DMatrixf64, PI};
 /// # use gauss_quad::GaussHermite;
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::{E, PI};
+/// // initialize a Gauss-Hermite rule with 20 nodes
 /// let quad = GaussHermite::init(20);
+///
+/// // numerically integrate a function over (-∞, ∞) using the Gauss-Hermite rule
 /// let integral = quad.integrate(|x| x.cos());
+///
 /// assert_abs_diff_eq!(integral, PI.sqrt() / E.powf(0.25), epsilon = 1e-14);
 /// ```
 pub struct GaussHermite {
@@ -36,6 +40,7 @@ pub struct GaussHermite {
 }
 
 impl GaussHermite {
+    /// Initializes Gauss-Hermite quadrature rule of the given degree by computing the needed nodes and weights.
     pub fn init(deg: usize) -> GaussHermite {
         let (nodes, weights) = GaussHermite::nodes_and_weights(deg);
 

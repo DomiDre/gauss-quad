@@ -1,18 +1,22 @@
-//! Numerical integration using Gauss-Jacobi quadrature rules.
+//! Numerical integration using the Gauss-Jacobi quadrature rule.
 //!
-//! These rules can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [a, b],
+//! This rule can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [a, b],
 //! where f(x) is a smooth function on [a, b], alpha > -1 and beta > -1.
 
 use crate::gamma::gamma;
 use crate::DMatrixf64;
 
 /// A Gauss-Jacobi quadrature scheme.
+///
+/// These rules can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [a, b].
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
 }
 
 impl GaussJacobi {
+    /// Initializes Gauss-Jacobi quadrature rule of the given degree by computing the nodes and weights
+    /// needed for the given `alpha` and `beta`.
     pub fn init(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
         let (nodes, weights) = GaussJacobi::nodes_and_weights(deg, alpha, beta);
 
