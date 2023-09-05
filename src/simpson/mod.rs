@@ -35,10 +35,8 @@ let integrate_sin = quad.integrate(-PI, PI, |x| x.sin());
 assert_abs_diff_eq!(integrate_sin, 0.0, epsilon = eps);
 
 ```
-
 !*/
 
-#[derive(Debug, Clone)]
 /// A Simpson rule quadrature scheme.
 /// ```
 /// # extern crate gauss_quad;
@@ -52,6 +50,7 @@ assert_abs_diff_eq!(integrate_sin, 0.0, epsilon = eps);
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
 /// # }
 /// ```
+#[derive(Debug, Clone, PartialEq)]
 pub struct Simpson {
     /// The dimensionless Simpsons
     nodes: Vec<f64>,

@@ -1,5 +1,6 @@
 use crate::{DMatrixf64, PI};
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct GaussHermite {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,

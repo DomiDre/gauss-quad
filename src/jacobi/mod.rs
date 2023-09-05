@@ -1,6 +1,7 @@
 use crate::gamma::gamma;
 use crate::DMatrixf64;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,

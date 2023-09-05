@@ -1,5 +1,6 @@
 use bogaert::NodeWeightPair;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct GaussLegendre {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,

@@ -40,7 +40,6 @@ assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
 
 !*/
 
-#[derive(Debug, Clone)]
 /// A midpoint rule quadrature scheme.
 /// ```
 /// # extern crate gauss_quad;
@@ -54,6 +53,7 @@ assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
 /// # }
 /// ```
+#[derive(Debug, Clone, PartialEq)]
 pub struct Midpoint {
     /// The dimensionless midpoints
     nodes: Vec<f64>,
