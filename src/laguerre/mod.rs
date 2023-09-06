@@ -160,4 +160,13 @@ mod tests {
             approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
+
+    #[test]
+    fn check_derives() {
+        let quad = GaussLaguerre::init(10, 1.0);
+        let quad_clone = quad.clone();
+        assert_eq!(quad, quad_clone);
+        let other_quad = GaussLaguerre::init(10, 2.0);
+        assert_ne!(quad, other_quad);
+    }
 }

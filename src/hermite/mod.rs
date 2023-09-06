@@ -79,4 +79,13 @@ mod tests {
             approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
         }
     }
+
+    #[test]
+    fn check_derives() {
+        let quad = GaussHermite::init(10);
+        let quad_clone = quad.clone();
+        assert_eq!(quad, quad_clone);
+        let other_quad = GaussHermite::init(3);
+        assert_ne!(quad, other_quad);
+    }
 }

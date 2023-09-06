@@ -252,6 +252,15 @@ mod tests {
             approx::assert_abs_diff_eq!(*w_val, w[i]);
         }
     }
+
+    #[test]
+    fn check_derives() {
+        let quad = GaussLegendre::init(10);
+        let quad_clone = quad.clone();
+        assert_eq!(quad, quad_clone);
+        let other_quad = GaussLegendre::init(3);
+        assert_ne!(quad, other_quad);
+    }
 }
 
 #[rustfmt::skip]
