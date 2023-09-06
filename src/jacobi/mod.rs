@@ -1,6 +1,6 @@
 //! Numerical integration using the Gauss-Jacobi quadrature rule.
 //!
-//! This rule can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [-1, 1],
+//! This rule can integrate integrands of the form (1 + x)^alpha * (1 - x)^beta * f(x) over the domain [-1, 1],
 //! where f(x) is a smooth function on [1, 1], alpha > -1 and beta > -1.
 //! The domain can be changed to any [a, b] through a linear transformation (which is done in this module),
 //! and this enables the approximation of integrals with singularities at the end points of the domain.
