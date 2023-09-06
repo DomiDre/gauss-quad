@@ -1,14 +1,29 @@
 //! Numerical integration using the Gauss-Jacobi quadrature rule.
 //!
-//! This rule can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [a, b],
-//! where f(x) is a smooth function on [a, b], alpha > -1 and beta > -1.
+//! This rule can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [-1, 1],
+//! where f(x) is a smooth function on [1, 1], alpha > -1 and beta > -1.
+//! The domain can be changed to any [a, b] through a linear transformation (which is done in this module),
+//! and this enables the approximation of integrals with singularities at the end points of the domain.
 
 use crate::gamma::gamma;
 use crate::DMatrixf64;
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
-/// These rules can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [a, b].
+/// These rules can approximate integrals with singularities at the end points of the domain, [a, b].
+///
+/// # Examples
+/// ```
+/// # use gauss_quad::GaussJacobi;
+/// # use approx::assert_abs_diff_eq;
+/// // initialize the quadrature rule
+/// let quad = GaussJacobi::init(10, 1.0, 1.0);
+///
+/// // numerically integrate a function with singularities at -1 and 1
+/// let integral = quad.integrate(-1.0, 1.0, |x| x / ((1.0 - x) * (1.0 + x)));
+///
+/// assert_abs_diff_eq!(integral, 0.0, epsilon = 1e-14);
+/// ```
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
