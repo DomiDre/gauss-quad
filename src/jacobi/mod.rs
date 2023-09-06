@@ -4,6 +4,16 @@
 //! where f(x) is a smooth function on [1, 1], alpha > -1 and beta > -1.
 //! The domain can be changed to any [a, b] through a linear transformation (which is done in this module),
 //! and this enables the approximation of integrals with singularities at the end points of the domain.
+//!
+//! # Example
+//! ```
+//! use gauss_quad::jacobi::GaussJacobi;
+//! use approx::assert_abs_diff_eq;
+//!
+//! let quad = GaussJacobi::init(10, 0.0, -1.0 / 3.0);
+//! let integral = quad.integrate(-1.0, 1.0, |x| x.sin());
+//! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
+//! ```
 
 use crate::gamma::gamma;
 use crate::DMatrixf64;
