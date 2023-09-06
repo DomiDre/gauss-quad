@@ -17,12 +17,12 @@ use crate::DMatrixf64;
 /// # use gauss_quad::GaussJacobi;
 /// # use approx::assert_abs_diff_eq;
 /// // initialize the quadrature rule
-/// let quad = GaussJacobi::init(10, 1.0, 1.0);
+/// let quad = GaussJacobi::init(100, 1.0, 1.0);
 ///
 /// // numerically integrate a function with singularities at -1 and 1
-/// let integral = quad.integrate(-1.0, 1.0, |x| x / ((1.0 - x) * (1.0 + x)));
+/// let integral = quad.integrate(-1.0, 1.0, |x| x * x / ((1.0 - x) * (1.0 + x)));
 ///
-/// assert_abs_diff_eq!(integral, 0.0, epsilon = 1e-14);
+/// assert_abs_diff_eq!(integral, 2.0 / 3.0, epsilon = 1e-3);
 /// ```
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
