@@ -6,7 +6,7 @@
 //!
 //! # Examples
 //! ```
-//! use gauss_quad::GaussLaguerre;
+//! use gauss_quad::laguerre::GaussLaguerre;
 //! use approx::assert_abs_diff_eq;
 //!
 //! let quad = GaussLaguerre::init(10, 1.0);

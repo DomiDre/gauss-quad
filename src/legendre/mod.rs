@@ -11,7 +11,7 @@
 //!
 //! # Example
 //! ```
-//! use gauss_quad::GaussLegendre;
+//! use gauss_quad::legendre::GaussLegendre;
 //! use approx::assert_abs_diff_eq;
 //!
 //! let quad = GaussLegendre::init(10);

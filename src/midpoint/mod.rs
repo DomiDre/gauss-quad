@@ -8,7 +8,7 @@
 //!  value at the midpoint.
 //!
 //! ```
-//! use gauss_quad::Midpoint;
+//! use gauss_quad::midpoint::Midpoint;
 //! use approx::assert_abs_diff_eq;
 //!
 //! use core::f64::consts::PI;

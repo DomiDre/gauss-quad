@@ -7,7 +7,7 @@
 //! # Example
 //! Integrate x^2 * e^(-x^2)
 //! ```
-//! use gauss_quad::GaussHermite;
+//! use gauss_quad::hermite::GaussHermite;
 //! use approx::assert_abs_diff_eq;
 //!
 //! let quad = GaussHermite::init(10);

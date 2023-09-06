@@ -14,7 +14,7 @@
 //! with x_k = a + k*h.
 //!
 //! ```
-//! use gauss_quad::Simpson;
+//! use gauss_quad::simpson::Simpson;
 //! use approx::assert_abs_diff_eq;
 //!
 //! use core::f64::consts::PI;
