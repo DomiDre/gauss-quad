@@ -11,7 +11,10 @@
 //! use approx::assert_abs_diff_eq;
 //!
 //! let quad = GaussJacobi::init(10, 0.0, -1.0 / 3.0);
+//!
+//! // numerically integrate sin(x) / (1 - x)^(1/3), a function with a singularity at x = 1.
 //! let integral = quad.integrate(-1.0, 1.0, |x| x.sin());
+//!
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
 //! ```
 
