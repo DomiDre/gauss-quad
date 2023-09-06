@@ -16,13 +16,15 @@ use crate::DMatrixf64;
 /// ```
 /// # use gauss_quad::GaussJacobi;
 /// # use approx::assert_abs_diff_eq;
+/// # use core::f64::consts::E;
 /// // initialize the quadrature rule.
 /// let quad = GaussJacobi::init(10, -0.5, 0.0);
 ///
 /// // numerically integrate e^-x / sqrt(1 + x).
 /// let integral = quad.integrate(-1.0, 1.0, |x| (-x).exp());
 ///
-/// assert_abs_diff_eq!(integral, 2.460262013896155, epsilon = 1e-14);
+/// let dawson_function_of_sqrt_2 = 0.4525399074037225;
+/// assert_abs_diff_eq!(integral, 2.0 * E * dawson_function_of_sqrt_2, epsilon = 1e-14);
 /// ```
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
