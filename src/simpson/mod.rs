@@ -33,7 +33,7 @@
 //!
 //! ```
 
-#[derive(Debug, Clone)]
+
 /// A Simpson rule quadrature scheme.
 /// ```
 /// # use gauss_quad::Simpson;
@@ -43,6 +43,7 @@
 /// // numerically integrate a function from -1.0 to 1.0 using the Simpson rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
 /// ```
+#[derive(Debug, Clone, PartialEq)]
 pub struct Simpson {
     /// The dimensionless Simpsons
     nodes: Vec<f64>,
@@ -112,5 +113,14 @@ mod tests {
         let quad = Simpson::init(2);
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
+    }
+
+    #[test]
+    fn check_derives() {
+        let quad = Simpson::init(10);
+        let quad_clone = quad.clone();
+        assert_eq!(quad, quad_clone);
+        let other_quad = Simpson::init(3);
+        assert_ne!(quad, other_quad);
     }
 }

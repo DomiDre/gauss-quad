@@ -34,6 +34,7 @@ use crate::{DMatrixf64, PI};
 ///
 /// assert_abs_diff_eq!(integral, PI.sqrt() / E.powf(0.25), epsilon = 1e-14);
 /// ```
+#[derive(Debug, Clone, PartialEq)]
 pub struct GaussHermite {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
@@ -70,11 +71,10 @@ impl GaussHermite {
         let eigen = companion_matrix.symmetric_eigen();
 
         // return nodes and weights as Vec<f64>
-        let nodes = eigen.eigenvalues.data.as_vec().clone();
-        let weights = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * PI.sqrt())
+        let nodes: Vec<f64> = eigen.eigenvalues.data.into();
+        let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * PI.sqrt())
             .data
-            .as_vec()
-            .clone();
+            .into();
         (nodes, weights)
     }
 
@@ -112,5 +112,14 @@ mod tests {
         for (i, w_val) in w_should.iter().enumerate() {
             approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
         }
+    }
+
+    #[test]
+    fn check_derives() {
+        let quad = GaussHermite::init(10);
+        let quad_clone = quad.clone();
+        assert_eq!(quad, quad_clone);
+        let other_quad = GaussHermite::init(3);
+        assert_ne!(quad, other_quad);
     }
 }

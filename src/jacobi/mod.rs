@@ -39,6 +39,7 @@ use crate::DMatrixf64;
 /// let dawson_function_of_sqrt_2 = 0.4525399074037225;
 /// assert_abs_diff_eq!(integral, 2.0 * E * dawson_function_of_sqrt_2, epsilon = 1e-14);
 /// ```
+#[derive(Debug, Clone, PartialEq)]
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
@@ -93,11 +94,10 @@ impl GaussJacobi {
                 / gamma(alpha + beta + 1.0)
                 / (alpha + beta + 1.0);
         // return nodes and weights as Vec<f64>
-        let nodes = eigen.eigenvalues.data.as_vec().clone();
-        let weights = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
+        let nodes: Vec<f64> = eigen.eigenvalues.data.into();
+        let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
             .data
-            .as_vec()
-            .clone();
+            .into();
         let mut both: Vec<_> = nodes.iter().zip(weights.iter()).collect();
         both.sort_by(|a, b| a.0.partial_cmp(b.0).unwrap());
         let (mut nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
@@ -342,5 +342,14 @@ mod tests {
         for (i, w_val) in w_should.iter().enumerate() {
             approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-10);
         }
+    }
+
+    #[test]
+    fn check_derives() {
+        let quad = GaussJacobi::init(10, 0.0, 1.0);
+        let quad_clone = quad.clone();
+        assert_eq!(quad, quad_clone);
+        let other_quad = GaussJacobi::init(10, 1.0, 0.0);
+        assert_ne!(quad, other_quad);
     }
 }
