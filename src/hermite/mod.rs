@@ -1,5 +1,6 @@
 use crate::{DMatrixf64, PI};
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct GaussHermite {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
@@ -76,5 +77,14 @@ mod tests {
         for (i, w_val) in w_should.iter().enumerate() {
             approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
         }
+    }
+
+    #[test]
+    fn check_derives() {
+        let quad = GaussHermite::init(10);
+        let quad_clone = quad.clone();
+        assert_eq!(quad, quad_clone);
+        let other_quad = GaussHermite::init(3);
+        assert_ne!(quad, other_quad);
     }
 }

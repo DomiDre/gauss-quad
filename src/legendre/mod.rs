@@ -1,5 +1,6 @@
 use bogaert::NodeWeightPair;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct GaussLegendre {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
@@ -250,6 +251,15 @@ mod tests {
         for (i, w_val) in w_should.iter().enumerate() {
             approx::assert_abs_diff_eq!(*w_val, w[i]);
         }
+    }
+
+    #[test]
+    fn check_derives() {
+        let quad = GaussLegendre::init(10);
+        let quad_clone = quad.clone();
+        assert_eq!(quad, quad_clone);
+        let other_quad = GaussLegendre::init(3);
+        assert_ne!(quad, other_quad);
     }
 }
 
