@@ -72,8 +72,7 @@ impl Midpoint {
 
     /// Make a set of evenly spaced nodes
     fn nodes(degree: usize) -> Vec<f64> {
-        let mut nodes = Vec::new();
-        nodes.reserve(degree);
+        let mut nodes = Vec::with_capacity(degree);
         for idx in 0..degree {
             nodes.push(idx as f64);
         }

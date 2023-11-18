@@ -33,7 +33,6 @@
 //!
 //! ```
 
-
 /// A Simpson rule quadrature scheme.
 /// ```
 /// # use gauss_quad::Simpson;
@@ -60,8 +59,7 @@ impl Simpson {
 
     /// Generate vector of indices for the subintervals
     fn nodes(degree: usize) -> Vec<f64> {
-        let mut nodes = Vec::new();
-        nodes.reserve(degree);
+        let mut nodes = Vec::with_capacity(degree);
         for idx in 0..degree {
             nodes.push(idx as f64);
         }
