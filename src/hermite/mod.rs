@@ -35,11 +35,10 @@ impl GaussHermite {
         let eigen = companion_matrix.symmetric_eigen();
 
         // return nodes and weights as Vec<f64>
-        let nodes = eigen.eigenvalues.data.as_vec().clone();
-        let weights = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * PI.sqrt())
+        let nodes: Vec<f64> = eigen.eigenvalues.data.into();
+        let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * PI.sqrt())
             .data
-            .as_vec()
-            .clone();
+            .into();
         (nodes, weights)
     }
 

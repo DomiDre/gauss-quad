@@ -50,11 +50,10 @@ impl GaussLaguerre {
 
         let scale_factor = gamma(alpha + 1.0);
         // return nodes and weights as Vec<f64>
-        let nodes = eigen.eigenvalues.data.as_vec().clone();
-        let weights = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
+        let nodes: Vec<f64> = eigen.eigenvalues.data.into();
+        let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
             .data
-            .as_vec()
-            .clone();
+            .into();
         let mut both: Vec<_> = nodes.iter().zip(weights.iter()).collect();
         both.sort_by(|a, b| a.0.partial_cmp(b.0).unwrap());
         let (nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
