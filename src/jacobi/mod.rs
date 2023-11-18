@@ -1,6 +1,44 @@
+//! Numerical integration using the Gauss-Jacobi quadrature rule.
+//!
+//! This rule can integrate integrands of the form (1 + x)^alpha * (1 - x)^beta * f(x) over the domain [-1, 1],
+//! where f(x) is a smooth function on [1, 1], alpha > -1 and beta > -1.
+//! The domain can be changed to any [a, b] through a linear transformation (which is done in this module),
+//! and this enables the approximation of integrals with singularities at the end points of the domain.
+//!
+//! # Example
+//! ```
+//! use gauss_quad::jacobi::GaussJacobi;
+//! use approx::assert_abs_diff_eq;
+//!
+//! let quad = GaussJacobi::init(10, 0.0, -1.0 / 3.0);
+//!
+//! // numerically integrate sin(x) / (1 - x)^(1/3), a function with a singularity at x = 1.
+//! let integral = quad.integrate(-1.0, 1.0, |x| x.sin());
+//!
+//! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
+//! ```
+
 use crate::gamma::gamma;
 use crate::DMatrixf64;
 
+/// A Gauss-Jacobi quadrature scheme.
+///
+/// These rules can approximate integrals with singularities at the end points of the domain, [a, b].
+///
+/// # Examples
+/// ```
+/// # use gauss_quad::GaussJacobi;
+/// # use approx::assert_abs_diff_eq;
+/// # use core::f64::consts::E;
+/// // initialize the quadrature rule.
+/// let quad = GaussJacobi::init(10, -0.5, 0.0);
+///
+/// // numerically integrate e^-x / sqrt(1 + x).
+/// let integral = quad.integrate(-1.0, 1.0, |x| (-x).exp());
+///
+/// let dawson_function_of_sqrt_2 = 0.4525399074037225;
+/// assert_abs_diff_eq!(integral, 2.0 * E * dawson_function_of_sqrt_2, epsilon = 1e-14);
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
@@ -8,6 +46,8 @@ pub struct GaussJacobi {
 }
 
 impl GaussJacobi {
+    /// Initializes Gauss-Jacobi quadrature rule of the given degree by computing the nodes and weights
+    /// needed for the given `alpha` and `beta`.
     pub fn init(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
         let (nodes, weights) = GaussJacobi::nodes_and_weights(deg, alpha, beta);
 
@@ -79,7 +119,9 @@ impl GaussJacobi {
         0.5 * (b - a)
     }
 
-    /// Perform quadrature of integrand using given nodes x and weights w
+    /// Perform quadrature of integrand from `a` to `b`. This will integrate  
+    /// (1 - x)^`alpha` * (1 + x)^`beta` * `integrand`  
+    /// where `alpha` and `beta` were given in the call to [`init`](Self::init).
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,

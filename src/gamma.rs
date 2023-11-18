@@ -1,9 +1,7 @@
-/*!
-The gamma function provided in this module is copied directly from stats.rs:
-https://docs.rs/statrs/latest/src/statrs/function/gamma.rs.html
-
-The reason for this is the reduction of dependencies.
- */
+//! The gamma function provided in this module is copied directly from stats.rs:
+//! <https://docs.rs/statrs/latest/src/statrs/function/gamma.rs.html>
+//!
+//! The reason for this is the reduction of dependencies.
 
 /// Constant value for `2 * sqrt(e / pi)`
 const TWO_SQRT_E_OVER_PI: f64 = 1.860_382_734_205_265_7;
@@ -38,11 +36,11 @@ pub(crate) fn gamma(x: f64) -> f64 {
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
-        std::f64::consts::PI
-            / ((std::f64::consts::PI * x).sin()
+        core::f64::consts::PI
+            / ((core::f64::consts::PI * x).sin()
                 * s
                 * TWO_SQRT_E_OVER_PI
-                * ((0.5 - x + GAMMA_R) / std::f64::consts::E).powf(0.5 - x))
+                * ((0.5 - x + GAMMA_R) / core::f64::consts::E).powf(0.5 - x))
     } else {
         let s = GAMMA_DK
             .iter()
@@ -50,14 +48,14 @@ pub(crate) fn gamma(x: f64) -> f64 {
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
-        s * TWO_SQRT_E_OVER_PI * ((x - 0.5 + GAMMA_R) / std::f64::consts::E).powf(x - 0.5)
+        s * TWO_SQRT_E_OVER_PI * ((x - 0.5 + GAMMA_R) / core::f64::consts::E).powf(x - 0.5)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
-    use std::f64::{self, consts};
+    use core::f64::{self, consts};
 
     #[test]
     fn test_gamma() {

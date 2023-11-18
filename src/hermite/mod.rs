@@ -1,5 +1,39 @@
+//! Numerical integration using the Gauss-Hermite quadrature rule.
+//!
+//! This rule can integrate integrands of the form  
+//! e^(-x^2) * f(x)  
+//! over the domain (-∞, ∞).
+//!
+//! # Example
+//! Integrate x^2 * e^(-x^2)
+//! ```
+//! use gauss_quad::hermite::GaussHermite;
+//! use approx::assert_abs_diff_eq;
+//!
+//! let quad = GaussHermite::init(10);
+//! let integral = quad.integrate(|x| x.powi(2));
+//! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
+//! ```
+
 use crate::{DMatrixf64, PI};
 
+/// A Gauss-Hermite quadrature scheme.
+///
+/// These rules can integrate integrands of the form e^(-x^2) * f(x) over the domain (-∞, ∞).
+/// # Example
+/// Integrate e^(-x^2) * cos(x)
+/// ```
+/// # use gauss_quad::GaussHermite;
+/// # use approx::assert_abs_diff_eq;
+/// # use core::f64::consts::{E, PI};
+/// // initialize a Gauss-Hermite rule with 20 nodes
+/// let quad = GaussHermite::init(20);
+///
+/// // numerically integrate a function over (-∞, ∞) using the Gauss-Hermite rule
+/// let integral = quad.integrate(|x| x.cos());
+///
+/// assert_abs_diff_eq!(integral, PI.sqrt() / E.powf(0.25), epsilon = 1e-14);
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct GaussHermite {
     pub nodes: Vec<f64>,
@@ -7,6 +41,7 @@ pub struct GaussHermite {
 }
 
 impl GaussHermite {
+    /// Initializes Gauss-Hermite quadrature rule of the given degree by computing the needed nodes and weights.
     pub fn init(deg: usize) -> GaussHermite {
         let (nodes, weights) = GaussHermite::nodes_and_weights(deg);
 
@@ -43,7 +78,7 @@ impl GaussHermite {
         (nodes, weights)
     }
 
-    /// Perform quadrature of integrand using given nodes x and weights w
+    /// Perform quadrature of e^(-x^2) * `integrand` over the domain (-∞, ∞).
     pub fn integrate<F>(&self, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
