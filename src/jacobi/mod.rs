@@ -58,7 +58,7 @@ impl GaussJacobi {
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
     pub fn nodes_and_weights(deg: usize, alpha: f64, beta: f64) -> (Vec<f64>, Vec<f64>) {
         if alpha < -1.0 || beta < -1.0 {
-            panic!("Gauss-Laguerre quadrature needs alpha > -1.0 and beta > -1.0");
+            panic!("Gauss-Jacobi quadrature needs alpha > -1.0 and beta > -1.0");
         }
         if deg < 2 {
             panic!("Degree of Gauss-Quadrature needs to be >= 2");
@@ -351,5 +351,17 @@ mod tests {
         assert_eq!(quad, quad_clone);
         let other_quad = GaussJacobi::init(10, 1.0, 0.0);
         assert_ne!(quad, other_quad);
+    }
+
+    #[test]
+    #[should_panic]
+    fn panics_for_too_small_alpha() {
+        GaussJacobi::init(3, -2.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn panics_for_too_small_beta() {
+        GaussJacobi::init(3, 1.0, -2.0);
     }
 }
