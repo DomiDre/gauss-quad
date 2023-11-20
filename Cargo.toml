@@ -2,6 +2,7 @@
 name = "gauss-quad"
 version = "0.1.7"
 authors = ["DomiDre <dominiquedresen@gmail.com>"]
+keywords = ["gaussian", "quadrature", "numerical", "integration"]
 edition = "2018"
 description = "Library for applying Gaussian quadrature to integrate a function"
 license = "MIT/Apache-2.0"
