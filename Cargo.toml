@@ -1,8 +1,9 @@
 [package]
 name = "gauss-quad"
 version = "0.1.7"
-authors = ["DomiDre <dominiquedresen@gmail.com>"]
+authors = ["DomiDre <dominiquedresen@gmail.com>", "Johanna Sörngård (jsorngard@gmail.com)"]
 keywords = ["gaussian", "quadrature", "numerics", "integration"]
+categories = ["Mathematics"]
 edition = "2018"
 description = "Library for applying Gaussian quadrature to integrate a function"
 license = "MIT/Apache-2.0"
