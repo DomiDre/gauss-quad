@@ -23,3 +23,6 @@ approx = "0.5.1"
 
 [features]
 serde = ["dep:serde"]
+
+[package.metadata.docs.rs]
+all-features = true
