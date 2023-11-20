@@ -61,8 +61,8 @@ pub struct Midpoint {
 
 impl Midpoint {
     /// Initialize a new midpoint rule with `degree` number of cells.
-    /// -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
-    ///    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
+    // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
+    //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
     /// # Panics
     /// Panics if degree is less than 1
     pub fn init(degree: usize) -> Self {
