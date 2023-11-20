@@ -40,6 +40,7 @@ use crate::DMatrixf64;
 /// assert_abs_diff_eq!(integral, 2.0 * E * dawson_function_of_sqrt_2, epsilon = 1e-14);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussJacobi {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,

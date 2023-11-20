@@ -54,6 +54,7 @@
 /// # }
 /// ```
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Midpoint {
     /// The dimensionless midpoints
     nodes: Vec<f64>,

@@ -35,6 +35,7 @@ use crate::DMatrixf64;
 /// assert_abs_diff_eq!(fact_5, 1.0 * 2.0 * 3.0 * 4.0 * 5.0, epsilon = 1e-11);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLaguerre {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,

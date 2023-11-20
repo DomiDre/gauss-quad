@@ -50,6 +50,7 @@ use bogaert::NodeWeightPair;
 /// assert_abs_diff_eq!(integral, 0.0);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
