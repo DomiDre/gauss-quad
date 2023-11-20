@@ -43,7 +43,7 @@ pub struct GaussLaguerre {
 impl GaussLaguerre {
     /// Initializes Gauss-Laguerre quadrature rule of the given degree by computing the nodes and weights
     /// needed for the given `alpha` parameter.
-    /// 
+    ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
     pub fn init(deg: usize, alpha: f64) -> GaussLaguerre {
@@ -59,7 +59,7 @@ impl GaussLaguerre {
     /// (2n+1) on the diagonal & -(n+1) on the off-diagonal (n = row number).
     /// Root & weight finding are equivalent to eigenvalue problem.
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
-    /// 
+    ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
     pub fn nodes_and_weights(deg: usize, alpha: f64) -> (Vec<f64>, Vec<f64>) {
