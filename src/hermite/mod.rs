@@ -10,7 +10,7 @@
 //! use gauss_quad::hermite::GaussHermite;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussHermite::init(10);
+//! let quad = GaussHermite::new(10);
 //! let integral = quad.integrate(|x| x.powi(2));
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
 //! ```
@@ -27,7 +27,7 @@ use crate::{DMatrixf64, PI};
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::{E, PI};
 /// // initialize a Gauss-Hermite rule with 20 nodes
-/// let quad = GaussHermite::init(20);
+/// let quad = GaussHermite::new(20);
 ///
 /// // numerically integrate a function over (-∞, ∞) using the Gauss-Hermite rule
 /// let integral = quad.integrate(|x| x.cos());
@@ -42,7 +42,7 @@ pub struct GaussHermite {
 
 impl GaussHermite {
     /// Initializes Gauss-Hermite quadrature rule of the given degree by computing the needed nodes and weights.
-    pub fn init(deg: usize) -> GaussHermite {
+    pub fn new(deg: usize) -> GaussHermite {
         let (nodes, weights) = GaussHermite::nodes_and_weights(deg);
 
         GaussHermite { nodes, weights }
@@ -116,10 +116,10 @@ mod tests {
 
     #[test]
     fn check_derives() {
-        let quad = GaussHermite::init(10);
+        let quad = GaussHermite::new(10);
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussHermite::init(3);
+        let other_quad = GaussHermite::new(3);
         assert_ne!(quad, other_quad);
     }
 }

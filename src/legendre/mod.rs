@@ -14,7 +14,7 @@
 //! use gauss_quad::legendre::GaussLegendre;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussLegendre::init(10);
+//! let quad = GaussLegendre::new(10);
 //! let integral = quad.integrate(-1.0, 1.0,
 //!     |x| 0.125 * (63.0 * x.powi(5) - 70.0 * x.powi(3) + 15.0 * x)
 //! );
@@ -33,7 +33,7 @@ use bogaert::NodeWeightPair;
 /// # use gauss_quad::GaussLegendre;
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Legendre rule with 3 nodes
-/// let quad = GaussLegendre::init(3);
+/// let quad = GaussLegendre::new(3);
 ///
 /// // numerically integrate x^2 - 1/3 over the domain [0, 1]
 /// let integral = quad.integrate(0.0, 1.0, |x| x * x - 1.0 / 3.0);
@@ -45,7 +45,7 @@ use bogaert::NodeWeightPair;
 /// ```
 /// # use gauss_quad::GaussLegendre;
 /// # use approx::assert_abs_diff_eq;
-/// let quad = GaussLegendre::init(1_000_000);
+/// let quad = GaussLegendre::new(1_000_000);
 /// let integral = quad.integrate(-3.0, 3.0, |x| x.sin());
 /// assert_abs_diff_eq!(integral, 0.0);
 /// ```
@@ -57,7 +57,7 @@ pub struct GaussLegendre {
 
 impl GaussLegendre {
     /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights.
-    pub fn init(deg: usize) -> Self {
+    pub fn new(deg: usize) -> Self {
         let (nodes, weights) = Self::nodes_and_weights(deg);
 
         Self { nodes, weights }
@@ -85,7 +85,7 @@ impl GaussLegendre {
     /// ```
     /// # use gauss_quad::GaussLegendre;
     /// # use approx::assert_abs_diff_eq;
-    /// let glq_rule = GaussLegendre::init(3);
+    /// let glq_rule = GaussLegendre::new(3);
     /// assert_abs_diff_eq!(glq_rule.integrate(-1.0, 1.0, |x| x.powi(5)), 0.0);
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
@@ -305,10 +305,10 @@ mod tests {
 
     #[test]
     fn check_derives() {
-        let quad = GaussLegendre::init(10);
+        let quad = GaussLegendre::new(10);
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussLegendre::init(3);
+        let other_quad = GaussLegendre::new(3);
         assert_ne!(quad, other_quad);
     }
 }

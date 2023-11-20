@@ -16,7 +16,7 @@
 //! let eps = 0.001;
 //!
 //! let n = 30;
-//! let quad = Midpoint::init(n);
+//! let quad = Midpoint::new(n);
 //!
 //! // integrate some functions
 //! let two_thirds = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -27,7 +27,7 @@
 //!
 //! // some functions need more steps than others
 //! let m = 100;
-//! let better_quad = Midpoint::init(m);
+//! let better_quad = Midpoint::new(m);
 //!
 //! let piecewise = better_quad.integrate(-5.0, 5.0, |x|
 //!     if x > 1.0 && x < 2.0 {
@@ -47,7 +47,7 @@
 /// # fn main() {
 /// #
 /// // initialize a midpoint rule with 100 cells
-/// let quad: Midpoint = Midpoint::init(100);
+/// let quad: Midpoint = Midpoint::new(100);
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the midpoint rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -65,7 +65,7 @@ impl Midpoint {
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
     /// # Panics
     /// Panics if degree is less than 1
-    pub fn init(degree: usize) -> Self {
+    pub fn new(degree: usize) -> Self {
         assert!(degree >= 1, "Degree of Midpoint rule needs to be >= 1");
         Self {
             nodes: Self::nodes(degree),
@@ -105,17 +105,17 @@ mod tests {
 
     #[test]
     fn check_midpoint_integration() {
-        let quad = Midpoint::init(100);
+        let quad = Midpoint::new(100);
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
     fn check_derives() {
-        let quad = Midpoint::init(10);
+        let quad = Midpoint::new(10);
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Midpoint::init(3);
+        let other_quad = Midpoint::new(3);
         assert_ne!(quad, other_quad);
     }
 }

@@ -23,7 +23,7 @@
 //!
 //! // initialize the quadrature rule
 //! let degree = 10;
-//! let quad = GaussLegendre::init(degree);
+//! let quad = GaussLegendre::new(degree);
 //!
 //! // use the rule to integrate a function
 //! let left_bound = 0.0;
@@ -49,19 +49,19 @@
 //! # let b = 1.0;
 //! # let c = -10.;
 //! # let d = 100.;
-//! let gauss_legendre = GaussLegendre::init(degree);
+//! let gauss_legendre = GaussLegendre::new(degree);
 //! // Integrate on the domain [a, b]
 //! let x_cubed = gauss_legendre.integrate(a, b, |x| x * x * x);
 //!
-//! let gauss_jacobi = GaussJacobi::init(degree, alpha, beta);
+//! let gauss_jacobi = GaussJacobi::new(degree, alpha, beta);
 //! // Integrate on the domain [c, d]
 //! let double_x = gauss_jacobi.integrate(c, d, |x| 2.0 * x);
 //!
-//! let gauss_laguerre = GaussLaguerre::init(degree, alpha);
+//! let gauss_laguerre = GaussLaguerre::new(degree, alpha);
 //! // no explicit domain, Gauss-Laguerre integration is done on the domain [0, ∞).
 //! let piecewise = gauss_laguerre.integrate(|x| if x > 0.0 && x < 2.0 { x } else { 0.0 });
 //!
-//! let gauss_hermite = GaussHermite::init(degree);
+//! let gauss_hermite = GaussHermite::new(degree);
 //! // again, no explicit domain since integration is done over the domain (-∞, ∞).
 //! let constant = gauss_hermite.integrate(|x| if x > -1.0 && x < 1.0 { 2.0 } else { 1.0 });
 //! ```
@@ -79,7 +79,7 @@
 //! // initialize the quadrature rule
 //! let degree = 10;
 //! let alpha = 0.5;
-//! let quad = GaussLaguerre::init(degree, alpha);
+//! let quad = GaussLaguerre::new(degree, alpha);
 //!
 //! // use the rule to integrate a function
 //! let integral = quad.integrate(|x| x * x);
@@ -91,7 +91,7 @@
 //! ```should_panic
 //! # use gauss_quad::GaussLaguerre;
 //! let degree = 1;
-//! let quad = GaussLaguerre::init(degree, 0.1); // panics!
+//! let quad = GaussLaguerre::new(degree, 0.1); // panics!
 //! ```
 //!
 //! Specific rules may have other requirements.
@@ -102,7 +102,7 @@
 //! let alpha = 0.1;
 //! let beta = -1.1;
 //!
-//! let quad = GaussJacobi::init(degree, alpha, beta); // panics!
+//! let quad = GaussJacobi::new(degree, alpha, beta); // panics!
 //! ```
 //! Make sure to read the specific quadrature rule's documentation before using it.
 //!
@@ -118,7 +118,7 @@
 //!
 //! // initialize the quadrature rule
 //! let degree = 10;
-//! let quad = GaussLegendre::init(degree);
+//! let quad = GaussLegendre::new(degree);
 //!
 //! // use the rule to integrate a function
 //! let left_bound = 0.0;
