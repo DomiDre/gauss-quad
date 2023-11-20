@@ -352,4 +352,16 @@ mod tests {
         let other_quad = GaussJacobi::init(10, 1.0, 0.0);
         assert_ne!(quad, other_quad);
     }
+
+    #[test]
+    #[should_panic]
+    fn panics_for_too_small_alpha() {
+        GaussJacobi::init(3, -2.0, 1.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn panics_for_too_small_beta() {
+        GaussJacobi::init(3, 1.0, -2.0);
+    }
 }
