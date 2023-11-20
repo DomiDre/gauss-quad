@@ -48,6 +48,9 @@ pub struct GaussJacobi {
 impl GaussJacobi {
     /// Initializes Gauss-Jacobi quadrature rule of the given degree by computing the nodes and weights
     /// needed for the given `alpha` and `beta`.
+    /// 
+    /// # Panics
+    /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
     pub fn init(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
         let (nodes, weights) = GaussJacobi::nodes_and_weights(deg, alpha, beta);
 
@@ -56,6 +59,9 @@ impl GaussJacobi {
 
     /// Apply Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
+    /// 
+    /// # Panics
+    /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
     pub fn nodes_and_weights(deg: usize, alpha: f64, beta: f64) -> (Vec<f64>, Vec<f64>) {
         if alpha < -1.0 || beta < -1.0 {
             panic!("Gauss-Jacobi quadrature needs alpha > -1.0 and beta > -1.0");
