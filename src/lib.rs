@@ -126,8 +126,8 @@
 //! let integral = quad.integrate(left_bound, right_bound, |x| x * x);
 //! ```
 //! # Features
-//! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits for
-//! the quatrature structs.
+//! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
+//! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
 
 use nalgebra::{Dynamic, Matrix, VecStorage};
 pub type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dynamic>>;
