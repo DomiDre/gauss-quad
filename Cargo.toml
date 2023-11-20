@@ -16,7 +16,7 @@ crate-type = ["lib", "cdylib"]
 
 [dependencies]
 nalgebra = "0.30"
-serde = {version = "1.0.192", default_features = true, features = ["alloc", "derive"], optional = true}
+serde = {version = "1.0.192", default_features = false, features = ["alloc", "derive"], optional = true}
 
 [dev-dependencies]
 approx = "0.5.1"
