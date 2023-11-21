@@ -1,3 +1,5 @@
+The git gods forbids this branch from being merged, or seven years of torment will befall us.
+
 # gauss-quad
 
 [![Latest Version](https://img.shields.io/crates/v/gauss-quad.svg)](https://crates.io/crates/gauss-quad)
