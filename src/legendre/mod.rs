@@ -23,6 +23,8 @@
 
 use bogaert::NodeWeightPair;
 
+use rayon::prelude::*;
+
 /// A Gauss-Legendre quadrature scheme.
 ///
 /// These rules can integrate functions on the domain [a, b].
@@ -54,6 +56,54 @@ use bogaert::NodeWeightPair;
 pub struct GaussLegendre {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GaussLegendreUnified {
+    pub node_weight_pairs: Vec<(f64, f64)>,
+}
+
+impl GaussLegendreUnified {
+    pub fn new(deg: usize) -> Self {
+        Self {
+            node_weight_pairs: (1..deg + 1)
+                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+                .collect(),
+        }
+    }
+
+    fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
+        0.5 * ((b - a) * x + (b + a))
+    }
+
+    fn scale_factor(a: f64, b: f64) -> f64 {
+        0.5 * (b - a)
+    }
+
+    pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64,
+    {
+        let result: f64 = self
+            .node_weight_pairs
+            .iter()
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * *w_val)
+            .sum();
+        Self::scale_factor(a, b) * result
+    }
+
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Send + Sync,
+    {
+        let result: f64 = self
+            .node_weight_pairs
+            .par_iter()
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * *w_val)
+            .sum();
+        Self::scale_factor(a, b) * result
+    }
 }
 
 impl GaussLegendre {
@@ -97,6 +147,20 @@ impl GaussLegendre {
             .nodes
             .iter()
             .zip(self.weights.iter())
+            .map(|(&x_val, w_val)| integrand(Self::argument_transformation(x_val, a, b)) * w_val)
+            .sum();
+        Self::scale_factor(a, b) * result
+    }
+
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Send + Sync,
+    {
+        let result: f64 = self
+            .nodes
+            .iter()
+            .zip(self.weights.iter())
+            .par_bridge()
             .map(|(&x_val, w_val)| integrand(Self::argument_transformation(x_val, a, b)) * w_val)
             .sum();
         Self::scale_factor(a, b) * result
