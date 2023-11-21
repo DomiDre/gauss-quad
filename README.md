@@ -1,5 +1,7 @@
 The git gods forbids this branch from being merged, or seven years of torment will befall us.
 
+To run the benchmarks type `cargo bench`. There's a lot (probably too many). When they're done you can view the results by opening target/criterion/reports/index.html.
+
 # gauss-quad
 
 [![Latest Version](https://img.shields.io/crates/v/gauss-quad.svg)](https://crates.io/crates/gauss-quad)
