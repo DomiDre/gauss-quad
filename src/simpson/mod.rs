@@ -43,6 +43,7 @@
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Simpson {
     /// The dimensionless Simpsons
     nodes: Vec<f64>,

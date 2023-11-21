@@ -35,6 +35,7 @@ use crate::{DMatrixf64, PI};
 /// assert_abs_diff_eq!(integral, PI.sqrt() / E.powf(0.25), epsilon = 1e-14);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussHermite {
     pub nodes: Vec<f64>,
     pub weights: Vec<f64>,
