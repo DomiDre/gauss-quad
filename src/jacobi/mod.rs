@@ -33,7 +33,7 @@ use crate::DMatrixf64;
 /// // initialize the quadrature rule.
 /// let quad = GaussJacobi::new(10, -0.5, 0.0);
 ///
-/// // numerically integrate e^-x / sqrt(1 + x).
+/// // numerically integrate e^-x / sqrt(1 - x).
 /// let integral = quad.integrate(-1.0, 1.0, |x| (-x).exp());
 ///
 /// let dawson_function_of_sqrt_2 = 0.4525399074037225;
