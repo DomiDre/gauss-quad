@@ -10,7 +10,7 @@
 //! use gauss_quad::jacobi::GaussJacobi;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussJacobi::init(10, 0.0, -1.0 / 3.0);
+//! let quad = GaussJacobi::new(10, 0.0, -1.0 / 3.0);
 //!
 //! // numerically integrate sin(x) / (1 - x)^(1/3), a function with a singularity at x = 1.
 //! let integral = quad.integrate(-1.0, 1.0, |x| x.sin());
@@ -31,7 +31,7 @@ use crate::DMatrixf64;
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::E;
 /// // initialize the quadrature rule.
-/// let quad = GaussJacobi::init(10, -0.5, 0.0);
+/// let quad = GaussJacobi::new(10, -0.5, 0.0);
 ///
 /// // numerically integrate e^-x / sqrt(1 + x).
 /// let integral = quad.integrate(-1.0, 1.0, |x| (-x).exp());
@@ -52,7 +52,7 @@ impl GaussJacobi {
     ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
-    pub fn init(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
+    pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
         let (nodes, weights) = GaussJacobi::nodes_and_weights(deg, alpha, beta);
 
         GaussJacobi { nodes, weights }
@@ -128,7 +128,7 @@ impl GaussJacobi {
 
     /// Perform quadrature of integrand from `a` to `b`. This will integrate  
     /// (1 - x)^`alpha` * (1 + x)^`beta` * `integrand`  
-    /// where `alpha` and `beta` were given in the call to [`init`](Self::init).
+    /// where `alpha` and `beta` were given in the call to [`init`](Self::new).
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
@@ -353,22 +353,22 @@ mod tests {
 
     #[test]
     fn check_derives() {
-        let quad = GaussJacobi::init(10, 0.0, 1.0);
+        let quad = GaussJacobi::new(10, 0.0, 1.0);
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussJacobi::init(10, 1.0, 0.0);
+        let other_quad = GaussJacobi::new(10, 1.0, 0.0);
         assert_ne!(quad, other_quad);
     }
 
     #[test]
     #[should_panic]
     fn panics_for_too_small_alpha() {
-        GaussJacobi::init(3, -2.0, 1.0);
+        GaussJacobi::new(3, -2.0, 1.0);
     }
 
     #[test]
     #[should_panic]
     fn panics_for_too_small_beta() {
-        GaussJacobi::init(3, 1.0, -2.0);
+        GaussJacobi::new(3, 1.0, -2.0);
     }
 }

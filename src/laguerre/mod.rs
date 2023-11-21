@@ -9,7 +9,7 @@
 //! use gauss_quad::laguerre::GaussLaguerre;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussLaguerre::init(10, 1.0);
+//! let quad = GaussLaguerre::new(10, 1.0);
 //! let integral = quad.integrate(|x| x.powi(2));
 //! assert_abs_diff_eq!(integral, 6.0, epsilon = 1e-14);
 //! ```
@@ -26,7 +26,7 @@ use crate::DMatrixf64;
 /// # use gauss_quad::GaussLaguerre;
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Laguerre rule with 10 nodes
-/// let quad = GaussLaguerre::init(10, 0.0);
+/// let quad = GaussLaguerre::new(10, 0.0);
 ///
 /// // numerically evaluate this integral,
 /// // which is a definition of the gamma function
@@ -47,7 +47,7 @@ impl GaussLaguerre {
     ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
-    pub fn init(deg: usize, alpha: f64) -> GaussLaguerre {
+    pub fn new(deg: usize, alpha: f64) -> GaussLaguerre {
         let (nodes, weights) = GaussLaguerre::nodes_and_weights(deg, alpha);
 
         GaussLaguerre { nodes, weights }
@@ -105,7 +105,7 @@ impl GaussLaguerre {
 
     /// Perform quadrature of  
     /// x^`alpha` * e^(-x) * `integrand`  
-    /// over the domain `[0, ∞)`, where `alpha` was given in the call to [`init`](Self::init).
+    /// over the domain `[0, ∞)`, where `alpha` was given in the call to [`new`](Self::new).
     pub fn integrate<F>(&self, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
@@ -206,10 +206,10 @@ mod tests {
 
     #[test]
     fn check_derives() {
-        let quad = GaussLaguerre::init(10, 1.0);
+        let quad = GaussLaguerre::new(10, 1.0);
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussLaguerre::init(10, 2.0);
+        let other_quad = GaussLaguerre::new(10, 2.0);
         assert_ne!(quad, other_quad);
     }
 }

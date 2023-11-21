@@ -22,7 +22,7 @@
 //! let eps = 0.001;
 //!
 //! let n = 10;
-//! let quad = Simpson::init(n);
+//! let quad = Simpson::new(n);
 //!
 //! // integrate some functions
 //! let integrate_euler = quad.integrate(0.0, 1.0, |x| x.exp());
@@ -37,7 +37,7 @@
 /// ```
 /// # use gauss_quad::Simpson;
 /// // initialize a Simpson rule with 100 subintervals
-/// let quad: Simpson = Simpson::init(100);
+/// let quad: Simpson = Simpson::new(100);
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the Simpson rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -51,7 +51,7 @@ pub struct Simpson {
 
 impl Simpson {
     /// Initialize a new Simpson rule with `degree` being the number of intervals
-    pub fn init(degree: usize) -> Self {
+    pub fn new(degree: usize) -> Self {
         assert!(degree >= 1, "Degree of Simpson rule needs to be >= 1");
         Self {
             nodes: Self::nodes(degree),
@@ -109,17 +109,17 @@ mod tests {
 
     #[test]
     fn check_simpson_integration() {
-        let quad = Simpson::init(2);
+        let quad = Simpson::new(2);
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
     fn check_derives() {
-        let quad = Simpson::init(10);
+        let quad = Simpson::new(10);
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Simpson::init(3);
+        let other_quad = Simpson::new(3);
         assert_ne!(quad, other_quad);
     }
 }

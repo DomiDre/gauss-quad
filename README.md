@@ -19,7 +19,7 @@ To use the crate, the desired quadrature rule has to be included in the program,
 The general call structure is to first initialize the n-point quadrature rule setting the degree n via
 
 ```
- let quad = QUADRATURE_RULE::init(n);
+ let quad = QUADRATURE_RULE::new(n);
 ```
 
 where QUADRATURE_RULE can currently be set to calculate either:
@@ -36,7 +36,7 @@ where QUADRATURE_RULE can currently be set to calculate either:
 For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
 
 ```
- let quad = GaussLaguerre::init(n, alpha);
+ let quad = GaussLaguerre::new(n, alpha);
 ```
 
 Then to calculate the integral of a function call
