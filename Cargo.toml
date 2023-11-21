@@ -1,6 +1,6 @@
 [package]
 name = "gauss-quad"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["DomiDre <dominiquedresen@gmail.com>", "Johanna Sörngård (jsorngard@gmail.com)"]
 keywords = ["gaussian", "quadrature", "numerics", "integration"]
 categories = ["Mathematics"]
