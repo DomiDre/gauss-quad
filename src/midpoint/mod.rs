@@ -74,7 +74,7 @@ impl Midpoint {
     }
 
     /// Returns an iterator over the nodes of the midpoint rule.
-    pub fn iter(&self) -> core::slice::Iter<f64> {
+    pub fn iter(&self) -> core::slice::Iter<'_, f64> {
         self.nodes.iter()
     }
 
