@@ -22,7 +22,7 @@ pub mod iterators;
 use iterators::{GaussJacobiIter, GaussJacobiNodes, GaussJacobiWeights};
 
 use crate::gamma::gamma;
-use crate::{impl_data_api, DMatrixf64};
+use crate::{impl_data_api, DMatrixf64, Node, Weight};
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -45,7 +45,7 @@ use crate::{impl_data_api, DMatrixf64};
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussJacobi {
-    node_weight_pairs: Vec<(f64, f64)>,
+    node_weight_pairs: Vec<(Node, Weight)>,
     alpha: f64,
     beta: f64,
 }

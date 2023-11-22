@@ -144,6 +144,7 @@ pub mod legendre;
 pub mod midpoint;
 pub mod simpson;
 
+pub use data_api::{Node, NodeWeightPair, Weight};
 #[doc(inline)]
 pub use hermite::GaussHermite;
 #[doc(inline)]

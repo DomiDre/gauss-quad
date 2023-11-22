@@ -18,7 +18,7 @@
 pub mod iterators;
 use iterators::{GaussHermiteIter, GaussHermiteNodes, GaussHermiteWeights};
 
-use crate::{impl_data_api, DMatrixf64, PI};
+use crate::{impl_data_api, DMatrixf64, Node, Weight, PI};
 
 /// A Gauss-Hermite quadrature scheme.
 ///
@@ -40,7 +40,7 @@ use crate::{impl_data_api, DMatrixf64, PI};
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussHermite {
-    node_weight_pairs: Vec<(f64, f64)>,
+    node_weight_pairs: Vec<(Node, Weight)>,
 }
 
 impl GaussHermite {

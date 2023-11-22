@@ -26,7 +26,7 @@ use iterators::{GaussLegendreIter, GaussLegendreNodes, GaussLegendreWeights};
 
 use bogaert::NodeWeightPair;
 
-use crate::impl_data_api;
+use crate::{impl_data_api, Node, Weight};
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -57,7 +57,7 @@ use crate::impl_data_api;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
-    node_weight_pairs: Vec<(f64, f64)>,
+    node_weight_pairs: Vec<(Node, Weight)>,
 }
 
 impl GaussLegendre {
