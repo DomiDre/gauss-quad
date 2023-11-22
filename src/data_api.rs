@@ -79,8 +79,99 @@ macro_rules! impl_iterators {
         $quadrature_rule_iter:ident,
         $quadrature_rule_into_iter:ident
     ) => {
-        slice_map_iter_impl! {$quadrature_rule_nodes}
-        slice_map_iter_impl! {$quadrature_rule_weights}
+        // region: QuadratureRuleNodes
+
+        /// An iterator over the nodes of the quadrature rule.
+        #[derive(Debug, Clone)]
+        #[must_use = "iterators are lazy and do nothing unless consumed"]
+        pub struct $quadrature_rule_nodes<'a> {
+            iter_map: ::std::iter::Map<
+                ::core::slice::Iter<'a, (Node, Weight)>,
+                fn(&'a (Node, Weight)) -> &'a Node,
+            >,
+        }
+
+        impl<'a> $quadrature_rule_nodes<'a> {
+            pub(super) fn new(
+                iter_map: ::std::iter::Map<
+                    ::core::slice::Iter<'a, (Node, Weight)>,
+                    fn(&'a (Node, Weight)) -> &'a Node,
+                >,
+            ) -> Self {
+                Self { iter_map }
+            }
+        }
+
+        impl<'a> ::core::iter::Iterator for $quadrature_rule_nodes<'a> {
+            type Item = &'a Node;
+            fn next(&mut self) -> Option<Self::Item> {
+                self.iter_map.next()
+            }
+
+            #[inline]
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                self.iter_map.size_hint()
+            }
+        }
+
+        impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_nodes<'a> {
+            fn next_back(&mut self) -> Option<Self::Item> {
+                self.iter_map.next_back()
+            }
+        }
+
+        impl<'a> ::core::iter::ExactSizeIterator for $quadrature_rule_nodes<'a> {}
+        impl<'a> ::core::iter::FusedIterator for $quadrature_rule_nodes<'a> {}
+
+        // endregion: QuadratureRuleNodes
+
+        // region: QuadratureRuleWeights
+
+        /// An iterator over the weights of the quadrature rule.
+        #[derive(Debug, Clone)]
+        #[must_use = "iterators are lazy and do nothing unless consumed"]
+        pub struct $quadrature_rule_weights<'a> {
+            iter_map: ::std::iter::Map<
+                ::core::slice::Iter<'a, (Node, Weight)>,
+                fn(&'a (Node, Weight)) -> &'a Weight,
+            >,
+        }
+
+        impl<'a> $quadrature_rule_weights<'a> {
+            pub(super) fn new(
+                iter_map: ::std::iter::Map<
+                    ::core::slice::Iter<'a, (Node, Weight)>,
+                    fn(&'a (Node, Weight)) -> &'a Weight,
+                >,
+            ) -> Self {
+                Self { iter_map }
+            }
+        }
+
+        impl<'a> ::core::iter::Iterator for $quadrature_rule_weights<'a> {
+            type Item = &'a Weight;
+            fn next(&mut self) -> Option<Self::Item> {
+                self.iter_map.next()
+            }
+
+            #[inline]
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                self.iter_map.size_hint()
+            }
+        }
+
+        impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_weights<'a> {
+            fn next_back(&mut self) -> Option<Self::Item> {
+                self.iter_map.next_back()
+            }
+        }
+
+        impl<'a> ::core::iter::ExactSizeIterator for $quadrature_rule_weights<'a> {}
+        impl<'a> ::core::iter::FusedIterator for $quadrature_rule_weights<'a> {}
+
+        // endregion: QuadratureRuleWeights
+
+        // region: QuadratureRuleIter
 
         /// An iterator over node-weight-pairs of the quadrature rule.
         ///
@@ -107,6 +198,7 @@ macro_rules! impl_iterators {
         }
 
         impl<'a> ::core::iter::Iterator for $quadrature_rule_iter<'a> {
+            /// Element `.0` is the node and element `.1` the corresponding weight.
             type Item = &'a (Node, Weight);
             fn next(&mut self) -> Option<Self::Item> {
                 self.node_weight_pairs.next()
@@ -119,6 +211,10 @@ macro_rules! impl_iterators {
             }
         }
 
+        // endregion: QuadratureRuleIter
+
+        // region: QuadratureRuleIntoIter
+
         /// An owning iterator over the node-weight-pairs of the quadrature rule.
         ///
         /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
@@ -129,6 +225,7 @@ macro_rules! impl_iterators {
         }
 
         impl ::core::iter::Iterator for $quadrature_rule_into_iter {
+            /// Element `.0` is the node and element `.1` the corresponding weight.
             type Item = (Node, Weight);
             fn next(&mut self) -> Option<Self::Item> {
                 self.node_weight_pairs.next()
@@ -170,55 +267,7 @@ macro_rules! impl_iterators {
                 $quadrature_rule_into_iter::new(self.node_weight_pairs.into_iter())
             }
         }
-    };
-}
 
-/// This macro defines a struct with the given name that contains a `Map<Iter<'a, (f64, f64)>,fn(&'a (f64, f64)) -> &'a f64,>`.
-/// It then implements the [`Iterator`], [`DoubleEndedIterator`], [`ExactSizeIterator`], and [`FusedIterator`]
-///  traits for it, and the convenience method `as_slice`.
-#[doc(hidden)]
-#[macro_export]
-macro_rules! slice_map_iter_impl {
-    ($slice_iter:ident) => {
-        #[derive(Debug, Clone)]
-        #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $slice_iter<'a> {
-            iter_map: ::std::iter::Map<
-                ::core::slice::Iter<'a, (Node, Weight)>,
-                fn(&'a (Node, Weight)) -> &'a f64,
-            >,
-        }
-
-        impl<'a> $slice_iter<'a> {
-            pub(super) fn new(
-                iter_map: ::std::iter::Map<
-                    ::core::slice::Iter<'a, (Node, Weight)>,
-                    fn(&'a (Node, Weight)) -> &'a f64,
-                >,
-            ) -> Self {
-                Self { iter_map }
-            }
-        }
-
-        impl<'a> ::core::iter::Iterator for $slice_iter<'a> {
-            type Item = &'a f64;
-            fn next(&mut self) -> Option<Self::Item> {
-                self.iter_map.next()
-            }
-
-            #[inline]
-            fn size_hint(&self) -> (usize, Option<usize>) {
-                self.iter_map.size_hint()
-            }
-        }
-
-        impl<'a> ::core::iter::DoubleEndedIterator for $slice_iter<'a> {
-            fn next_back(&mut self) -> Option<Self::Item> {
-                self.iter_map.next_back()
-            }
-        }
-
-        impl<'a> ::core::iter::ExactSizeIterator for $slice_iter<'a> {}
-        impl<'a> ::core::iter::FusedIterator for $slice_iter<'a> {}
+        // endregion: QuadratureRuleIntoIter
     };
 }
