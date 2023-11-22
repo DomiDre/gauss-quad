@@ -18,8 +18,7 @@
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
 //! ```
 
-use crate::gamma::gamma;
-use crate::DMatrixf64;
+use crate::{gamma::gamma, DMatrixf64, NodeWeightPair};
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -42,28 +41,19 @@ use crate::DMatrixf64;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussJacobi {
-    pub nodes: Vec<f64>,
-    pub weights: Vec<f64>,
+    node_weight_pairs: Vec<NodeWeightPair>,
 }
 
 impl GaussJacobi {
     /// Initializes Gauss-Jacobi quadrature rule of the given degree by computing the nodes and weights
     /// needed for the given `alpha` and `beta`.
     ///
-    /// # Panics
-    /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
-    pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
-        let (nodes, weights) = GaussJacobi::nodes_and_weights(deg, alpha, beta);
-
-        GaussJacobi { nodes, weights }
-    }
-
     /// Apply Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
-    pub fn nodes_and_weights(deg: usize, alpha: f64, beta: f64) -> (Vec<f64>, Vec<f64>) {
+    pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
         if alpha < -1.0 || beta < -1.0 {
             panic!("Gauss-Jacobi quadrature needs alpha > -1.0 and beta > -1.0");
         }
@@ -105,17 +95,24 @@ impl GaussJacobi {
         let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
             .data
             .into();
-        let mut both: Vec<_> = nodes.iter().zip(weights.iter()).collect();
-        both.sort_by(|a, b| a.0.partial_cmp(b.0).unwrap());
-        let (mut nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
+        let mut both: Vec<_> = nodes
+            .iter()
+            .zip(weights.iter())
+            .map(|(&a, &b)| (a, b))
+            .collect();
+        both.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+
+        // let (mut nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
 
         // TO FIX: implement correction
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
         // for now... manual correction seems to do the trick
         if deg & 1 == 1 {
-            nodes[deg / 2] = 0.0;
+            both[deg / 2].0 = 0.0;
         }
-        (nodes, weights)
+        Self {
+            node_weight_pairs: both,
+        }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -134,11 +131,10 @@ impl GaussJacobi {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| {
-                integrand(GaussJacobi::argument_transformation(x_val, a, b)) * w_val
+            .map(|(x_val, w_val)| {
+                integrand(GaussJacobi::argument_transformation(*x_val, a, b)) * *w_val
             })
             .sum();
         GaussJacobi::scale_factor(a, b) * result
@@ -150,7 +146,7 @@ mod tests {
     use super::*;
     #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
-        let (x, w) = GaussJacobi::nodes_and_weights(5, 0.0, 0.0);
+        let quad_rule = GaussJacobi::new(5, 0.0, 0.0);
         let x_should = [
             -0.906_179_845_938_664,
             -0.538_469_310_105_683_1,
@@ -165,30 +161,26 @@ mod tests {
             0.478_628_670_499_366_47,
             0.236_926_885_056_189_08,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i], epsilon = 1e-15);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i], epsilon = 1e-15);
         }
     }
 
     #[test]
     fn golub_welsch_2_alpha_1_beta_0() {
-        let (x, w) = GaussJacobi::nodes_and_weights(2, 1.0, 0.0);
+        let quad_rule = GaussJacobi::new(2, 1.0, 0.0);
         let x_should = [-0.689_897_948_556_635_7, 0.289_897_948_556_635_64];
         let w_should = [1.272_165_526_975_908_7, 0.727_834_473_024_091_3];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i], epsilon = 1e-14);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i], epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_5_alpha_1_beta_0() {
-        let (x, w) = GaussJacobi::nodes_and_weights(5, 1.0, 0.0);
+        let quad_rule = GaussJacobi::new(5, 1.0, 0.0);
         let x_should = [
             -0.920_380_285_897_062_6,
             -0.603_973_164_252_783_7,
@@ -203,17 +195,15 @@ mod tests {
             0.295_635_480_290_466_66,
             0.062_991_658_086_769_1,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i], epsilon = 1e-14);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i], epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_5_alpha_0_beta_1() {
-        let (x, w) = GaussJacobi::nodes_and_weights(5, 0.0, 1.0);
+        let quad_rule = GaussJacobi::new(5, 0.0, 1.0);
         let x_should = [
             -0.802_929_828_402_347_2,
             -0.390_928_546_707_272_2,
@@ -228,17 +218,15 @@ mod tests {
             0.668_698_552_377_478_2,
             0.387_126_360_906_606_74,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i], epsilon = 1e-14);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i], epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_50_alpha_42_beta_23() {
-        let (x, w) = GaussJacobi::nodes_and_weights(50, 42.0, 23.0);
+        let quad_rule = GaussJacobi::new(50, 42.0, 23.0);
         let x_should = [
             -0.936_528_233_152_541_2,
             -0.914_340_864_546_088_5,
@@ -343,11 +331,9 @@ mod tests {
             1.912_538_194_408_499_4E-24,
             6.645_776_758_516_211E-28,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-10);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-10);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i], epsilon = 1e-10);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i], epsilon = 1e-10);
         }
     }
 

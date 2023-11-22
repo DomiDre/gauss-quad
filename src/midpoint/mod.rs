@@ -40,6 +40,7 @@
 //! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
 //! ```
 
+use crate::Node;
 /// A midpoint rule quadrature scheme.
 /// ```
 /// # extern crate gauss_quad;
@@ -57,7 +58,7 @@
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Midpoint {
     /// The dimensionless midpoints
-    nodes: Vec<f64>,
+    nodes: Vec<Node>,
 }
 
 impl Midpoint {
@@ -68,19 +69,13 @@ impl Midpoint {
     /// Panics if degree is less than 1
     pub fn new(degree: usize) -> Self {
         assert!(degree >= 1, "Degree of Midpoint rule needs to be >= 1");
-        Self {
-            nodes: Self::nodes(degree),
-        }
-    }
 
-    /// Make a set of evenly spaced nodes
-    fn nodes(degree: usize) -> Vec<f64> {
         let mut nodes = Vec::with_capacity(degree);
         for idx in 0..degree {
-            nodes.push(idx as f64);
+            nodes.push(idx as Node);
         }
 
-        nodes
+        Self { nodes }
     }
 
     /// Integrate over the domain [a, b].

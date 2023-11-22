@@ -14,8 +14,7 @@
 //! assert_abs_diff_eq!(integral, 6.0, epsilon = 1e-14);
 //! ```
 
-use crate::gamma::gamma;
-use crate::DMatrixf64;
+use crate::{gamma::gamma, DMatrixf64, NodeWeightPair};
 
 /// A Gauss-Laguerre quadrature scheme.
 ///
@@ -37,22 +36,13 @@ use crate::DMatrixf64;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLaguerre {
-    pub nodes: Vec<f64>,
-    pub weights: Vec<f64>,
+    node_weight_pairs: Vec<NodeWeightPair>,
 }
 
 impl GaussLaguerre {
     /// Initializes Gauss-Laguerre quadrature rule of the given degree by computing the nodes and weights
     /// needed for the given `alpha` parameter.
     ///
-    /// # Panics
-    /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
-    pub fn new(deg: usize, alpha: f64) -> GaussLaguerre {
-        let (nodes, weights) = GaussLaguerre::nodes_and_weights(deg, alpha);
-
-        GaussLaguerre { nodes, weights }
-    }
-
     /// Apply Golub-Welsch algorithm to determine Gauss-Laguerre nodes & weights
     /// construct companion matrix A for the Laguerre Polynomial using the relation:
     /// -n L_{n-1} + (2n+1) L_{n} -(n+1) L_{n+1} = x L_n
@@ -63,7 +53,7 @@ impl GaussLaguerre {
     ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
-    pub fn nodes_and_weights(deg: usize, alpha: f64) -> (Vec<f64>, Vec<f64>) {
+    pub fn new(deg: usize, alpha: f64) -> GaussLaguerre {
         if alpha < -1.0 {
             panic!("Gauss-Laguerre quadrature needs alpha > -1.0");
         }
@@ -97,10 +87,15 @@ impl GaussLaguerre {
         let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
             .data
             .into();
-        let mut both: Vec<_> = nodes.iter().zip(weights.iter()).collect();
-        both.sort_by(|a, b| a.0.partial_cmp(b.0).unwrap());
-        let (nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
-        (nodes, weights)
+        let mut both: Vec<_> = nodes
+            .iter()
+            .zip(weights.iter())
+            .map(|(&a, &b)| (a, b))
+            .collect();
+        both.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        Self {
+            node_weight_pairs: both,
+        }
     }
 
     /// Perform quadrature of  
@@ -111,10 +106,9 @@ impl GaussLaguerre {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| integrand(x_val) * w_val)
+            .map(|(x_val, w_val)| integrand(*x_val) * *w_val)
             .sum();
         result
     }
@@ -126,20 +120,18 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_5() {
-        let (x, w) = GaussLaguerre::nodes_and_weights(2, 5.0);
+        let quad_rule = GaussLaguerre::new(2, 5.0);
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
         let w_should = [82.677_868_380_553_63, 37.322_131_619_446_37];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-12);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-12);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i], epsilon = 1e-12);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i], epsilon = 1e-12);
         }
     }
 
     #[test]
     fn golub_welsch_3_alpha_0() {
-        let (x, w) = GaussLaguerre::nodes_and_weights(3, 0.0);
+        let quad_rule = GaussLaguerre::new(3, 0.0);
         let x_should = [
             0.415_774_556_783_479_1,
             2.294_280_360_279_042,
@@ -150,17 +142,15 @@ mod tests {
             0.278_517_733_569_240_87,
             0.010_389_256_501_586_135,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i], epsilon = 1e-14);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i], epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_3_alpha_1_5() {
-        let (x, w) = GaussLaguerre::nodes_and_weights(3, 1.5);
+        let quad_rule = GaussLaguerre::new(3, 1.5);
         let x_should = [
             1.220_402_317_558_883_8,
             3.808_880_721_467_068,
@@ -171,17 +161,15 @@ mod tests {
             0.566_249_100_686_605_7,
             0.032_453_393_142_515_25,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i], epsilon = 1e-14);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i], epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_5_alpha_negative() {
-        let (x, w) = GaussLaguerre::nodes_and_weights(5, -0.9);
+        let quad_rule = GaussLaguerre::new(5, -0.9);
         let x_should = [
             0.020_777_151_319_288_104,
             0.808_997_536_134_602_1,
@@ -196,11 +184,9 @@ mod tests {
             0.002_312_760_116_115_564,
             1.162_358_758_613_074_8E-5,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i], epsilon = 1e-14);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i], epsilon = 1e-14);
         }
     }
 

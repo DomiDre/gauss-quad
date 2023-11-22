@@ -33,6 +33,7 @@
 //!
 //! ```
 
+use crate::Node;
 /// A Simpson rule quadrature scheme.
 /// ```
 /// # use gauss_quad::Simpson;
@@ -46,26 +47,20 @@
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Simpson {
     /// The dimensionless Simpsons
-    nodes: Vec<f64>,
+    nodes: Vec<Node>,
 }
 
 impl Simpson {
     /// Initialize a new Simpson rule with `degree` being the number of intervals
     pub fn new(degree: usize) -> Self {
         assert!(degree >= 1, "Degree of Simpson rule needs to be >= 1");
-        Self {
-            nodes: Self::nodes(degree),
-        }
-    }
 
-    /// Generate vector of indices for the subintervals
-    fn nodes(degree: usize) -> Vec<f64> {
         let mut nodes = Vec::with_capacity(degree);
         for idx in 0..degree {
             nodes.push(idx as f64);
         }
 
-        nodes
+        Self { nodes }
     }
 
     /// Integrate over the domain [a, b].
