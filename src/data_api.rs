@@ -238,7 +238,7 @@ macro_rules! slice_iter_impl {
         impl<'a> $slice_iter<'a> {
             /// Returns a view of the underlying data as a slice.
             #[inline]
-            pub fn as_slice(&self) -> &[f64] {
+            pub fn as_slice(&self) -> &'a [f64] {
                 &self.slice[self.index..self.back_index]
             }
         }
