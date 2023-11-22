@@ -15,7 +15,7 @@
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
 //! ```
 
-use crate::{DMatrixf64, NodeWeightPair, PI};
+use crate::{DMatrixf64, Node, NodeWeightPair, Weight, PI};
 
 /// A Gauss-Hermite quadrature scheme.
 ///
@@ -89,6 +89,32 @@ impl GaussHermite {
             .map(|(x_val, w_val)| integrand(*x_val) * *w_val)
             .sum();
         result
+    }
+
+    // Get the node, weight as slice of tuple pairs
+    pub fn as_node_weight_pairs(&self) -> &[NodeWeightPair] {
+        &self.node_weight_pairs
+    }
+
+    // Get the node, weight tuple pairs as a vector
+    pub fn into_node_weight_pairs(self) -> Vec<NodeWeightPair> {
+        self.node_weight_pairs
+    }
+
+    // Get the nodes as vector
+    pub fn nodes(&self) -> Vec<Node> {
+        self.node_weight_pairs
+            .iter()
+            .map(|&(node, _)| node)
+            .collect()
+    }
+
+    // Get the weights as vector
+    pub fn weights(&self) -> Vec<Weight> {
+        self.node_weight_pairs
+            .iter()
+            .map(|&(_, weight)| weight)
+            .collect()
     }
 }
 

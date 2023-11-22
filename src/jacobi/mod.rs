@@ -18,7 +18,7 @@
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
 //! ```
 
-use crate::{gamma::gamma, DMatrixf64, NodeWeightPair};
+use crate::{gamma::gamma, DMatrixf64, Node, NodeWeightPair, Weight};
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -138,6 +138,32 @@ impl GaussJacobi {
             })
             .sum();
         GaussJacobi::scale_factor(a, b) * result
+    }
+
+    // Get the node, weight as slice of tuple pairs
+    pub fn as_node_weight_pairs(&self) -> &[NodeWeightPair] {
+        &self.node_weight_pairs
+    }
+
+    // Get the node, weight tuple pairs as a vector
+    pub fn into_node_weight_pairs(self) -> Vec<NodeWeightPair> {
+        self.node_weight_pairs
+    }
+
+    // Get the nodes as vector
+    pub fn nodes(&self) -> Vec<Node> {
+        self.node_weight_pairs
+            .iter()
+            .map(|&(node, _)| node)
+            .collect()
+    }
+
+    // Get the weights as vector
+    pub fn weights(&self) -> Vec<Weight> {
+        self.node_weight_pairs
+            .iter()
+            .map(|&(_, weight)| weight)
+            .collect()
     }
 }
 

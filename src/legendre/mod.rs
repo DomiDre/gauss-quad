@@ -21,7 +21,7 @@
 //! assert_abs_diff_eq!(integral, 0.0);
 //! ```
 
-use crate::NodeWeightPair;
+use crate::{Node, NodeWeightPair, Weight};
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -94,6 +94,32 @@ impl GaussLegendre {
             .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * *w_val)
             .sum();
         Self::scale_factor(a, b) * result
+    }
+
+    // Get the node, weight as slice of tuple pairs
+    pub fn as_node_weight_pairs(&self) -> &[NodeWeightPair] {
+        &self.node_weight_pairs
+    }
+
+    // Get the node, weight tuple pairs as a vector
+    pub fn into_node_weight_pairs(self) -> Vec<NodeWeightPair> {
+        self.node_weight_pairs
+    }
+
+    // Get the nodes as vector
+    pub fn nodes(&self) -> Vec<Node> {
+        self.node_weight_pairs
+            .iter()
+            .map(|&(node, _)| node)
+            .collect()
+    }
+
+    // Get the weights as vector
+    pub fn weights(&self) -> Vec<Weight> {
+        self.node_weight_pairs
+            .iter()
+            .map(|&(_, weight)| weight)
+            .collect()
     }
 }
 

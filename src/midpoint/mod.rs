@@ -93,6 +93,16 @@ impl Midpoint {
 
         sum * rect_width
     }
+
+    // Get the node, weight as slice of tuple pairs
+    pub fn as_nodes(&self) -> &[Node] {
+        &self.nodes
+    }
+
+    // Get the nodes as vector
+    pub fn into_nodes(&self) -> Vec<Node> {
+        self.nodes.clone()
+    }
 }
 
 #[cfg(test)]
