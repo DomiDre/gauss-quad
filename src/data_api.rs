@@ -172,7 +172,7 @@ macro_rules! impl_data_api {
             type IntoIter = $quadrature_rule_into_iter;
             type Item = (f64, f64);
             fn into_iter(self) -> Self::IntoIter {
-                assert_eq!(self.nodes.len(), self.weights.len());
+                assert_eq!(self.nodes.len(), self.weights.len(), "internal error, please file an issue at <https://github.com/DomiDre/gauss-quad>");
                 let l = self.nodes.len();
                 $quadrature_rule_into_iter {
                     nodes: self.nodes,
