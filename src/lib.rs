@@ -131,6 +131,10 @@
 
 use nalgebra::{Dynamic, Matrix, VecStorage};
 pub type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dynamic>>;
+pub type Node = f64;
+pub type Weight = f64;
+pub type NodeWeightPair = (Node, Weight);
+
 #[doc(inline)]
 pub use core::f64::consts::PI;
 
