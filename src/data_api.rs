@@ -68,6 +68,12 @@ macro_rules! impl_data_api {
             pub fn into_nodes_and_weights(self) -> (Vec<f64>, Vec<f64>) {
                 (self.nodes, self.weights)
             }
+
+            /// Returns the degree of the quadrature rule.
+            #[inline]
+            pub fn degree(&self) -> usize {
+                self.nodes.len()
+            }
         }
 
         slice_iter_impl! {$quadrature_rule_nodes}
