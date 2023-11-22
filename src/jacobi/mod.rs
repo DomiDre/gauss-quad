@@ -52,20 +52,12 @@ impl GaussJacobi {
     /// Initializes Gauss-Jacobi quadrature rule of the given degree by computing the nodes and weights
     /// needed for the given `alpha` and `beta`.
     ///
-    /// # Panics
-    /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
-    pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
-        let (nodes, weights) = GaussJacobi::nodes_and_weights(deg, alpha, beta);
-
-        GaussJacobi { nodes, weights }
-    }
-
-    /// Apply Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights
-    /// see Gil, Segura, Temme - Numerical Methods for Special Functions
+    /// Applies Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights.
+    /// See Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
-    pub fn nodes_and_weights(deg: usize, alpha: f64, beta: f64) -> (Vec<f64>, Vec<f64>) {
+    pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
         if alpha < -1.0 || beta < -1.0 {
             panic!("Gauss-Jacobi quadrature needs alpha > -1.0 and beta > -1.0");
         }
@@ -117,7 +109,8 @@ impl GaussJacobi {
         if deg & 1 == 1 {
             nodes[deg / 2] = 0.0;
         }
-        (nodes, weights)
+
+        GaussJacobi { nodes, weights }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -152,7 +145,7 @@ mod tests {
     use super::*;
     #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
-        let (x, w) = GaussJacobi::nodes_and_weights(5, 0.0, 0.0);
+        let (x, w) = GaussJacobi::new(5, 0.0, 0.0).into_nodes_and_weights();
         let x_should = [
             -0.906_179_845_938_664,
             -0.538_469_310_105_683_1,
@@ -177,7 +170,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_1_beta_0() {
-        let (x, w) = GaussJacobi::nodes_and_weights(2, 1.0, 0.0);
+        let (x, w) = GaussJacobi::new(2, 1.0, 0.0).into_nodes_and_weights();
         let x_should = [-0.689_897_948_556_635_7, 0.289_897_948_556_635_64];
         let w_should = [1.272_165_526_975_908_7, 0.727_834_473_024_091_3];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -190,7 +183,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_1_beta_0() {
-        let (x, w) = GaussJacobi::nodes_and_weights(5, 1.0, 0.0);
+        let (x, w) = GaussJacobi::new(5, 1.0, 0.0).into_nodes_and_weights();
         let x_should = [
             -0.920_380_285_897_062_6,
             -0.603_973_164_252_783_7,
@@ -215,7 +208,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_0_beta_1() {
-        let (x, w) = GaussJacobi::nodes_and_weights(5, 0.0, 1.0);
+        let (x, w) = GaussJacobi::new(5, 0.0, 1.0).into_nodes_and_weights();
         let x_should = [
             -0.802_929_828_402_347_2,
             -0.390_928_546_707_272_2,
@@ -240,7 +233,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_50_alpha_42_beta_23() {
-        let (x, w) = GaussJacobi::nodes_and_weights(50, 42.0, 23.0);
+        let (x, w) = GaussJacobi::new(50, 42.0, 23.0).into_nodes_and_weights();
         let x_should = [
             -0.936_528_233_152_541_2,
             -0.914_340_864_546_088_5,

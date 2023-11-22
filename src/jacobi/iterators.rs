@@ -3,4 +3,4 @@
 use super::GaussJacobi;
 use crate::{impl_data_api, slice_iter_impl};
 
-impl_data_api!{GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
+impl_data_api! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
