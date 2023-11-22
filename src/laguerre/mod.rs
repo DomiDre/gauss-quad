@@ -41,6 +41,7 @@ use crate::DMatrixf64;
 pub struct GaussLaguerre {
     nodes: Vec<f64>,
     weights: Vec<f64>,
+    alpha: f64,
 }
 
 impl GaussLaguerre {
@@ -98,7 +99,11 @@ impl GaussLaguerre {
         both.sort_by(|a, b| a.0.partial_cmp(b.0).unwrap());
         let (nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
 
-        GaussLaguerre { nodes, weights }
+        GaussLaguerre {
+            nodes,
+            weights,
+            alpha,
+        }
     }
 
     /// Perform quadrature of  
@@ -115,6 +120,12 @@ impl GaussLaguerre {
             .map(|(&x_val, w_val)| integrand(x_val) * w_val)
             .sum();
         result
+    }
+
+    /// Returns the value of the `alpha` parameter of the rule.
+    #[inline]
+    pub const fn alpha(&self) -> f64 {
+        self.alpha
     }
 }
 

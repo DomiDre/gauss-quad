@@ -46,6 +46,8 @@ use crate::DMatrixf64;
 pub struct GaussJacobi {
     nodes: Vec<f64>,
     weights: Vec<f64>,
+    alpha: f64,
+    beta: f64,
 }
 
 impl GaussJacobi {
@@ -110,7 +112,12 @@ impl GaussJacobi {
             nodes[deg / 2] = 0.0;
         }
 
-        GaussJacobi { nodes, weights }
+        GaussJacobi {
+            nodes,
+            weights,
+            alpha,
+            beta,
+        }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -137,6 +144,18 @@ impl GaussJacobi {
             })
             .sum();
         GaussJacobi::scale_factor(a, b) * result
+    }
+
+    /// Returns the value of the `alpha` parameter.
+    #[inline]
+    pub const fn alpha(&self) -> f64 {
+        self.alpha
+    }
+
+    /// Returns the value of the `beta` parameter.
+    #[inline]
+    pub const fn beta(&self) -> f64 {
+        self.beta
     }
 }
 
