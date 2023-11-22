@@ -22,8 +22,11 @@
 //! ```
 
 pub mod iterators;
+use iterators::{GaussLegendreIter, GaussLegendreNodes, GaussLegendreWeights};
 
 use bogaert::NodeWeightPair;
+
+use crate::impl_data_api;
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -99,6 +102,8 @@ impl GaussLegendre {
         Self::scale_factor(a, b) * result
     }
 }
+
+impl_data_api! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter}
 
 /// This algorithm is based on an expansion of Legendre polynomials in terms of Bessel functions
 /// where for large degrees only the first terms in the expansion matter. This means that

@@ -16,8 +16,9 @@
 //! ```
 
 pub mod iterators;
+use iterators::{GaussHermiteIter, GaussHermiteNodes, GaussHermiteWeights};
 
-use crate::{DMatrixf64, PI};
+use crate::{impl_data_api, DMatrixf64, PI};
 
 /// A Gauss-Hermite quadrature scheme.
 ///
@@ -90,6 +91,8 @@ impl GaussHermite {
         result
     }
 }
+
+impl_data_api! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter}
 
 #[cfg(test)]
 mod tests {

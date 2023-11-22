@@ -13,10 +13,7 @@ macro_rules! impl_data_api {
         $quadrature_rule_weights:ident,
         // The name that the iterator returned when calling the `iter` function should have,
         // e.g. GaussLegendreIter.
-        $quadrature_rule_iter:ident,
-        // The name that the iterator returned by the `into_iter` function of the IntoIterator
-        // trait should have, e.g. GaussLegendreIntoIter.
-        $quadrature_rule_into_iter:ident
+        $quadrature_rule_iter:ident
     ) => {
         // The functions in this impl block all have an #[inline] directive because they are trivial.
         impl $quadrature_rule {
@@ -75,6 +72,13 @@ macro_rules! impl_data_api {
                 self.nodes.len()
             }
         }
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! impl_iterators {
+    ($quadrature_rule:ident, $quadrature_rule_nodes:ident, $quadrature_rule_weights:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
 
         slice_iter_impl! {$quadrature_rule_nodes}
         slice_iter_impl! {$quadrature_rule_weights}
@@ -85,8 +89,8 @@ macro_rules! impl_data_api {
         #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_iter<'a> {
-            node_iter: $quadrature_rule_nodes<'a>,
-            weight_iter: $quadrature_rule_weights<'a>,
+            pub(super) node_iter: $quadrature_rule_nodes<'a>,
+            pub(super) weight_iter: $quadrature_rule_weights<'a>,
         }
 
         impl<'a> ::core::iter::Iterator for $quadrature_rule_iter<'a> {
@@ -114,10 +118,10 @@ macro_rules! impl_data_api {
         #[derive(Debug, Clone, PartialEq)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_into_iter {
-            nodes: Vec<f64>,
-            weights: Vec<f64>,
-            index: usize,
-            back_index: usize,
+            pub(super) nodes: Vec<f64>,
+            pub(super) weights: Vec<f64>,
+            pub(super) index: usize,
+            pub(super) back_index: usize,
         }
 
         impl ::core::iter::Iterator for $quadrature_rule_into_iter {
@@ -197,7 +201,7 @@ macro_rules! slice_iter_impl {
         #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $slice_iter<'a> {
-            iter: ::core::slice::Iter<'a, f64>,
+            pub(super) iter: ::core::slice::Iter<'a, f64>,
         }
 
         impl<'a> ::core::iter::Iterator for $slice_iter<'a> {
