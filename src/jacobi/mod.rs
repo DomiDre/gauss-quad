@@ -44,8 +44,8 @@ use crate::DMatrixf64;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussJacobi {
-    pub nodes: Vec<f64>,
-    pub weights: Vec<f64>,
+    nodes: Vec<f64>,
+    weights: Vec<f64>,
 }
 
 impl GaussJacobi {
