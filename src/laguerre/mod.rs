@@ -40,8 +40,7 @@ use crate::{impl_data_api, DMatrixf64};
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLaguerre {
-    nodes: Vec<f64>,
-    weights: Vec<f64>,
+    node_weight_pairs: Vec<(f64, f64)>,
     alpha: f64,
 }
 
@@ -101,8 +100,7 @@ impl GaussLaguerre {
         let (nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
 
         GaussLaguerre {
-            nodes,
-            weights,
+            node_weight_pairs: nodes.into_iter().zip(weights.into_iter()).collect(),
             alpha,
         }
     }
@@ -115,10 +113,9 @@ impl GaussLaguerre {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| integrand(x_val) * w_val)
+            .map(|(x_val, w_val)| integrand(*x_val) * w_val)
             .sum();
         result
     }
@@ -138,7 +135,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_5() {
-        let (x, w) = GaussLaguerre::new(2, 5.0).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(2, 5.0).into_iter().unzip();
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
         let w_should = [82.677_868_380_553_63, 37.322_131_619_446_37];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -151,7 +148,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_0() {
-        let (x, w) = GaussLaguerre::new(3, 0.0).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 0.0).into_iter().unzip();
         let x_should = [
             0.415_774_556_783_479_1,
             2.294_280_360_279_042,
@@ -172,7 +169,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_1_5() {
-        let (x, w) = GaussLaguerre::new(3, 1.5).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 1.5).into_iter().unzip();
         let x_should = [
             1.220_402_317_558_883_8,
             3.808_880_721_467_068,
@@ -193,7 +190,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_negative() {
-        let (x, w) = GaussLaguerre::new(5, -0.9).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(5, -0.9).into_iter().unzip();
         let x_should = [
             0.020_777_151_319_288_104,
             0.808_997_536_134_602_1,

@@ -40,8 +40,7 @@ use crate::{impl_data_api, DMatrixf64, PI};
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussHermite {
-    nodes: Vec<f64>,
-    weights: Vec<f64>,
+    node_weight_pairs: Vec<(f64, f64)>,
 }
 
 impl GaussHermite {
@@ -69,12 +68,19 @@ impl GaussHermite {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        // return nodes and weights as Vec<f64>
-        let nodes: Vec<f64> = eigen.eigenvalues.data.into();
-        let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * PI.sqrt())
-            .data
-            .into();
-        GaussHermite { nodes, weights }
+        // return nodes and weights as Vec<(f64, f64)>
+        GaussHermite {
+            node_weight_pairs: eigen
+                .eigenvalues
+                .iter()
+                .copied()
+                .zip(
+                    (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * PI.sqrt())
+                        .iter()
+                        .copied(),
+                )
+                .collect(),
+        }
     }
 
     /// Perform quadrature of e^(-x^2) * `integrand` over the domain (-∞, ∞).
@@ -83,10 +89,9 @@ impl GaussHermite {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| integrand(x_val) * w_val)
+            .map(|(x_val, w_val)| integrand(*x_val) * w_val)
             .sum();
         result
     }
@@ -100,7 +105,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_3() {
-        let (x, w) = GaussHermite::new(3).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3).into_iter().unzip();
         let x_should = [1.224_744_871_391_589, 0.0, -1.224_744_871_391_589];
         let w_should = [
             0.295_408_975_150_919_35,

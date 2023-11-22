@@ -57,19 +57,18 @@ use crate::impl_data_api;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
-    nodes: Vec<f64>,
-    weights: Vec<f64>,
+    node_weight_pairs: Vec<(f64, f64)>,
 }
 
 impl GaussLegendre {
     /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights
     /// with the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
     pub fn new(deg: usize) -> Self {
-        let (nodes, weights) = (1..deg + 1)
-            .map(|k| NodeWeightPair::new(deg, k).into_tuple())
-            .unzip();
-
-        Self { nodes, weights }
+        Self {
+            node_weight_pairs: (1..deg + 1)
+                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+                .collect(),
+        }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -94,10 +93,9 @@ impl GaussLegendre {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| integrand(Self::argument_transformation(x_val, a, b)) * w_val)
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
             .sum();
         Self::scale_factor(a, b) * result
     }
@@ -294,7 +292,7 @@ mod tests {
 
     #[test]
     fn check_degree_3() {
-        let (x, w) = GaussLegendre::new(3).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).into_iter().unzip();
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];

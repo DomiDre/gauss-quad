@@ -45,8 +45,7 @@ use crate::{impl_data_api, DMatrixf64};
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussJacobi {
-    nodes: Vec<f64>,
-    weights: Vec<f64>,
+    node_weight_pairs: Vec<(f64, f64)>,
     alpha: f64,
     beta: f64,
 }
@@ -114,8 +113,7 @@ impl GaussJacobi {
         }
 
         GaussJacobi {
-            nodes,
-            weights,
+            node_weight_pairs: nodes.into_iter().zip(weights.into_iter()).collect(),
             alpha,
             beta,
         }
@@ -137,11 +135,10 @@ impl GaussJacobi {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| {
-                integrand(GaussJacobi::argument_transformation(x_val, a, b)) * w_val
+            .map(|(x_val, w_val)| {
+                integrand(GaussJacobi::argument_transformation(*x_val, a, b)) * w_val
             })
             .sum();
         GaussJacobi::scale_factor(a, b) * result
@@ -167,7 +164,7 @@ mod tests {
     use super::*;
     #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
-        let (x, w) = GaussJacobi::new(5, 0.0, 0.0).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 0.0).into_iter().unzip();
         let x_should = [
             -0.906_179_845_938_664,
             -0.538_469_310_105_683_1,
@@ -192,7 +189,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_1_beta_0() {
-        let (x, w) = GaussJacobi::new(2, 1.0, 0.0).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(2, 1.0, 0.0).into_iter().unzip();
         let x_should = [-0.689_897_948_556_635_7, 0.289_897_948_556_635_64];
         let w_should = [1.272_165_526_975_908_7, 0.727_834_473_024_091_3];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -205,7 +202,10 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_1_beta_0() {
-        let (x, w) = GaussJacobi::new(5, 1.0, 0.0).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 1.0, 0.0)
+            .into_iter()
+            .into_iter()
+            .unzip();
         let x_should = [
             -0.920_380_285_897_062_6,
             -0.603_973_164_252_783_7,
@@ -230,7 +230,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_0_beta_1() {
-        let (x, w) = GaussJacobi::new(5, 0.0, 1.0).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 1.0).into_iter().unzip();
         let x_should = [
             -0.802_929_828_402_347_2,
             -0.390_928_546_707_272_2,
@@ -255,7 +255,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_50_alpha_42_beta_23() {
-        let (x, w) = GaussJacobi::new(50, 42.0, 23.0).into_nodes_and_weights();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(50, 42.0, 23.0).into_iter().unzip();
         let x_should = [
             -0.936_528_233_152_541_2,
             -0.914_340_864_546_088_5,

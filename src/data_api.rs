@@ -20,41 +20,28 @@ macro_rules! impl_data_api {
             /// Returns an iterator over the nodes of the quadrature rule.
             #[inline]
             pub fn nodes(&self) -> $quadrature_rule_nodes<'_> {
-                $quadrature_rule_nodes {
-                    iter: self.nodes.iter(),
-                }
-            }
-
-            /// Returns a slice of the nodes of the quadrature rule.
-            #[inline]
-            pub fn as_nodes(&self) -> &[f64] {
-                &self.nodes
+                $quadrature_rule_nodes::new(self.node_weight_pairs.iter().map(|p| &p.0))
             }
 
             /// Returns an iterator over the weights of the quadrature rule.
             #[inline]
             pub fn weights(&self) -> $quadrature_rule_weights<'_> {
-                $quadrature_rule_weights {
-                    iter: self.weights.iter(),
-                }
+                $quadrature_rule_weights::new(self.node_weight_pairs.iter().map(|p| &p.1))
             }
 
-            /// Returns a slice of the weights of the quadrature rule.
-            #[inline]
-            pub fn as_weights(&self) -> &[f64] {
-                &self.weights
-            }
-
-            /// Returns an iterator over pairs of nodes and the corresponding weights of the quadrature rule.
+            /// Returns an iterator over the node-weight-pairs of the quadrature rule.
             #[inline]
             pub fn iter(&self) -> $quadrature_rule_iter<'_> {
-                $quadrature_rule_iter {
-                    node_iter: self.nodes(),
-                    weight_iter: self.weights(),
-                }
+                $quadrature_rule_iter::new(self.node_weight_pairs.iter())
             }
 
-            /// Converts the quadrature rule into a tuple of vectors.
+            /// Returns a slice of the node-weight-pairs of the quadrature rule.
+            #[inline]
+            pub fn as_node_weight_pairs(&self) -> &[(f64, f64)] {
+                &self.node_weight_pairs
+            }
+
+            /// Converts the quadrature rule into a vector of node-weight-pairs.
             ///
             /// Element `.0` is the nodes of the rule and element `.1` is the weights.
             ///
@@ -62,14 +49,14 @@ macro_rules! impl_data_api {
             /// computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_nodes_and_weights(self) -> (Vec<f64>, Vec<f64>) {
-                (self.nodes, self.weights)
+            pub fn into_node_weight_pairs(self) -> Vec<(f64, f64)> {
+                self.node_weight_pairs
             }
 
             /// Returns the degree of the quadrature rule.
             #[inline]
             pub fn degree(&self) -> usize {
-                self.nodes.len()
+                self.node_weight_pairs.len()
             }
         }
     };
@@ -79,81 +66,68 @@ macro_rules! impl_data_api {
 #[macro_export]
 macro_rules! impl_iterators {
     ($quadrature_rule:ident, $quadrature_rule_nodes:ident, $quadrature_rule_weights:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
+        slice_iter_map_impl! {$quadrature_rule_nodes}
+        slice_iter_map_impl! {$quadrature_rule_weights}
 
-        slice_iter_impl! {$quadrature_rule_nodes}
-        slice_iter_impl! {$quadrature_rule_weights}
-
-        /// An iterator over the quadrature rule's nodes and weights.
+        /// An iterator over node-weight-pairs of the quadrature rule.
         ///
-        /// Created by the `iter` function on the quadrature rule.
+        /// Created by the `iter` function on the quadrature rule struct.
         #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_iter<'a> {
-            pub(super) node_iter: $quadrature_rule_nodes<'a>,
-            pub(super) weight_iter: $quadrature_rule_weights<'a>,
+            node_weight_pairs: ::core::slice::Iter<'a, (f64, f64)>,
+        }
+
+        impl<'a> $quadrature_rule_iter<'a> {
+            pub(super) fn new(node_weight_pairs: ::core::slice::Iter<'a, (f64, f64)>) -> Self {
+                Self { node_weight_pairs }
+            }
+        }
+
+        impl<'a> $quadrature_rule_iter<'a> {
+            /// Returns a view of the underlying data.
+            pub fn as_slice(&self) -> &'a [(f64, f64)] {
+                self.node_weight_pairs.as_slice()
+            }
         }
 
         impl<'a> ::core::iter::Iterator for $quadrature_rule_iter<'a> {
-            type Item = (&'a f64, &'a f64);
+            type Item = &'a (f64, f64);
             fn next(&mut self) -> Option<Self::Item> {
-                match (self.node_iter.next(), self.weight_iter.next()) {
-                    (Some(x), Some(w)) => Some((x, w)),
-                    _ => None,
-                }
+                self.node_weight_pairs.next()
             }
         }
 
         impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_iter<'a> {
             fn next_back(&mut self) -> Option<Self::Item> {
-                match (self.node_iter.next_back(), self.weight_iter.next_back()) {
-                    (Some(x), Some(w)) => Some((x, w)),
-                    _ => None,
-                }
+                self.node_weight_pairs.next_back()
             }
         }
 
         /// An owning iterator over the nodes and weights of the quadrature rule.
         ///
         /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
-        #[derive(Debug, Clone, PartialEq)]
+        #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_into_iter {
-            pub(super) nodes: Vec<f64>,
-            pub(super) weights: Vec<f64>,
-            pub(super) index: usize,
-            pub(super) back_index: usize,
+            node_weight_pairs: ::std::vec::IntoIter<(f64, f64)>,
         }
 
         impl ::core::iter::Iterator for $quadrature_rule_into_iter {
             type Item = (f64, f64);
             fn next(&mut self) -> Option<Self::Item> {
-                if self.index < self.back_index {
-                    let out = Some((self.nodes[self.index], self.weights[self.index]));
-                    self.index += 1;
-                    out
-                } else {
-                    None
-                }
+                self.node_weight_pairs.next()
             }
 
             #[inline]
             fn size_hint(&self) -> (usize, Option<usize>) {
-                // Only need to check one, the lengths
-                // were asserted to be equal upon the creation of the struct.
-                let len = self.nodes.len();
-                (len, Some(len))
+                self.node_weight_pairs.size_hint()
             }
         }
 
         impl ::core::iter::DoubleEndedIterator for $quadrature_rule_into_iter {
             fn next_back(&mut self) -> Option<Self::Item> {
-                if self.index < self.back_index {
-                    let out = Some((self.nodes[self.back_index], self.weights[self.back_index]));
-                    self.back_index -= 1;
-                    out
-                } else {
-                    None
-                }
+                self.node_weight_pairs.next_back()
             }
         }
 
@@ -161,16 +135,16 @@ macro_rules! impl_iterators {
         impl ::core::iter::FusedIterator for $quadrature_rule_into_iter {}
 
         impl $quadrature_rule_into_iter {
-            /// Returns a view into the underlying data as a tuple of slices.
+            pub(super) fn new(node_weight_pairs: ::std::vec::IntoIter<(f64, f64)>) -> Self {
+                Self { node_weight_pairs }
+            }
+
+            /// Returns a view into the underlying data as a slice of tuples.
             ///
-            /// Element `.0` is a slice of nodes and element `.1` is a slice
-            /// of their corresponding weights.
+            /// Element `.0` of the tuples is the node and element `.1` its corresponding weight.
             #[inline]
-            pub fn as_slices(&self) -> (&[f64], &[f64]) {
-                (
-                    &self.nodes[self.index..self.back_index],
-                    &self.weights[self.index..self.back_index],
-                )
+            pub fn as_slice(&self) -> &[(f64, f64)] {
+                self.node_weight_pairs.as_slice()
             }
         }
 
@@ -178,14 +152,7 @@ macro_rules! impl_iterators {
             type IntoIter = $quadrature_rule_into_iter;
             type Item = (f64, f64);
             fn into_iter(self) -> Self::IntoIter {
-                assert_eq!(self.nodes.len(), self.weights.len(), "internal error, please file an issue at <https://github.com/DomiDre/gauss-quad>");
-                let l = self.nodes.len();
-                $quadrature_rule_into_iter {
-                    nodes: self.nodes,
-                    weights: self.weights,
-                    index: 0,
-                    back_index: l,
-                }
+                $quadrature_rule_into_iter::new(self.node_weight_pairs.into_iter())
             }
         }
     };
@@ -196,41 +163,47 @@ macro_rules! impl_iterators {
 ///  traits for it, and the convenience method `as_slice`.
 #[doc(hidden)]
 #[macro_export]
-macro_rules! slice_iter_impl {
+macro_rules! slice_iter_map_impl {
     ($slice_iter:ident) => {
         #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $slice_iter<'a> {
-            pub(super) iter: ::core::slice::Iter<'a, f64>,
+            iter_map: ::std::iter::Map<
+                ::core::slice::Iter<'a, (f64, f64)>,
+                fn(&'a (f64, f64)) -> &'a f64,
+            >,
+        }
+
+        impl<'a> $slice_iter<'a> {
+            pub(super) fn new(
+                iter_map: ::std::iter::Map<
+                    ::core::slice::Iter<'a, (f64, f64)>,
+                    fn(&'a (f64, f64)) -> &'a f64,
+                >,
+            ) -> Self {
+                Self { iter_map }
+            }
         }
 
         impl<'a> ::core::iter::Iterator for $slice_iter<'a> {
             type Item = &'a f64;
             fn next(&mut self) -> Option<Self::Item> {
-                self.iter.next()
+                self.iter_map.next()
             }
 
             #[inline]
             fn size_hint(&self) -> (usize, Option<usize>) {
-                self.iter.size_hint()
+                self.iter_map.size_hint()
             }
         }
 
         impl<'a> ::core::iter::DoubleEndedIterator for $slice_iter<'a> {
             fn next_back(&mut self) -> Option<Self::Item> {
-                self.iter.next_back()
+                self.iter_map.next_back()
             }
         }
 
         impl<'a> ::core::iter::ExactSizeIterator for $slice_iter<'a> {}
         impl<'a> ::core::iter::FusedIterator for $slice_iter<'a> {}
-
-        impl<'a> $slice_iter<'a> {
-            /// Returns a view of the underlying data as a slice.
-            #[inline]
-            pub fn as_slice(&self) -> &'a [f64] {
-                self.iter.as_slice()
-            }
-        }
     };
 }
