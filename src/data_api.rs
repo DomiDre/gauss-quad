@@ -18,6 +18,7 @@ macro_rules! impl_data_api {
         // trait should have, e.g. GaussLegendreIntoIter.
         $quadrature_rule_into_iter:ident
     ) => {
+        // The functions in this impl block all have an #[inline] directive because they are trivial.
         impl $quadrature_rule {
             /// Returns an iterator over the nodes of the quadrature rule.
             #[inline]
