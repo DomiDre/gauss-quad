@@ -61,7 +61,7 @@ pub struct Midpoint {
 }
 
 impl Midpoint {
-    /// Initialize a new midpoint rule with `degree` number of cells.
+    /// Initialize a new midpoint rule with `degree` number of cells. The nodes are evenly spaced.
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
     /// # Panics
@@ -69,18 +69,25 @@ impl Midpoint {
     pub fn new(degree: usize) -> Self {
         assert!(degree >= 1, "Degree of Midpoint rule needs to be >= 1");
         Self {
-            nodes: Self::nodes(degree),
+            nodes: (0..degree).map(|d| d as f64).collect(),
         }
     }
 
-    /// Make a set of evenly spaced nodes
-    fn nodes(degree: usize) -> Vec<f64> {
-        let mut nodes = Vec::with_capacity(degree);
-        for idx in 0..degree {
-            nodes.push(idx as f64);
-        }
+    /// Returns an iterator over the nodes of the midpoint rule.
+    pub fn iter(&self) -> core::slice::Iter<f64> {
+        self.nodes.iter()
+    }
 
-        nodes
+    /// Returns the nodes of the rule as a slice.
+    pub fn as_nodes(&self) -> &[f64] {
+        &self.nodes
+    }
+
+    /// Converts `self` into a vector of nodes.
+    ///
+    /// Simply returns the underlying vector with no computation or allocation.
+    pub fn into_nodes(self) -> Vec<f64> {
+        self.nodes
     }
 
     /// Integrate over the domain [a, b].
@@ -97,6 +104,14 @@ impl Midpoint {
             .sum();
 
         sum * rect_width
+    }
+}
+
+impl IntoIterator for Midpoint {
+    type IntoIter = std::vec::IntoIter<f64>;
+    type Item = f64;
+    fn into_iter(self) -> Self::IntoIter {
+        self.nodes.into_iter()
     }
 }
 
