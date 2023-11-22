@@ -21,7 +21,7 @@
 //! assert_abs_diff_eq!(integral, 0.0);
 //! ```
 
-use bogaert::NodeWeightPair;
+use crate::NodeWeightPair;
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -52,24 +52,19 @@ use bogaert::NodeWeightPair;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
-    pub nodes: Vec<f64>,
-    pub weights: Vec<f64>,
+    node_weight_pairs: Vec<NodeWeightPair>,
 }
 
 impl GaussLegendre {
-    /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights.
-    pub fn new(deg: usize) -> Self {
-        let (nodes, weights) = Self::nodes_and_weights(deg);
-
-        Self { nodes, weights }
-    }
-
-    /// Compute the nodes and weights of a Gauss-Legendre quadrature rule of degree `deg`
+    /// Initializes a Gauss-Legendre quadrature rule of the given degree `deg` by computing the needed nodes and weights.
+    /// Compute the nodes and weights
     /// with the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
-    pub fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>) {
-        (1..deg + 1)
-            .map(|k| NodeWeightPair::new(deg, k).into_tuple())
-            .unzip()
+    pub fn new(deg: usize) -> Self {
+        Self {
+            node_weight_pairs: (1..deg + 1)
+                .map(|k| bogaert::NodeWeightPair::new(deg, k).into_tuple())
+                .collect(),
+        }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -94,10 +89,9 @@ impl GaussLegendre {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| integrand(Self::argument_transformation(x_val, a, b)) * w_val)
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * *w_val)
             .sum();
         Self::scale_factor(a, b) * result
     }
@@ -292,15 +286,13 @@ mod tests {
 
     #[test]
     fn check_degree_3() {
-        let (x, w) = GaussLegendre::nodes_and_weights(3);
+        let quad_rule = GaussLegendre::new(3);
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i]);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i]);
+        for (i, (x_val, w_val)) in quad_rule.node_weight_pairs.iter().enumerate() {
+            approx::assert_abs_diff_eq!(*x_val, x_should[i]);
+            approx::assert_abs_diff_eq!(*w_val, w_should[i]);
         }
     }
 
