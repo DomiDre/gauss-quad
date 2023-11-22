@@ -2,8 +2,6 @@
 pub type Node = f64;
 /// A weight in a quadrature rule.
 pub type Weight = f64;
-/// A pair of a node and its corresponding weight from a quadrature rule.
-pub type NodeWeightPair = (Node, Weight);
 
 /// This macro implements the data access API for the given quadrature rule struct.
 /// It takes in the name of the quadrature rule as well as the names of the iterators
