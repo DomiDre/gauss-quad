@@ -36,6 +36,8 @@ macro_rules! impl_data_api {
             }
 
             /// Returns a slice of the node-weight-pairs of the quadrature rule.
+            /// 
+            /// Element `.0` of the tuples is the node and element `.1` its corresponding weight.
             #[inline]
             pub fn as_node_weight_pairs(&self) -> &[(f64, f64)] {
                 &self.node_weight_pairs
