@@ -24,9 +24,7 @@ macro_rules! impl_data_api {
             #[inline]
             pub fn nodes(&self) -> $quadrature_rule_nodes<'_> {
                 $quadrature_rule_nodes {
-                    slice: &self.nodes,
-                    index: 0,
-                    back_index: self.nodes.len(),
+                    iter: self.nodes.iter(),
                 }
             }
 
@@ -40,9 +38,7 @@ macro_rules! impl_data_api {
             #[inline]
             pub fn weights(&self) -> $quadrature_rule_weights<'_> {
                 $quadrature_rule_weights {
-                    slice: &self.weights,
-                    index: 0,
-                    back_index: self.weights.len(),
+                    iter: self.weights.iter(),
                 }
             }
 
@@ -80,7 +76,7 @@ macro_rules! impl_data_api {
         /// An iterator over the quadrature rule's nodes and weights.
         ///
         /// Created by the `iter` function on the quadrature rule.
-        #[derive(Debug, Clone, Copy, PartialEq)]
+        #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_iter<'a> {
             node_iter: $quadrature_rule_nodes<'a>,
@@ -193,42 +189,27 @@ macro_rules! impl_data_api {
 #[macro_export]
 macro_rules! slice_iter_impl {
     ($slice_iter:ident) => {
-        #[derive(Debug, Clone, Copy, PartialEq)]
+        #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $slice_iter<'a> {
-            slice: &'a [f64],
-            index: usize,
-            back_index: usize,
+            iter: ::core::slice::Iter<'a, f64>,
         }
 
         impl<'a> ::core::iter::Iterator for $slice_iter<'a> {
             type Item = &'a f64;
             fn next(&mut self) -> Option<Self::Item> {
-                if self.index < self.back_index {
-                    let out = Some(&self.slice[self.index]);
-                    self.index += 1;
-                    out
-                } else {
-                    None
-                }
+                self.iter.next()
             }
 
             #[inline]
             fn size_hint(&self) -> (usize, Option<usize>) {
-                let len = self.back_index - self.index;
-                (len, Some(len))
+                self.iter.size_hint()
             }
         }
 
         impl<'a> ::core::iter::DoubleEndedIterator for $slice_iter<'a> {
             fn next_back(&mut self) -> Option<Self::Item> {
-                if self.index < self.back_index {
-                    let out = Some(&self.slice[self.back_index]);
-                    self.back_index -= 1;
-                    out
-                } else {
-                    None
-                }
+                self.iter.next_back()
             }
         }
 
@@ -239,7 +220,7 @@ macro_rules! slice_iter_impl {
             /// Returns a view of the underlying data as a slice.
             #[inline]
             pub fn as_slice(&self) -> &'a [f64] {
-                &self.slice[self.index..self.back_index]
+                self.iter.as_slice()
             }
         }
     };
