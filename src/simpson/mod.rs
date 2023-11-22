@@ -53,7 +53,7 @@ impl Simpson {
     /// Initialize a new Simpson rule with `degree` being the number of intervals.
     pub fn new(degree: usize) -> Self {
         assert!(degree >= 1, "Degree of Simpson rule needs to be >= 1");
-        
+
         Self {
             nodes: (0..degree).map(|d| d as f64).collect(),
         }
@@ -72,7 +72,7 @@ impl Simpson {
     }
 
     /// Converts `self` into a vector of nodes.
-    /// 
+    ///
     /// Simply returns the underlying vector without any computation or allocation.
     #[inline]
     pub fn into_nodes(self) -> Vec<f64> {
