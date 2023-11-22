@@ -62,10 +62,18 @@ macro_rules! impl_data_api {
     };
 }
 
+/// This macro defines the iterators used by the functions defined in the macro `impl_data_api`.
+/// It takes in the names of the same structs as that macro.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_iterators {
-    ($quadrature_rule:ident, $quadrature_rule_nodes:ident, $quadrature_rule_weights:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
+    (
+        $quadrature_rule:ident,
+        $quadrature_rule_nodes:ident,
+        $quadrature_rule_weights:ident,
+        $quadrature_rule_iter:ident,
+        $quadrature_rule_into_iter:ident
+    ) => {
         slice_iter_map_impl! {$quadrature_rule_nodes}
         slice_iter_map_impl! {$quadrature_rule_weights}
 
