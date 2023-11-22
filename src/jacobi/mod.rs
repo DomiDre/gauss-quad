@@ -18,6 +18,8 @@
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
 //! ```
 
+pub mod iterators;
+
 use crate::gamma::gamma;
 use crate::DMatrixf64;
 
