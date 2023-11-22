@@ -52,7 +52,7 @@ impl GaussJacobi {
     /// Initializes Gauss-Jacobi quadrature rule of the given degree by computing the nodes and weights
     /// needed for the given `alpha` and `beta`.
     ///
-    /// Applies Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights.
+    /// Applies the Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights.
     /// See Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
     /// # Panics
