@@ -33,6 +33,8 @@
 //!
 //! ```
 
+use crate::Node;
+
 /// A Simpson rule quadrature scheme.
 /// ```
 /// # use gauss_quad::Simpson;
@@ -46,7 +48,7 @@
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Simpson {
     /// The dimensionless Simpsons nodes.
-    nodes: Vec<f64>,
+    nodes: Vec<Node>,
 }
 
 impl Simpson {
@@ -61,13 +63,13 @@ impl Simpson {
 
     /// Returns an iterator over the nodes of the rule.
     #[inline]
-    pub fn iter(&self) -> core::slice::Iter<'_, f64> {
+    pub fn iter(&self) -> core::slice::Iter<'_, Node> {
         self.nodes.iter()
     }
 
     /// Returns a slice of all the nodes of the rule.
     #[inline]
-    pub fn as_nodes(&self) -> &[f64] {
+    pub fn as_nodes(&self) -> &[Node] {
         &self.nodes
     }
 
@@ -75,7 +77,7 @@ impl Simpson {
     ///
     /// Simply returns the underlying vector without any computation or allocation.
     #[inline]
-    pub fn into_nodes(self) -> Vec<f64> {
+    pub fn into_nodes(self) -> Vec<Node> {
         self.nodes
     }
 
@@ -115,8 +117,8 @@ impl Simpson {
 }
 
 impl IntoIterator for Simpson {
-    type IntoIter = std::vec::IntoIter<f64>;
-    type Item = f64;
+    type IntoIter = std::vec::IntoIter<Node>;
+    type Item = Node;
     fn into_iter(self) -> Self::IntoIter {
         self.nodes.into_iter()
     }

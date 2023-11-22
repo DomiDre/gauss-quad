@@ -40,6 +40,8 @@
 //! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
 //! ```
 
+use crate::Node;
+
 /// A midpoint rule quadrature scheme.
 /// ```
 /// # extern crate gauss_quad;
@@ -57,7 +59,7 @@
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Midpoint {
     /// The dimensionless midpoints
-    nodes: Vec<f64>,
+    nodes: Vec<Node>,
 }
 
 impl Midpoint {
@@ -75,13 +77,13 @@ impl Midpoint {
 
     /// Returns an iterator over the nodes of the midpoint rule.
     #[inline]
-    pub fn iter(&self) -> core::slice::Iter<'_, f64> {
+    pub fn iter(&self) -> core::slice::Iter<'_, Node> {
         self.nodes.iter()
     }
 
     /// Returns the nodes of the rule as a slice.
     #[inline]
-    pub fn as_nodes(&self) -> &[f64] {
+    pub fn as_nodes(&self) -> &[Node] {
         &self.nodes
     }
 
@@ -89,7 +91,7 @@ impl Midpoint {
     ///
     /// Simply returns the underlying vector with no computation or allocation.
     #[inline]
-    pub fn into_nodes(self) -> Vec<f64> {
+    pub fn into_nodes(self) -> Vec<Node> {
         self.nodes
     }
 
@@ -111,8 +113,8 @@ impl Midpoint {
 }
 
 impl IntoIterator for Midpoint {
-    type IntoIter = std::vec::IntoIter<f64>;
-    type Item = f64;
+    type IntoIter = std::vec::IntoIter<Node>;
+    type Item = Node;
     fn into_iter(self) -> Self::IntoIter {
         self.nodes.into_iter()
     }

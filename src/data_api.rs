@@ -1,8 +1,3 @@
-/// A node in a quadrature rule.
-pub type Node = f64;
-/// A weight in a quadrature rule.
-pub type Weight = f64;
-
 /// This macro implements the data access API for the given quadrature rule struct.
 /// It takes in the name of the quadrature rule as well as the names of the iterators
 /// over its nodes, weights, both, and IntoIterator implementation.
