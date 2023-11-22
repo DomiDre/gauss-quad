@@ -134,6 +134,7 @@ pub type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dyn
 #[doc(inline)]
 pub use core::f64::consts::PI;
 
+mod data_api;
 mod gamma;
 #[cfg(test)]
 mod gaussian_quadrature;

@@ -21,6 +21,8 @@
 //! assert_abs_diff_eq!(integral, 0.0);
 //! ```
 
+pub mod iterators;
+
 use bogaert::NodeWeightPair;
 
 /// A Gauss-Legendre quadrature scheme.
