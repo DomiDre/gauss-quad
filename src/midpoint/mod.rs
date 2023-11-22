@@ -74,11 +74,13 @@ impl Midpoint {
     }
 
     /// Returns an iterator over the nodes of the midpoint rule.
+    #[inline]
     pub fn iter(&self) -> core::slice::Iter<'_, f64> {
         self.nodes.iter()
     }
 
     /// Returns the nodes of the rule as a slice.
+    #[inline]
     pub fn as_nodes(&self) -> &[f64] {
         &self.nodes
     }
@@ -86,6 +88,7 @@ impl Midpoint {
     /// Converts `self` into a vector of nodes.
     ///
     /// Simply returns the underlying vector with no computation or allocation.
+    #[inline]
     pub fn into_nodes(self) -> Vec<f64> {
         self.nodes
     }
