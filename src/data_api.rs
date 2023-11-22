@@ -76,7 +76,7 @@ macro_rules! impl_data_api {
         slice_iter_impl! {$quadrature_rule_nodes}
         slice_iter_impl! {$quadrature_rule_weights}
 
-        /// An iterator over a quadrature rule's nodes and weights.
+        /// An iterator over the quadrature rule's nodes and weights.
         ///
         /// Created by the `iter` function on the quadrature rule.
         #[derive(Debug, Clone, Copy, PartialEq)]
