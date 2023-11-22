@@ -81,7 +81,7 @@ macro_rules! impl_data_api {
         ///
         /// Created by the `iter` function on the quadrature rule.
         #[derive(Debug, Clone, Copy, PartialEq)]
-        #[must_use = "iterators do nothing unless consumed"]
+        #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_iter<'a> {
             node_iter: $quadrature_rule_nodes<'a>,
             weight_iter: $quadrature_rule_weights<'a>,
@@ -110,7 +110,7 @@ macro_rules! impl_data_api {
         ///
         /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
         #[derive(Debug, Clone, PartialEq)]
-        #[must_use = "iterators do nothing unless consumed"]
+        #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_into_iter {
             nodes: Vec<f64>,
             weights: Vec<f64>,
@@ -194,7 +194,7 @@ macro_rules! impl_data_api {
 macro_rules! slice_iter_impl {
     ($slice_iter:ident) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
-        #[must_use = "iterators do nothing unless consumed"]
+        #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $slice_iter<'a> {
             slice: &'a [f64],
             index: usize,
