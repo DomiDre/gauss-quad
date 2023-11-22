@@ -181,10 +181,9 @@ macro_rules! impl_data_api {
     };
 }
 
-/// This macro defines a struct with the given name that contains a slice and two
-/// indices, one from the front and one from the back.
-/// It then implements the [`Iterator`] trait for it, and the convenience method
-/// `as_slice`. Kind of a rename of [`core::slice::Iter`].
+/// This macro defines a struct with the given name that contains a [`core::slice::Iter`].
+/// It then implements the [`Iterator`], [`DoubleEndedIterator`], [`ExactSizeIterator`], and [`FusedIterator`]
+///  traits for it, and the convenience method `as_slice`.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! slice_iter_impl {
