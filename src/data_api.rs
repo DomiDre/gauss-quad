@@ -43,8 +43,6 @@ macro_rules! impl_data_api {
 
             /// Converts the quadrature rule into a vector of node-weight-pairs.
             ///
-            /// Element `.0` is the nodes of the rule and element `.1` is the weights.
-            ///
             /// This function just returns the underlying data and does no
             /// computation or cloning.
             #[inline]
@@ -74,8 +72,8 @@ macro_rules! impl_iterators {
         $quadrature_rule_iter:ident,
         $quadrature_rule_into_iter:ident
     ) => {
-        slice_iter_map_impl! {$quadrature_rule_nodes}
-        slice_iter_map_impl! {$quadrature_rule_weights}
+        slice_map_iter_impl! {$quadrature_rule_nodes}
+        slice_map_iter_impl! {$quadrature_rule_weights}
 
         /// An iterator over node-weight-pairs of the quadrature rule.
         ///
@@ -93,7 +91,9 @@ macro_rules! impl_iterators {
         }
 
         impl<'a> $quadrature_rule_iter<'a> {
-            /// Returns a view of the underlying data.
+            /// Views the underlying data as a subslice of the original data.
+            ///
+            /// See [`core::slice::Iter::as_slice`] for more information.
             pub fn as_slice(&self) -> &'a [(f64, f64)] {
                 self.node_weight_pairs.as_slice()
             }
@@ -112,7 +112,7 @@ macro_rules! impl_iterators {
             }
         }
 
-        /// An owning iterator over the nodes and weights of the quadrature rule.
+        /// An owning iterator over the node-weight-pairs of the quadrature rule.
         ///
         /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
         #[derive(Debug, Clone)]
@@ -147,9 +147,9 @@ macro_rules! impl_iterators {
                 Self { node_weight_pairs }
             }
 
-            /// Returns a view into the underlying data as a slice of tuples.
+            /// Views the underlying data as a subslice of the original data.
             ///
-            /// Element `.0` of the tuples is the node and element `.1` its corresponding weight.
+            /// See [`core::slice::Iter::as_slice`] for more information.
             #[inline]
             pub fn as_slice(&self) -> &[(f64, f64)] {
                 self.node_weight_pairs.as_slice()
@@ -166,12 +166,12 @@ macro_rules! impl_iterators {
     };
 }
 
-/// This macro defines a struct with the given name that contains a [`core::slice::Iter`].
+/// This macro defines a struct with the given name that contains a `Map<Iter<'a, (f64, f64)>,fn(&'a (f64, f64)) -> &'a f64,>`.
 /// It then implements the [`Iterator`], [`DoubleEndedIterator`], [`ExactSizeIterator`], and [`FusedIterator`]
 ///  traits for it, and the convenience method `as_slice`.
 #[doc(hidden)]
 #[macro_export]
-macro_rules! slice_iter_map_impl {
+macro_rules! slice_map_iter_impl {
     ($slice_iter:ident) => {
         #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
