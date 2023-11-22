@@ -132,7 +132,8 @@ macro_rules! impl_data_api {
 
             #[inline]
             fn size_hint(&self) -> (usize, Option<usize>) {
-                assert_eq!(self.nodes.len(), self.weights.len());
+                // Only need to check one, the lengths
+                // were asserted to be equal upon the creation of the struct.
                 let len = self.nodes.len();
                 (len, Some(len))
             }
@@ -164,6 +165,21 @@ macro_rules! impl_data_api {
                     &self.nodes[self.index..self.back_index],
                     &self.weights[self.index..self.back_index],
                 )
+            }
+        }
+
+        impl ::core::iter::IntoIterator for $quadrature_rule {
+            type IntoIter = $quadrature_rule_into_iter;
+            type Item = (f64, f64);
+            fn into_iter(self) -> Self::IntoIter {
+                assert_eq!(self.nodes.len(), self.weights.len());
+                let l = self.nodes.len();
+                $quadrature_rule_into_iter {
+                    nodes: self.nodes,
+                    weights: self.weights,
+                    index: 0,
+                    back_index: l,
+                }
             }
         }
     };
