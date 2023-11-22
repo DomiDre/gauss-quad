@@ -54,8 +54,8 @@ use bogaert::NodeWeightPair;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
-    pub nodes: Vec<f64>,
-    pub weights: Vec<f64>,
+    nodes: Vec<f64>,
+    weights: Vec<f64>,
 }
 
 impl GaussLegendre {
@@ -63,8 +63,8 @@ impl GaussLegendre {
     /// with the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
     pub fn new(deg: usize) -> Self {
         let (nodes, weights) = (1..deg + 1)
-        .map(|k| NodeWeightPair::new(deg, k).into_tuple())
-        .unzip();
+            .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+            .unzip();
 
         Self { nodes, weights }
     }
