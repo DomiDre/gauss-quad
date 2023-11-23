@@ -3,16 +3,17 @@
 
 use crate::Node;
 use core::iter::FusedIterator;
+use core::slice::Iter;
 
 /// An iterator of the nodes of a [`Midpoint`](super::Midpoint) instance.
 /// Created by the [`Midpoint::iter`](super::Midpoint::iter) function, see it for more information.
 #[derive(Debug, Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct MidpointIter<'a>(core::slice::Iter<'a, f64>);
+pub struct MidpointIter<'a>(Iter<'a, f64>);
 
 impl<'a> MidpointIter<'a> {
     #[inline]
-    pub(super) fn new(iter: core::slice::Iter<'a, f64>) -> Self {
+    pub(super) fn new(iter: Iter<'a, f64>) -> Self {
         Self(iter)
     }
 
