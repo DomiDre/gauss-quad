@@ -297,6 +297,15 @@ macro_rules! impl_iterators {
             }
         }
 
+        impl<'a> ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
+            for $quadrature_rule_into_iter
+        {
+            #[inline]
+            fn as_ref(&self) -> &[($crate::Node, $crate::Weight)] {
+                self.0.as_ref()
+            }
+        }
+
         impl ::core::iter::IntoIterator for $quadrature_rule {
             type IntoIter = $quadrature_rule_into_iter;
             type Item = ($crate::Node, $crate::Weight);
