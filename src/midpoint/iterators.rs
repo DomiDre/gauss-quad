@@ -4,8 +4,8 @@
 use crate::Node;
 use core::iter::FusedIterator;
 
-/// An iterator of the nodes of a [`Midpoint`](super::Midpoint) instance created by
-/// [`Midpoint::iter`](super::Midpoint::iter).
+/// An iterator of the nodes of a [`Midpoint`](super::Midpoint) instance.
+/// Created by the [`Midpoint::iter`](super::Midpoint::iter) function, see it for more information.
 #[derive(Debug, Clone)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct MidpointIter<'a>(core::slice::Iter<'a, f64>);
