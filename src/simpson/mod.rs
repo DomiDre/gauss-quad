@@ -33,7 +33,10 @@
 //!
 //! ```
 
+pub mod iterators;
+
 use crate::Node;
+use iterators::SimpsonIter;
 
 /// A Simpson rule quadrature scheme.
 /// ```
@@ -63,8 +66,8 @@ impl Simpson {
 
     /// Returns an iterator over the nodes of the rule.
     #[inline]
-    pub fn iter(&self) -> core::slice::Iter<'_, Node> {
-        self.nodes.iter()
+    pub fn iter(&self) -> SimpsonIter<'_> {
+        SimpsonIter::new(self.nodes.iter())
     }
 
     /// Returns a slice of all the nodes of the rule.
