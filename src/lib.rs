@@ -129,11 +129,11 @@
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
 
-use nalgebra::{Dynamic, Matrix, VecStorage};
-pub type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dynamic>>;
-#[doc(inline)]
-pub use core::f64::consts::PI;
+use nalgebra::{Dyn, Matrix, VecStorage};
+type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
+use core::f64::consts::PI;
 
+mod data_api;
 mod gamma;
 #[cfg(test)]
 mod gaussian_quadrature;
@@ -156,3 +156,8 @@ pub use legendre::GaussLegendre;
 pub use midpoint::Midpoint;
 #[doc(inline)]
 pub use simpson::Simpson;
+
+/// A node in a quadrature rule.
+pub type Node = f64;
+/// A weight in a quadrature rule.
+pub type Weight = f64;

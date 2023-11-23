@@ -33,6 +33,11 @@
 //!
 //! ```
 
+pub mod iterators;
+
+use crate::Node;
+use iterators::SimpsonIter;
+
 /// A Simpson rule quadrature scheme.
 /// ```
 /// # use gauss_quad::Simpson;
@@ -45,27 +50,38 @@
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Simpson {
-    /// The dimensionless Simpsons
-    nodes: Vec<f64>,
+    /// The dimensionless Simpsons nodes.
+    nodes: Vec<Node>,
 }
 
 impl Simpson {
-    /// Initialize a new Simpson rule with `degree` being the number of intervals
+    /// Initialize a new Simpson rule with `degree` being the number of intervals.
     pub fn new(degree: usize) -> Self {
         assert!(degree >= 1, "Degree of Simpson rule needs to be >= 1");
+
         Self {
-            nodes: Self::nodes(degree),
+            nodes: (0..degree).map(|d| d as f64).collect(),
         }
     }
 
-    /// Generate vector of indices for the subintervals
-    fn nodes(degree: usize) -> Vec<f64> {
-        let mut nodes = Vec::with_capacity(degree);
-        for idx in 0..degree {
-            nodes.push(idx as f64);
-        }
+    /// Returns an iterator over the nodes of the rule.
+    #[inline]
+    pub fn iter(&self) -> SimpsonIter<'_> {
+        SimpsonIter::new(self.nodes.iter())
+    }
 
-        nodes
+    /// Returns a slice of all the nodes of the rule.
+    #[inline]
+    pub fn as_nodes(&self) -> &[Node] {
+        &self.nodes
+    }
+
+    /// Converts `self` into a vector of nodes.
+    ///
+    /// Simply returns the underlying vector without any computation or allocation.
+    #[inline]
+    pub fn into_nodes(self) -> Vec<Node> {
+        self.nodes
     }
 
     /// Integrate over the domain [a, b].
@@ -100,6 +116,14 @@ impl Simpson {
                 + 4.0 * integrand(a + (2.0 * n - 1.0) * h / 2.0)
                 + integrand(a)
                 + integrand(b))
+    }
+}
+
+impl IntoIterator for Simpson {
+    type IntoIter = std::vec::IntoIter<Node>;
+    type Item = Node;
+    fn into_iter(self) -> Self::IntoIter {
+        self.nodes.into_iter()
     }
 }
 

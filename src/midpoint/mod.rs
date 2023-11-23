@@ -40,6 +40,11 @@
 //! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
 //! ```
 
+pub mod iterators;
+
+use crate::Node;
+use iterators::MidpointIter;
+
 /// A midpoint rule quadrature scheme.
 /// ```
 /// # extern crate gauss_quad;
@@ -57,11 +62,11 @@
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Midpoint {
     /// The dimensionless midpoints
-    nodes: Vec<f64>,
+    nodes: Vec<Node>,
 }
 
 impl Midpoint {
-    /// Initialize a new midpoint rule with `degree` number of cells.
+    /// Initialize a new midpoint rule with `degree` number of cells. The nodes are evenly spaced.
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
     /// # Panics
@@ -69,18 +74,28 @@ impl Midpoint {
     pub fn new(degree: usize) -> Self {
         assert!(degree >= 1, "Degree of Midpoint rule needs to be >= 1");
         Self {
-            nodes: Self::nodes(degree),
+            nodes: (0..degree).map(|d| d as f64).collect(),
         }
     }
 
-    /// Make a set of evenly spaced nodes
-    fn nodes(degree: usize) -> Vec<f64> {
-        let mut nodes = Vec::with_capacity(degree);
-        for idx in 0..degree {
-            nodes.push(idx as f64);
-        }
+    /// Returns an iterator over the nodes of the midpoint rule.
+    #[inline]
+    pub fn iter(&self) -> MidpointIter<'_> {
+        MidpointIter::new(self.nodes.iter())
+    }
 
-        nodes
+    /// Returns the nodes of the rule as a slice.
+    #[inline]
+    pub fn as_nodes(&self) -> &[Node] {
+        &self.nodes
+    }
+
+    /// Converts `self` into a vector of nodes.
+    ///
+    /// Simply returns the underlying vector with no computation or allocation.
+    #[inline]
+    pub fn into_nodes(self) -> Vec<Node> {
+        self.nodes
     }
 
     /// Integrate over the domain [a, b].
@@ -97,6 +112,14 @@ impl Midpoint {
             .sum();
 
         sum * rect_width
+    }
+}
+
+impl IntoIterator for Midpoint {
+    type IntoIter = std::vec::IntoIter<Node>;
+    type Item = Node;
+    fn into_iter(self) -> Self::IntoIter {
+        self.nodes.into_iter()
     }
 }
 

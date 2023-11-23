@@ -21,7 +21,12 @@
 //! assert_abs_diff_eq!(integral, 0.0);
 //! ```
 
+pub mod iterators;
+use iterators::{GaussLegendreIter, GaussLegendreNodes, GaussLegendreWeights};
+
 use bogaert::NodeWeightPair;
+
+use crate::{impl_data_api, Node, Weight};
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -52,24 +57,18 @@ use bogaert::NodeWeightPair;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
-    pub nodes: Vec<f64>,
-    pub weights: Vec<f64>,
+    node_weight_pairs: Vec<(Node, Weight)>,
 }
 
 impl GaussLegendre {
-    /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights.
-    pub fn new(deg: usize) -> Self {
-        let (nodes, weights) = Self::nodes_and_weights(deg);
-
-        Self { nodes, weights }
-    }
-
-    /// Compute the nodes and weights of a Gauss-Legendre quadrature rule of degree `deg`
+    /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights
     /// with the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
-    pub fn nodes_and_weights(deg: usize) -> (Vec<f64>, Vec<f64>) {
-        (1..deg + 1)
-            .map(|k| NodeWeightPair::new(deg, k).into_tuple())
-            .unzip()
+    pub fn new(deg: usize) -> Self {
+        Self {
+            node_weight_pairs: (1..deg + 1)
+                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+                .collect(),
+        }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -94,14 +93,15 @@ impl GaussLegendre {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| integrand(Self::argument_transformation(x_val, a, b)) * w_val)
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
             .sum();
         Self::scale_factor(a, b) * result
     }
 }
+
+impl_data_api! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter}
 
 /// This algorithm is based on an expansion of Legendre polynomials in terms of Bessel functions
 /// where for large degrees only the first terms in the expansion matter. This means that
@@ -292,7 +292,7 @@ mod tests {
 
     #[test]
     fn check_degree_3() {
-        let (x, w) = GaussLegendre::nodes_and_weights(3);
+        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).into_iter().unzip();
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];

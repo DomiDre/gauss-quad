@@ -14,8 +14,11 @@
 //! assert_abs_diff_eq!(integral, 6.0, epsilon = 1e-14);
 //! ```
 
+pub mod iterators;
+use iterators::{GaussLaguerreIter, GaussLaguerreNodes, GaussLaguerreWeights};
+
 use crate::gamma::gamma;
-use crate::DMatrixf64;
+use crate::{impl_data_api, DMatrixf64, Node, Weight};
 
 /// A Gauss-Laguerre quadrature scheme.
 ///
@@ -37,24 +40,16 @@ use crate::DMatrixf64;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLaguerre {
-    pub nodes: Vec<f64>,
-    pub weights: Vec<f64>,
+    node_weight_pairs: Vec<(Node, Weight)>,
+    alpha: f64,
 }
 
 impl GaussLaguerre {
     /// Initializes Gauss-Laguerre quadrature rule of the given degree by computing the nodes and weights
     /// needed for the given `alpha` parameter.
     ///
-    /// # Panics
-    /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
-    pub fn new(deg: usize, alpha: f64) -> GaussLaguerre {
-        let (nodes, weights) = GaussLaguerre::nodes_and_weights(deg, alpha);
-
-        GaussLaguerre { nodes, weights }
-    }
-
-    /// Apply Golub-Welsch algorithm to determine Gauss-Laguerre nodes & weights
-    /// construct companion matrix A for the Laguerre Polynomial using the relation:
+    /// Applies the Golub-Welsch algorithm to determine Gauss-Laguerre nodes & weights.
+    /// Constructs the companion matrix A for the Laguerre Polynomial using the relation:
     /// -n L_{n-1} + (2n+1) L_{n} -(n+1) L_{n+1} = x L_n
     /// The constructed matrix is symmetric and tridiagonal with
     /// (2n+1) on the diagonal & -(n+1) on the off-diagonal (n = row number).
@@ -63,7 +58,7 @@ impl GaussLaguerre {
     ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
-    pub fn nodes_and_weights(deg: usize, alpha: f64) -> (Vec<f64>, Vec<f64>) {
+    pub fn new(deg: usize, alpha: f64) -> GaussLaguerre {
         if alpha < -1.0 {
             panic!("Gauss-Laguerre quadrature needs alpha > -1.0");
         }
@@ -92,15 +87,24 @@ impl GaussLaguerre {
         let eigen = companion_matrix.symmetric_eigen();
 
         let scale_factor = gamma(alpha + 1.0);
-        // return nodes and weights as Vec<f64>
-        let nodes: Vec<f64> = eigen.eigenvalues.data.into();
-        let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
-            .data
-            .into();
-        let mut both: Vec<_> = nodes.iter().zip(weights.iter()).collect();
-        both.sort_by(|a, b| a.0.partial_cmp(b.0).unwrap());
-        let (nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
-        (nodes, weights)
+
+        // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
+        let mut node_weight_pairs: Vec<(f64, f64)> = eigen
+            .eigenvalues
+            .into_iter()
+            .copied()
+            .zip(
+                (eigen.eigenvectors.row(0).map(|x| x * x) * scale_factor)
+                    .into_iter()
+                    .copied(),
+            )
+            .collect();
+        node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+
+        GaussLaguerre {
+            node_weight_pairs,
+            alpha,
+        }
     }
 
     /// Perform quadrature of  
@@ -111,14 +115,21 @@ impl GaussLaguerre {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| integrand(x_val) * w_val)
+            .map(|(x_val, w_val)| integrand(*x_val) * w_val)
             .sum();
         result
     }
+
+    /// Returns the value of the `alpha` parameter of the rule.
+    #[inline]
+    pub const fn alpha(&self) -> f64 {
+        self.alpha
+    }
 }
+
+impl_data_api! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter}
 
 #[cfg(test)]
 mod tests {
@@ -126,7 +137,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_5() {
-        let (x, w) = GaussLaguerre::nodes_and_weights(2, 5.0);
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(2, 5.0).into_iter().unzip();
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
         let w_should = [82.677_868_380_553_63, 37.322_131_619_446_37];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -139,7 +150,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_0() {
-        let (x, w) = GaussLaguerre::nodes_and_weights(3, 0.0);
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 0.0).into_iter().unzip();
         let x_should = [
             0.415_774_556_783_479_1,
             2.294_280_360_279_042,
@@ -160,7 +171,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_1_5() {
-        let (x, w) = GaussLaguerre::nodes_and_weights(3, 1.5);
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 1.5).into_iter().unzip();
         let x_should = [
             1.220_402_317_558_883_8,
             3.808_880_721_467_068,
@@ -181,7 +192,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_negative() {
-        let (x, w) = GaussLaguerre::nodes_and_weights(5, -0.9);
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(5, -0.9).into_iter().unzip();
         let x_should = [
             0.020_777_151_319_288_104,
             0.808_997_536_134_602_1,

@@ -18,8 +18,11 @@
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
 //! ```
 
+pub mod iterators;
+use iterators::{GaussJacobiIter, GaussJacobiNodes, GaussJacobiWeights};
+
 use crate::gamma::gamma;
-use crate::DMatrixf64;
+use crate::{impl_data_api, DMatrixf64, Node, Weight};
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -42,28 +45,21 @@ use crate::DMatrixf64;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussJacobi {
-    pub nodes: Vec<f64>,
-    pub weights: Vec<f64>,
+    node_weight_pairs: Vec<(Node, Weight)>,
+    alpha: f64,
+    beta: f64,
 }
 
 impl GaussJacobi {
     /// Initializes Gauss-Jacobi quadrature rule of the given degree by computing the nodes and weights
     /// needed for the given `alpha` and `beta`.
     ///
-    /// # Panics
-    /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
-    pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
-        let (nodes, weights) = GaussJacobi::nodes_and_weights(deg, alpha, beta);
-
-        GaussJacobi { nodes, weights }
-    }
-
-    /// Apply Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights
-    /// see Gil, Segura, Temme - Numerical Methods for Special Functions
+    /// Applies the Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights.
+    /// See Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
-    pub fn nodes_and_weights(deg: usize, alpha: f64, beta: f64) -> (Vec<f64>, Vec<f64>) {
+    pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
         if alpha < -1.0 || beta < -1.0 {
             panic!("Gauss-Jacobi quadrature needs alpha > -1.0 and beta > -1.0");
         }
@@ -100,22 +96,32 @@ impl GaussJacobi {
             (2.0f64).powf(alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
                 / gamma(alpha + beta + 1.0)
                 / (alpha + beta + 1.0);
-        // return nodes and weights as Vec<f64>
-        let nodes: Vec<f64> = eigen.eigenvalues.data.into();
-        let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
-            .data
-            .into();
-        let mut both: Vec<_> = nodes.iter().zip(weights.iter()).collect();
-        both.sort_by(|a, b| a.0.partial_cmp(b.0).unwrap());
-        let (mut nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
+
+        // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
+        let mut node_weight_pairs: Vec<(f64, f64)> = eigen
+            .eigenvalues
+            .iter()
+            .copied()
+            .zip(
+                (eigen.eigenvectors.row(0).map(|x| x * x) * scale_factor)
+                    .iter()
+                    .copied(),
+            )
+            .collect();
+        node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         // TO FIX: implement correction
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
         // for now... manual correction seems to do the trick
-        if deg & 1 == 1 {
-            nodes[deg / 2] = 0.0;
+        if deg % 2 == 1 {
+            node_weight_pairs[deg / 2].0 = 0.0;
         }
-        (nodes, weights)
+
+        GaussJacobi {
+            node_weight_pairs,
+            alpha,
+            beta,
+        }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -134,23 +140,36 @@ impl GaussJacobi {
         F: Fn(f64) -> f64,
     {
         let result: f64 = self
-            .nodes
+            .node_weight_pairs
             .iter()
-            .zip(self.weights.iter())
-            .map(|(&x_val, w_val)| {
-                integrand(GaussJacobi::argument_transformation(x_val, a, b)) * w_val
+            .map(|(x_val, w_val)| {
+                integrand(GaussJacobi::argument_transformation(*x_val, a, b)) * w_val
             })
             .sum();
         GaussJacobi::scale_factor(a, b) * result
     }
+
+    /// Returns the value of the `alpha` parameter.
+    #[inline]
+    pub const fn alpha(&self) -> f64 {
+        self.alpha
+    }
+
+    /// Returns the value of the `beta` parameter.
+    #[inline]
+    pub const fn beta(&self) -> f64 {
+        self.beta
+    }
 }
+
+impl_data_api! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter}
 
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
-        let (x, w) = GaussJacobi::nodes_and_weights(5, 0.0, 0.0);
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 0.0).into_iter().unzip();
         let x_should = [
             -0.906_179_845_938_664,
             -0.538_469_310_105_683_1,
@@ -175,7 +194,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_1_beta_0() {
-        let (x, w) = GaussJacobi::nodes_and_weights(2, 1.0, 0.0);
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(2, 1.0, 0.0).into_iter().unzip();
         let x_should = [-0.689_897_948_556_635_7, 0.289_897_948_556_635_64];
         let w_should = [1.272_165_526_975_908_7, 0.727_834_473_024_091_3];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -188,7 +207,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_1_beta_0() {
-        let (x, w) = GaussJacobi::nodes_and_weights(5, 1.0, 0.0);
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 1.0, 0.0).into_iter().unzip();
         let x_should = [
             -0.920_380_285_897_062_6,
             -0.603_973_164_252_783_7,
@@ -213,7 +232,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_0_beta_1() {
-        let (x, w) = GaussJacobi::nodes_and_weights(5, 0.0, 1.0);
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 1.0).into_iter().unzip();
         let x_should = [
             -0.802_929_828_402_347_2,
             -0.390_928_546_707_272_2,
@@ -238,7 +257,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_50_alpha_42_beta_23() {
-        let (x, w) = GaussJacobi::nodes_and_weights(50, 42.0, 23.0);
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(50, 42.0, 23.0).into_iter().unzip();
         let x_should = [
             -0.936_528_233_152_541_2,
             -0.914_340_864_546_088_5,
