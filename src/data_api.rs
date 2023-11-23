@@ -231,6 +231,9 @@ macro_rules! impl_iterators {
             }
         }
 
+        impl<'a> ::core::iter::ExactSizeIterator for $quadrature_rule_iter<'a> {}
+        impl<'a> ::core::iter::FusedIterator for $quadrature_rule_iter<'a> {}
+
         // endregion: QuadratureRuleIter
 
         // region: QuadratureRuleIntoIter
