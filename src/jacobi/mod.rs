@@ -108,7 +108,7 @@ impl GaussJacobi {
                     .copied(),
             )
             .collect();
-        node_weight_pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         // TO FIX: implement correction
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
