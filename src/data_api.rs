@@ -15,6 +15,8 @@ macro_rules! impl_data_api {
         // e.g. GaussLegendreIter.
         $quadrature_rule_iter:ident
     ) => {
+        // Implements functions for accessing the underlying data of the quadrature rule struct
+        // in a way the adheres to the API guidelines: <https://rust-lang.github.io/api-guidelines/naming.html>.
         // The functions in this impl block all have an #[inline] directive because they are trivial.
         impl $quadrature_rule {
             /// Returns an iterator over the nodes of the quadrature rule.
@@ -61,10 +63,10 @@ macro_rules! impl_data_api {
 }
 
 /// This macro defines the iterators used by the functions defined in the macro `impl_data_api`.
-/// It takes in the names of the same structs as that macro, plus the name of the iterator returned
-/// by the [`IntoIterator`] implementation.
+/// It takes in the names of the same structs as that macro, 
+/// plus the name of the iterator that should be returned by the [`IntoIterator`] implementation.
 /// These iterators can only be created in the module where the macro is called
-/// or the module above it (due to the `pub(super)`).
+/// or the module above it (due to the `pub(super)` marker on the constructors).
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_iterators {
@@ -73,6 +75,7 @@ macro_rules! impl_iterators {
         $quadrature_rule_nodes:ident,
         $quadrature_rule_weights:ident,
         $quadrature_rule_iter:ident,
+        // The name of the iterator that should be returned by the IntoIterator trait.
         $quadrature_rule_into_iter:ident
     ) => {
         // region: QuadratureRuleNodes
