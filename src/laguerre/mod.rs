@@ -90,17 +90,22 @@ impl GaussLaguerre {
         let eigen = companion_matrix.symmetric_eigen();
 
         let scale_factor = gamma(alpha + 1.0);
-        // return nodes and weights as Vec<f64>
-        let nodes: Vec<f64> = eigen.eigenvalues.data.into();
-        let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
-            .data
-            .into();
-        let mut both: Vec<_> = nodes.iter().zip(weights.iter()).collect();
-        both.sort_by(|a, b| a.0.partial_cmp(b.0).unwrap());
-        let (nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
+
+        // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
+        let mut node_weight_pairs: Vec<(f64, f64)> = eigen
+            .eigenvalues
+            .into_iter()
+            .copied()
+            .zip(
+                (eigen.eigenvectors.row(0).map(|x| x * x) * scale_factor)
+                    .into_iter()
+                    .copied(),
+            )
+            .collect();
+        node_weight_pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         GaussLaguerre {
-            node_weight_pairs: nodes.into_iter().zip(weights.into_iter()).collect(),
+            node_weight_pairs,
             alpha,
         }
     }

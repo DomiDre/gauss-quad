@@ -96,24 +96,29 @@ impl GaussJacobi {
             (2.0f64).powf(alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
                 / gamma(alpha + beta + 1.0)
                 / (alpha + beta + 1.0);
-        // return nodes and weights as Vec<f64>
-        let nodes: Vec<f64> = eigen.eigenvalues.data.into();
-        let weights: Vec<f64> = (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * scale_factor)
-            .data
-            .into();
-        let mut both: Vec<_> = nodes.iter().zip(weights.iter()).collect();
-        both.sort_by(|a, b| a.0.partial_cmp(b.0).unwrap());
-        let (mut nodes, weights): (Vec<f64>, Vec<f64>) = both.iter().cloned().unzip();
+
+        // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
+        let mut node_weight_pairs: Vec<(f64, f64)> = eigen
+            .eigenvalues
+            .into_iter()
+            .copied()
+            .zip(
+                (eigen.eigenvectors.row(0).map(|x| x * x) * scale_factor)
+                    .into_iter()
+                    .copied(),
+            )
+            .collect();
+        node_weight_pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         // TO FIX: implement correction
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
         // for now... manual correction seems to do the trick
         if deg & 1 == 1 {
-            nodes[deg / 2] = 0.0;
+            node_weight_pairs[deg / 2].0 = 0.0;
         }
 
         GaussJacobi {
-            node_weight_pairs: nodes.into_iter().zip(weights.into_iter()).collect(),
+            node_weight_pairs,
             alpha,
             beta,
         }

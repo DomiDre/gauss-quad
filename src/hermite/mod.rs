@@ -68,14 +68,14 @@ impl GaussHermite {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        // return nodes and weights as Vec<(f64, f64)>
+        // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
         GaussHermite {
             node_weight_pairs: eigen
                 .eigenvalues
                 .iter()
                 .copied()
                 .zip(
-                    (eigen.eigenvectors.row(0).map(|x| x.powi(2)) * PI.sqrt())
+                    (eigen.eigenvectors.row(0).map(|x| x * x) * PI.sqrt())
                         .iter()
                         .copied(),
                 )
