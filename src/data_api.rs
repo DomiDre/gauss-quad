@@ -7,7 +7,7 @@
 
 // The code in the macros uses fully qualified paths for every type, so it is quite verbose.
 // That is, instead of `usize` it uses `::core::primitive::usize` and so on. This makes it so that
-// the called of the macro doesn't have to import anything into the module in order for the macro to compile.
+// the caller of the macro doesn't have to import anything into the module in order for the macro to compile.
 
 /// This macro implements the data access API for the given quadrature rule struct.
 /// It takes in the name of the quadrature rule struct as well as the names of the iterators
