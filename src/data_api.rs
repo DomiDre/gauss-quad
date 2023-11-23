@@ -49,13 +49,13 @@ macro_rules! impl_data_api {
             /// computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> Vec<(Node, Weight)> {
+            pub fn into_node_weight_pairs(self) -> ::std::vec::Vec<(Node, Weight)> {
                 self.node_weight_pairs
             }
 
             /// Returns the degree of the quadrature rule.
             #[inline]
-            pub fn degree(&self) -> usize {
+            pub fn degree(&self) -> ::core::primitive::usize {
                 self.node_weight_pairs.len()
             }
         }
@@ -79,20 +79,20 @@ macro_rules! impl_iterators {
         // region: QuadratureRuleNodes
 
         /// An iterator over the nodes of the quadrature rule.
-        #[derive(Debug, Clone)]
+        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_nodes<'a>(
             ::std::iter::Map<
-                ::core::slice::Iter<'a, (Node, Weight)>,
-                fn(&'a (Node, Weight)) -> &'a Node,
+                ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+                fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
             >,
         );
 
         impl<'a> $quadrature_rule_nodes<'a> {
             pub(super) fn new(
                 iter_map: ::std::iter::Map<
-                    ::core::slice::Iter<'a, (Node, Weight)>,
-                    fn(&'a (Node, Weight)) -> &'a Node,
+                    ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+                    fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
                 >,
             ) -> Self {
                 Self(iter_map)
@@ -100,19 +100,24 @@ macro_rules! impl_iterators {
         }
 
         impl<'a> ::core::iter::Iterator for $quadrature_rule_nodes<'a> {
-            type Item = &'a Node;
-            fn next(&mut self) -> Option<Self::Item> {
+            type Item = &'a $crate::Node;
+            fn next(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next()
             }
 
             #[inline]
-            fn size_hint(&self) -> (usize, Option<usize>) {
+            fn size_hint(
+                &self,
+            ) -> (
+                ::core::primitive::usize,
+                ::core::option::Option<::core::primitive::usize>,
+            ) {
                 self.0.size_hint()
             }
         }
 
         impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_nodes<'a> {
-            fn next_back(&mut self) -> Option<Self::Item> {
+            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next_back()
             }
         }
@@ -125,20 +130,20 @@ macro_rules! impl_iterators {
         // region: QuadratureRuleWeights
 
         /// An iterator over the weights of the quadrature rule.
-        #[derive(Debug, Clone)]
+        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_weights<'a>(
             ::std::iter::Map<
-                ::core::slice::Iter<'a, (Node, Weight)>,
-                fn(&'a (Node, Weight)) -> &'a Weight,
+                ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+                fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
             >,
         );
 
         impl<'a> $quadrature_rule_weights<'a> {
             pub(super) fn new(
                 iter_map: ::std::iter::Map<
-                    ::core::slice::Iter<'a, (Node, Weight)>,
-                    fn(&'a (Node, Weight)) -> &'a Weight,
+                    ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+                    fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
                 >,
             ) -> Self {
                 Self(iter_map)
@@ -146,19 +151,24 @@ macro_rules! impl_iterators {
         }
 
         impl<'a> ::core::iter::Iterator for $quadrature_rule_weights<'a> {
-            type Item = &'a Weight;
-            fn next(&mut self) -> Option<Self::Item> {
+            type Item = &'a $crate::Weight;
+            fn next(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next()
             }
 
             #[inline]
-            fn size_hint(&self) -> (usize, Option<usize>) {
+            fn size_hint(
+                &self,
+            ) -> (
+                ::core::primitive::usize,
+                ::core::option::Option<::core::primitive::usize>,
+            ) {
                 self.0.size_hint()
             }
         }
 
         impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_weights<'a> {
-            fn next_back(&mut self) -> Option<Self::Item> {
+            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next_back()
             }
         }
@@ -173,33 +183,37 @@ macro_rules! impl_iterators {
         /// An iterator over node-weight-pairs of the quadrature rule.
         ///
         /// Created by the `iter` function on the quadrature rule struct.
-        #[derive(Debug, Clone)]
+        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_iter<'a>(::core::slice::Iter<'a, (Node, Weight)>);
+        pub struct $quadrature_rule_iter<'a>(
+            ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+        );
 
         impl<'a> $quadrature_rule_iter<'a> {
-            pub(super) fn new(node_weight_pairs: ::core::slice::Iter<'a, (Node, Weight)>) -> Self {
+            pub(super) fn new(
+                node_weight_pairs: ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+            ) -> Self {
                 Self(node_weight_pairs)
             }
 
             /// Views the underlying data as a subslice of the original data.
             ///
             /// See [`core::slice::Iter::as_slice`] for more information.
-            pub fn as_slice(&self) -> &'a [(Node, Weight)] {
+            pub fn as_slice(&self) -> &'a [($crate::Node, $crate::Weight)] {
                 self.0.as_slice()
             }
         }
 
         impl<'a> ::core::iter::Iterator for $quadrature_rule_iter<'a> {
             /// Element `.0` is the node and element `.1` the corresponding weight.
-            type Item = &'a (Node, Weight);
-            fn next(&mut self) -> Option<Self::Item> {
+            type Item = &'a ($crate::Node, $crate::Weight);
+            fn next(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next()
             }
         }
 
         impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_iter<'a> {
-            fn next_back(&mut self) -> Option<Self::Item> {
+            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next_back()
             }
         }
@@ -211,25 +225,30 @@ macro_rules! impl_iterators {
         /// An owning iterator over the node-weight-pairs of the quadrature rule.
         ///
         /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
-        #[derive(Debug, Clone)]
+        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<(Node, Weight)>);
+        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<($crate::Node, $crate::Weight)>);
 
         impl ::core::iter::Iterator for $quadrature_rule_into_iter {
             /// Element `.0` is the node and element `.1` the corresponding weight.
-            type Item = (Node, Weight);
-            fn next(&mut self) -> Option<Self::Item> {
+            type Item = ($crate::Node, $crate::Weight);
+            fn next(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next()
             }
 
             #[inline]
-            fn size_hint(&self) -> (usize, Option<usize>) {
+            fn size_hint(
+                &self,
+            ) -> (
+                ::core::primitive::usize,
+                ::core::option::Option<::core::primitive::usize>,
+            ) {
                 self.0.size_hint()
             }
         }
 
         impl ::core::iter::DoubleEndedIterator for $quadrature_rule_into_iter {
-            fn next_back(&mut self) -> Option<Self::Item> {
+            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next_back()
             }
         }
@@ -238,7 +257,9 @@ macro_rules! impl_iterators {
         impl ::core::iter::FusedIterator for $quadrature_rule_into_iter {}
 
         impl $quadrature_rule_into_iter {
-            pub(super) fn new(node_weight_pairs: ::std::vec::IntoIter<(Node, Weight)>) -> Self {
+            pub(super) fn new(
+                node_weight_pairs: ::std::vec::IntoIter<($crate::Node, $crate::Weight)>,
+            ) -> Self {
                 Self(node_weight_pairs)
             }
 
@@ -246,14 +267,14 @@ macro_rules! impl_iterators {
             ///
             /// See [`core::slice::Iter::as_slice`] for more information.
             #[inline]
-            pub fn as_slice(&self) -> &[(Node, Weight)] {
+            pub fn as_slice(&self) -> &[($crate::Node, $crate::Weight)] {
                 self.0.as_slice()
             }
         }
 
         impl ::core::iter::IntoIterator for $quadrature_rule {
             type IntoIter = $quadrature_rule_into_iter;
-            type Item = (Node, Weight);
+            type Item = ($crate::Node, $crate::Weight);
             fn into_iter(self) -> Self::IntoIter {
                 $quadrature_rule_into_iter::new(self.node_weight_pairs.into_iter())
             }
