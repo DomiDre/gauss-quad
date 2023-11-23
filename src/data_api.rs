@@ -1,6 +1,6 @@
 /// This macro implements the data access API for the given quadrature rule struct.
 /// It takes in the name of the quadrature rule as well as the names of the iterators
-/// over its nodes, weights, and both. Also defined the iterator used by the IntoIterator implementation.
+/// over its nodes, weights, and both. Also defines the iterator used by the IntoIterator implementation.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_data_api {
