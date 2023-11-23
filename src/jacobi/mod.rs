@@ -113,7 +113,7 @@ impl GaussJacobi {
         // TO FIX: implement correction
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
         // for now... manual correction seems to do the trick
-        if deg & 1 == 1 {
+        if deg % 2 == 1 {
             node_weight_pairs[deg / 2].0 = 0.0;
         }
 
