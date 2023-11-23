@@ -64,6 +64,8 @@ macro_rules! impl_data_api {
 
 /// This macro defines the iterators used by the functions defined in the macro `impl_data_api`.
 /// It takes in the names of the same structs as that macro.
+/// These iterators can only be created in the module where the macro is called
+/// or the module above it (due to the `pub(super)`).
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_iterators {
