@@ -103,7 +103,10 @@ impl GaussJacobi {
             .iter()
             .copied()
             .zip(
-                (eigen.eigenvectors.row(0).map(|x| x * x) * scale_factor)
+                eigen
+                    .eigenvectors
+                    .row(0)
+                    .map(|x| x * x * scale_factor)
                     .iter()
                     .copied(),
             )
