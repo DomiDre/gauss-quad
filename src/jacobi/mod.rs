@@ -100,11 +100,11 @@ impl GaussJacobi {
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
         let mut node_weight_pairs: Vec<(f64, f64)> = eigen
             .eigenvalues
-            .into_iter()
+            .iter()
             .copied()
             .zip(
                 (eigen.eigenvectors.row(0).map(|x| x * x) * scale_factor)
-                    .into_iter()
+                    .iter()
                     .copied(),
             )
             .collect();
