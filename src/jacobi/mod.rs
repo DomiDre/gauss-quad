@@ -1,6 +1,6 @@
 //! Numerical integration using the Gauss-Jacobi quadrature rule.
 //!
-//! This rule can integrate integrands of the form (1 + x)^alpha * (1 - x)^beta * f(x) over the domain [-1, 1],
+//! This rule can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [-1, 1],
 //! where f(x) is a smooth function on [1, 1], alpha > -1 and beta > -1.
 //! The domain can be changed to any [a, b] through a linear transformation (which is done in this module),
 //! and this enables the approximation of integrals with singularities at the end points of the domain.
@@ -12,7 +12,7 @@
 //!
 //! let quad = GaussJacobi::new(10, 0.0, -1.0 / 3.0);
 //!
-//! // numerically integrate sin(x) / (1 - x)^(1/3), a function with a singularity at x = 1.
+//! // numerically integrate sin(x) / (1 + x)^(1/3), a function with a singularity at x = -1.
 //! let integral = quad.integrate(-1.0, 1.0, |x| x.sin());
 //!
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
@@ -36,7 +36,7 @@ use crate::{impl_data_api, DMatrixf64, Node, Weight};
 /// // initialize the quadrature rule.
 /// let quad = GaussJacobi::new(10, -0.5, 0.0);
 ///
-/// // numerically integrate e^-x / sqrt(1 + x).
+/// // numerically integrate e^-x / sqrt(1 - x).
 /// let integral = quad.integrate(-1.0, 1.0, |x| (-x).exp());
 ///
 /// let dawson_function_of_sqrt_2 = 0.4525399074037225;
