@@ -179,9 +179,7 @@ macro_rules! impl_iterators {
             pub(super) fn new(node_weight_pairs: ::core::slice::Iter<'a, (Node, Weight)>) -> Self {
                 Self(node_weight_pairs)
             }
-        }
 
-        impl<'a> $quadrature_rule_iter<'a> {
             /// Views the underlying data as a subslice of the original data.
             ///
             /// See [`core::slice::Iter::as_slice`] for more information.
