@@ -234,6 +234,15 @@ macro_rules! impl_iterators {
         impl<'a> ::core::iter::ExactSizeIterator for $quadrature_rule_iter<'a> {}
         impl<'a> ::core::iter::FusedIterator for $quadrature_rule_iter<'a> {}
 
+        impl<'a> ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
+            for $quadrature_rule_iter<'a>
+        {
+            #[inline]
+            fn as_ref(&self) -> &[($crate::Node, $crate::Weight)] {
+                self.0.as_ref()
+            }
+        }
+
         // endregion: QuadratureRuleIter
 
         // region: QuadratureRuleIntoIter
