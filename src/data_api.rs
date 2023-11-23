@@ -102,6 +102,7 @@ macro_rules! impl_iterators {
         );
 
         impl<'a> $quadrature_rule_nodes<'a> {
+            #[inline]
             pub(super) fn new(
                 iter_map: ::std::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
@@ -153,6 +154,7 @@ macro_rules! impl_iterators {
         );
 
         impl<'a> $quadrature_rule_weights<'a> {
+            #[inline]
             pub(super) fn new(
                 iter_map: ::std::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
@@ -203,6 +205,7 @@ macro_rules! impl_iterators {
         );
 
         impl<'a> $quadrature_rule_iter<'a> {
+            #[inline]
             pub(super) fn new(
                 node_weight_pairs: ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
             ) -> Self {
@@ -212,6 +215,7 @@ macro_rules! impl_iterators {
             /// Views the underlying data as a subslice of the original data.
             ///
             /// See [`core::slice::Iter::as_slice`] for more information.
+            #[inline]
             pub fn as_slice(&self) -> &'a [($crate::Node, $crate::Weight)] {
                 self.0.as_slice()
             }
@@ -282,6 +286,7 @@ macro_rules! impl_iterators {
         impl ::core::iter::FusedIterator for $quadrature_rule_into_iter {}
 
         impl $quadrature_rule_into_iter {
+            #[inline]
             pub(super) fn new(
                 node_weight_pairs: ::std::vec::IntoIter<($crate::Node, $crate::Weight)>,
             ) -> Self {
@@ -309,6 +314,7 @@ macro_rules! impl_iterators {
         impl ::core::iter::IntoIterator for $quadrature_rule {
             type IntoIter = $quadrature_rule_into_iter;
             type Item = ($crate::Node, $crate::Weight);
+            #[inline]
             fn into_iter(self) -> Self::IntoIter {
                 $quadrature_rule_into_iter::new(self.node_weight_pairs.into_iter())
             }
