@@ -58,9 +58,6 @@ impl GaussLaguerre {
     ///
     /// # Panics
     /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
-    ///
-    /// # Panics
-    /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
     pub fn new(deg: usize, alpha: f64) -> GaussLaguerre {
         if alpha < -1.0 {
             panic!("Gauss-Laguerre quadrature needs alpha > -1.0");
