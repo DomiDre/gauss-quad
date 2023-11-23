@@ -1,3 +1,15 @@
+//! This module contains two macros: [`impl_data_api!`] and [`impl_iterators!`].
+//! The first takes in the name of a quadrature rule struct that has a field named `node_weight_pairs`
+//! of the type `Vec<(f64, f64)>`. It also needs the names that it should give the various structs
+//! that iterate over that data. It should be called in the module that defines the quadrature rule struct.
+//! The second macro defines the iterators that the first returns. It should be called somewhere it makes sense
+//! for the iterators to be defined, e.g. a sub-module.
+//!
+
+// The code in the macros uses fully qualified paths for every type, so it is quite verbose.
+// That is, instead of `usize` it uses `::core::primitive::usize` and so on. This makes it so that
+// the called of the macro doesn't have to import anything into the module in order for the macro to compile.
+
 /// This macro implements the data access API for the given quadrature rule struct.
 /// It takes in the name of the quadrature rule struct as well as the names of the iterators
 /// over its nodes, weights, and both.
