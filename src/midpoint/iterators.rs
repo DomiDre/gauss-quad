@@ -11,8 +11,17 @@ use core::iter::FusedIterator;
 pub struct MidpointIter<'a>(core::slice::Iter<'a, f64>);
 
 impl<'a> MidpointIter<'a> {
+    #[inline]
     pub(super) fn new(iter: core::slice::Iter<'a, f64>) -> Self {
         Self(iter)
+    }
+
+    /// Views the underlying data as a subslice of the original data.
+    ///
+    /// See [`core::slice::Iter::as_slice`] for more information.
+    #[inline]
+    pub fn as_slice(&self) -> &[Node] {
+        self.0.as_slice()
     }
 }
 
@@ -22,6 +31,7 @@ impl<'a> Iterator for MidpointIter<'a> {
         self.0.next()
     }
 
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
