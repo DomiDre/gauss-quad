@@ -129,8 +129,8 @@
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
 
-use nalgebra::{Dynamic, Matrix, VecStorage};
-type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dynamic>>;
+use nalgebra::{Dyn, Matrix, VecStorage};
+type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 use core::f64::consts::PI;
 
 mod data_api;
