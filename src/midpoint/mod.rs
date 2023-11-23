@@ -40,7 +40,10 @@
 //! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
 //! ```
 
+pub mod iterators;
+
 use crate::Node;
+use iterators::MidpointIter;
 
 /// A midpoint rule quadrature scheme.
 /// ```
@@ -77,8 +80,8 @@ impl Midpoint {
 
     /// Returns an iterator over the nodes of the midpoint rule.
     #[inline]
-    pub fn iter(&self) -> core::slice::Iter<'_, Node> {
-        self.nodes.iter()
+    pub fn iter(&self) -> MidpointIter<'_> {
+        MidpointIter::new(self.nodes.iter())
     }
 
     /// Returns the nodes of the rule as a slice.
