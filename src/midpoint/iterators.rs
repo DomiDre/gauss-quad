@@ -7,6 +7,7 @@ use core::iter::FusedIterator;
 /// An iterator of the nodes of a [`Midpoint`](super::Midpoint) instance created by
 /// [`Midpoint::iter`](super::Midpoint::iter).
 #[derive(Debug, Clone)]
+#[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct MidpointIter<'a>(core::slice::Iter<'a, f64>);
 
 impl<'a> MidpointIter<'a> {
