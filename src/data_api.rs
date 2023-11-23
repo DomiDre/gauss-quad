@@ -63,7 +63,7 @@ macro_rules! impl_data_api {
 }
 
 /// This macro defines the iterators used by the functions defined in the macro `impl_data_api`.
-/// It takes in the names of the same structs as that macro, 
+/// It takes in the names of the same structs as that macro,
 /// plus the name of the iterator that should be returned by the [`IntoIterator`] implementation.
 /// These iterators can only be created in the module where the macro is called
 /// or the module above it (due to the `pub(super)` marker on the constructors).
