@@ -1,6 +1,6 @@
 //! This module contains two macros: [`impl_data_api!`] and [`impl_iterators!`].
 //! The first takes in the name of a quadrature rule struct that has a field named `node_weight_pairs`
-//! of the type `Vec<(f64, f64)>`. It also needs the names that it should give the various structs
+//! of the type `Vec<(Node, Weight)>`. It also needs the names that it should give the various structs
 //! that iterate over that data. It should be called in the module that defines the quadrature rule struct.
 //! The second macro defines the iterators that the first returns. It should be called somewhere it makes sense
 //! for the iterators to be defined, e.g. a sub-module.
