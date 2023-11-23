@@ -20,7 +20,7 @@ impl<'a> MidpointIter<'a> {
     ///
     /// See [`core::slice::Iter::as_slice`] for more information.
     #[inline]
-    pub fn as_slice(&self) -> &[Node] {
+    pub fn as_slice(&self) -> &'a [Node] {
         self.0.as_slice()
     }
 }
