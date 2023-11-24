@@ -295,7 +295,16 @@ mod tests {
     fn iterator_sanity_check() {
         for deg in (10..=100).step_by(10) {
             let rule = GaussLegendre::new(deg);
+            assert_eq!(rule.degree(), deg);
             for ((ni, wi), (nn, ww)) in rule.iter().zip(rule.nodes().zip(rule.weights())) {
+                assert_abs_diff_eq!(ni, nn);
+                assert_eq!(wi, ww);
+            }
+            for ((ni, wi), (nn, ww)) in rule
+                .as_node_weight_pairs()
+                .iter()
+                .zip(rule.nodes().zip(rule.weights()))
+            {
                 assert_abs_diff_eq!(ni, nn);
                 assert_eq!(wi, ww);
             }
@@ -313,18 +322,6 @@ mod tests {
         }
         for (&weight, should) in rule.weights().zip(w_should) {
             assert_abs_diff_eq!(weight, should);
-        }
-        for ((node, weight), (&node_should, weight_should)) in
-            rule.iter().zip(x_should.iter().zip(w_should))
-        {
-            assert_abs_diff_eq!(*node, node_should);
-            assert_abs_diff_eq!(*weight, weight_should);
-        }
-        for ((node, weight), (&node_should, weight_should)) in
-            rule.into_iter().zip(x_should.iter().zip(w_should))
-        {
-            assert_abs_diff_eq!(node, node_should);
-            assert_abs_diff_eq!(weight, weight_should);
         }
     }
 
