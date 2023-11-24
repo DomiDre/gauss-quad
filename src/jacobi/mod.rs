@@ -58,7 +58,7 @@ impl GaussJacobi {
     /// See Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
     /// # Panics
-    /// Panics if `degree` is smaller than 2, or if `alpha` or `beta` are smaller than or equal to -1.
+    /// Panics if `deg` is smaller than 2, or if `alpha` or `beta` are smaller than or equal to -1.
     pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
         if alpha <= -1.0 || beta <= -1.0 {
             panic!("Gauss-Jacobi quadrature needs alpha > -1.0 and beta > -1.0");
