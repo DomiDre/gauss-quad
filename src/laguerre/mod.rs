@@ -134,23 +134,24 @@ impl_data_api! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLa
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::assert_abs_diff_eq;
 
     #[test]
     fn golub_welsch_2_alpha_5() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(2, 5.0).into_iter().unzip();
+        let rule = GaussLaguerre::new(2, 5.0);
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
         let w_should = [82.677_868_380_553_63, 37.322_131_619_446_37];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-12);
+        for (&node, x_val) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, x_val, epsilon = 1e-12);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-12);
+        for (&weight, w_val) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, w_val, epsilon = 1e-12);
         }
     }
 
     #[test]
     fn golub_welsch_3_alpha_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 0.0).into_iter().unzip();
+        let rule = GaussLaguerre::new(3, 0.0);
         let x_should = [
             0.415_774_556_783_479_1,
             2.294_280_360_279_042,
@@ -161,17 +162,17 @@ mod tests {
             0.278_517_733_569_240_87,
             0.010_389_256_501_586_135,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+        for (&node, x_val) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, x_val, epsilon = 1e-14);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (&weight, w_val) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, w_val, epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_3_alpha_1_5() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 1.5).into_iter().unzip();
+        let rule = GaussLaguerre::new(3, 1.5);
         let x_should = [
             1.220_402_317_558_883_8,
             3.808_880_721_467_068,
@@ -182,17 +183,17 @@ mod tests {
             0.566_249_100_686_605_7,
             0.032_453_393_142_515_25,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+        for (&node, x_val) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, x_val, epsilon = 1e-14);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (&weight, w_val) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, w_val, epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_5_alpha_negative() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(5, -0.9).into_iter().unzip();
+        let rule = GaussLaguerre::new(5, -0.9);
         let x_should = [
             0.020_777_151_319_288_104,
             0.808_997_536_134_602_1,
@@ -207,11 +208,11 @@ mod tests {
             0.002_312_760_116_115_564,
             1.162_358_758_613_074_8E-5,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+        for (&node, x_val) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, x_val, epsilon = 1e-14);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (&weight, w_val) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, w_val, epsilon = 1e-14);
         }
     }
 
