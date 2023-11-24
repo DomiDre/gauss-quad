@@ -178,6 +178,13 @@ mod tests {
     }
 
     #[test]
+    fn found_nans_2() {
+        // This should succeed according to the documentation of GaussJacobi::new(), but
+        // line 72 divides by (2 + alpha + beta): a division by zero if alpha = beta = -1.
+        _ = GaussJacobi::new(10, -1., -1.);
+    }
+
+    #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
         let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 0.0).into_iter().unzip();
         let x_should = [
