@@ -108,6 +108,10 @@ impl GaussJacobi {
                     .copied(),
             )
             .collect();
+
+        // TODO: ADDED THIS PRINT ONLY FOR THE FAILING TEST, REMOVE AFTER FIXING
+        println!("{deg}, {alpha}, {beta}, {node_weight_pairs:?}");
+
         node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         // TO FIX: implement correction
@@ -167,6 +171,12 @@ impl_data_api! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIt
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn found_nans() {
+        _ = GaussJacobi::new(10, -0.5, -0.5);
+    }
+
     #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
         let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 0.0).into_iter().unzip();
