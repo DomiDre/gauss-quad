@@ -196,20 +196,20 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_1_beta_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(2, 1.0, 0.0).into_iter().unzip();
+        let rule = GaussJacobi::new(2, 1.0, 0.0);
         let x_should = [-0.689_897_948_556_635_7, 0.289_897_948_556_635_64];
         let w_should = [1.272_165_526_975_908_7, 0.727_834_473_024_091_3];
-        for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+        for (&node, x_val) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, x_val, epsilon = 1e-14);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (&weight, w_val) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, w_val, epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_5_alpha_1_beta_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 1.0, 0.0).into_iter().unzip();
+        let rule = GaussJacobi::new(5, 1.0, 0.0);
         let x_should = [
             -0.920_380_285_897_062_6,
             -0.603_973_164_252_783_7,
@@ -224,17 +224,17 @@ mod tests {
             0.295_635_480_290_466_66,
             0.062_991_658_086_769_1,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+        for (&node, x_val) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, x_val, epsilon = 1e-14);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (&weight, w_val) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, w_val, epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_5_alpha_0_beta_1() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 1.0).into_iter().unzip();
+        let rule = GaussJacobi::new(5, 0.0, 1.0);
         let x_should = [
             -0.802_929_828_402_347_2,
             -0.390_928_546_707_272_2,
@@ -249,17 +249,17 @@ mod tests {
             0.668_698_552_377_478_2,
             0.387_126_360_906_606_74,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+        for (&node, x_val) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, x_val, epsilon = 1e-14);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+        for (&weight, w_val) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, w_val, epsilon = 1e-14);
         }
     }
 
     #[test]
     fn golub_welsch_50_alpha_42_beta_23() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(50, 42.0, 23.0).into_iter().unzip();
+        let rule = GaussJacobi::new(50, 42.0, 23.0);
         let x_should = [
             -0.936_528_233_152_541_2,
             -0.914_340_864_546_088_5,
@@ -364,11 +364,11 @@ mod tests {
             1.912_538_194_408_499_4E-24,
             6.645_776_758_516_211E-28,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-10);
+        for (&node, x_val) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, x_val, epsilon = 1e-14);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-10);
+        for (&weight, w_val) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, w_val, epsilon = 1e-13);
         }
     }
 
