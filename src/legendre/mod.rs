@@ -289,18 +289,42 @@ mod bogaert {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::assert_abs_diff_eq;
+
+    #[test]
+    fn iterator_sanity_check() {
+        for deg in (10..=100).step_by(10) {
+            let rule = GaussLegendre::new(deg);
+            for ((ni, wi), (nn, ww)) in rule.iter().zip(rule.nodes().zip(rule.weights())) {
+                assert_abs_diff_eq!(ni, nn);
+                assert_eq!(wi, ww);
+            }
+        }
+    }
 
     #[test]
     fn check_degree_3() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).into_iter().unzip();
+        let rule = GaussLegendre::new(3);
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i]);
+        for (&node, should) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, should);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i]);
+        for (&weight, should) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, should);
+        }
+        for ((node, weight), (&node_should, weight_should)) in
+            rule.iter().zip(x_should.iter().zip(w_should))
+        {
+            assert_abs_diff_eq!(*node, node_should);
+            assert_abs_diff_eq!(*weight, weight_should);
+        }
+        for ((node, weight), (&node_should, weight_should)) in
+            rule.into_iter().zip(x_should.iter().zip(w_should))
+        {
+            assert_abs_diff_eq!(node, node_should);
+            assert_abs_diff_eq!(weight, weight_should);
         }
     }
 
