@@ -102,21 +102,42 @@ impl_data_api! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermi
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::assert_abs_diff_eq;
+
+    #[test]
+    fn iterator_sanity_check() {
+        for deg in (10..=100).step_by(10) {
+            let rule = GaussHermite::new(deg);
+            assert_eq!(rule.degree(), deg);
+            for ((ni, wi), (nn, ww)) in rule.iter().zip(rule.nodes().zip(rule.weights())) {
+                assert_abs_diff_eq!(ni, nn);
+                assert_eq!(wi, ww);
+            }
+            for ((ni, wi), (nn, ww)) in rule
+                .as_node_weight_pairs()
+                .iter()
+                .zip(rule.nodes().zip(rule.weights()))
+            {
+                assert_abs_diff_eq!(ni, nn);
+                assert_eq!(wi, ww);
+            }
+        }
+    }
 
     #[test]
     fn golub_welsch_3() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3).into_iter().unzip();
+        let rule = GaussHermite::new(3);
         let x_should = [1.224_744_871_391_589, 0.0, -1.224_744_871_391_589];
         let w_should = [
             0.295_408_975_150_919_35,
             1.181_635_900_603_677_4,
             0.295_408_975_150_919_35,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
+        for (&node, x_val) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, x_val, epsilon = 1e-15);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
+        for (&weight, w_val) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, w_val, epsilon = 1e-15);
         }
     }
 
