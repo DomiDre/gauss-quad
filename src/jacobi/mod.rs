@@ -52,7 +52,8 @@ pub struct GaussJacobi {
 
 impl GaussJacobi {
     /// Initializes Gauss-Jacobi quadrature rule of the given degree by computing the nodes and weights
-    /// needed for the given `alpha` and `beta`.
+    /// needed for the given parameters. `alpha` is the exponent of the `(1 - x)` factor and `beta` is the
+    /// exponent of the `(1 + x)` factor.
     ///
     /// Applies the Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights.
     /// See Gil, Segura, Temme - Numerical Methods for Special Functions
@@ -103,7 +104,10 @@ impl GaussJacobi {
             .iter()
             .copied()
             .zip(
-                (eigen.eigenvectors.row(0).map(|x| x * x) * scale_factor)
+                eigen
+                    .eigenvectors
+                    .row(0)
+                    .map(|x| x * x * scale_factor)
                     .iter()
                     .copied(),
             )

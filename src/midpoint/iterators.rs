@@ -26,6 +26,13 @@ impl<'a> MidpointIter<'a> {
     }
 }
 
+impl<'a> AsRef<[Node]> for MidpointIter<'a> {
+    #[inline]
+    fn as_ref(&self) -> &[Node] {
+        self.0.as_ref()
+    }
+}
+
 impl<'a> Iterator for MidpointIter<'a> {
     type Item = &'a Node;
     fn next(&mut self) -> Option<Self::Item> {

@@ -295,7 +295,7 @@ macro_rules! impl_iterators {
 
             /// Views the underlying data as a subslice of the original data.
             ///
-            /// See [`core::slice::Iter::as_slice`] for more information.
+            /// See [`std::vec::IntoIter::as_slice`] for more information.
             #[inline]
             pub fn as_slice(&self) -> &[($crate::Node, $crate::Weight)] {
                 self.0.as_slice()

@@ -25,6 +25,13 @@ impl<'a> SimpsonIter<'a> {
     }
 }
 
+impl<'a> AsRef<[Node]> for SimpsonIter<'a> {
+    #[inline]
+    fn as_ref(&self) -> &[Node] {
+        self.0.as_ref()
+    }
+}
+
 impl<'a> Iterator for SimpsonIter<'a> {
     type Item = &'a Node;
     fn next(&mut self) -> Option<Self::Item> {
