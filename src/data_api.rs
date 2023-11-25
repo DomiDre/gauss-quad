@@ -395,7 +395,7 @@ macro_rules! impl_node_weight_rule_iterators {
 }
 
 /// This macro implements the functions of the [`NodeRule`] trait for
-/// the given quadrature struct that contans a field named `nodes`
+/// the given rule struct that contans a field named `nodes`
 /// of the type `Vec<Node>`. It takes the name of the rule struct as well as the name
 /// of the iterator over its nodes.
 #[macro_export]
