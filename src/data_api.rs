@@ -29,44 +29,40 @@ macro_rules! impl_data_api {
         // Implements functions for accessing the underlying data of the quadrature rule struct
         // in a way the adheres to the API guidelines: <https://rust-lang.github.io/api-guidelines/naming.html>.
         // The functions in this impl block all have an #[inline] directive because they are trivial.
-        impl $quadrature_rule {
-            /// Returns an iterator over the nodes of the quadrature rule.
+        impl $crate::NodeWeightRule for $quadrature_rule {
+            type Node = f64;
+            type Weight = f64;
+            type Nodes<'a> = $quadrature_rule_nodes<'a>;
+            type Weights<'a> = $quadrature_rule_weights<'a>;
+            type Iter<'a> = $quadrature_rule_iter<'a>;
             #[inline]
-            pub fn nodes(&self) -> $quadrature_rule_nodes<'_> {
+            fn nodes(&self) -> Self::Nodes<'_> {
                 $quadrature_rule_nodes::new(self.node_weight_pairs.iter().map(|p| &p.0))
             }
 
-            /// Returns an iterator over the weights of the quadrature rule.
             #[inline]
-            pub fn weights(&self) -> $quadrature_rule_weights<'_> {
+            fn weights(&self) -> Self::Weights<'_> {
                 $quadrature_rule_weights::new(self.node_weight_pairs.iter().map(|p| &p.1))
             }
 
-            /// Returns an iterator over the node-weight-pairs of the quadrature rule.
             #[inline]
-            pub fn iter(&self) -> $quadrature_rule_iter<'_> {
+            fn iter(&self) -> Self::Iter<'_> {
                 $quadrature_rule_iter::new(self.node_weight_pairs.iter())
             }
 
-            /// Returns a slice of the node-weight-pairs of the quadrature rule.
             #[inline]
-            pub fn as_node_weight_pairs(&self) -> &[(Node, Weight)] {
+            fn as_node_weight_pairs(&self) -> &[(Self::Node, Self::Weight)] {
                 &self.node_weight_pairs
             }
 
-            /// Converts the quadrature rule into a vector of node-weight-pairs.
-            ///
-            /// This function just returns the underlying data and does no
-            /// computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> ::std::vec::Vec<(Node, Weight)> {
+            fn into_node_weight_pairs(self) -> ::std::vec::Vec<(Self::Node, Self::Weight)> {
                 self.node_weight_pairs
             }
 
-            /// Returns the degree of the quadrature rule.
             #[inline]
-            pub fn degree(&self) -> ::core::primitive::usize {
+            fn degree(&self) -> ::core::primitive::usize {
                 self.node_weight_pairs.len()
             }
         }
