@@ -28,7 +28,7 @@ where
     type Node;
     /// The type of the weights.
     type Weight;
-    /// An iterator over node-weight-pairs of the quadrature rule.
+    /// An iterator over the node-weight-pairs of the quadrature rule.
     type Iter<'a>: Iterator<Item = &'a (Self::Node, Self::Weight)>
     where
         Self: 'a;
