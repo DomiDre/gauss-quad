@@ -20,12 +20,12 @@ pub type Weight = f64;
 /// both nodes and weights.
 pub trait NodeWeightRule
 where
-    Self: IntoIterator,
+    Self: IntoIterator<Item = (Node, Weight)>,
 {
     /// The type of the nodes.
-    type Node: Copy;
+    type Node;
     /// The type of the weights.
-    type Weight: Copy;
+    type Weight;
     /// An iterator over node-weight-pairs of the quadrature rule.
     type Iter<'a>: Iterator<Item = &'a (Self::Node, Self::Weight)>
     where
@@ -59,10 +59,10 @@ where
 /// in rules that do not have weights.
 pub trait NodeRule
 where
-    Self: IntoIterator,
+    Self: IntoIterator<Item = Node>,
 {
     /// The type of the nodes.
-    type Node: Copy;
+    type Node;
     /// An iterator over the nodes.
     type Iter<'a>: Iterator<Item = &'a Self::Node>
     where
