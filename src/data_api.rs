@@ -451,7 +451,7 @@ macro_rules! impl_node_rule_iterators {
             }
         }
 
-        impl<'a> AsRef<[$crate::Node]> for $quadrature_rule_iter<'a> {
+        impl<'a> ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_iter<'a> {
             #[inline]
             fn as_ref(&self) -> &[$crate::Node] {
                 self.0.as_ref()
@@ -465,7 +465,7 @@ macro_rules! impl_node_rule_iterators {
             }
 
             #[inline]
-            fn size_hint(&self) -> (::core::primitive::usize, Option<::core::primitive::usize>) {
+            fn size_hint(&self) -> (::core::primitive::usize, ::core::option::Option<::core::primitive::usize>) {
                 self.0.size_hint()
             }
         }
