@@ -42,7 +42,7 @@
 
 pub mod iterators;
 
-use crate::{Node, NodeRule};
+use crate::{impl_node_rule_trait, Node};
 use iterators::MidpointIter;
 
 /// A midpoint rule quadrature scheme.
@@ -95,36 +95,7 @@ impl Midpoint {
     }
 }
 
-impl NodeRule for Midpoint {
-    type Node = Node;
-    type Iter<'a> = MidpointIter<'a>;
-    #[inline]
-    fn iter(&self) -> MidpointIter<'_> {
-        MidpointIter::new(self.nodes.iter())
-    }
-
-    #[inline]
-    fn as_nodes(&self) -> &[Node] {
-        &self.nodes
-    }
-    #[inline]
-    fn into_nodes(self) -> Vec<Node> {
-        self.nodes
-    }
-
-    #[inline]
-    fn degree(&self) -> usize {
-        self.nodes.len()
-    }
-}
-
-impl IntoIterator for Midpoint {
-    type IntoIter = std::vec::IntoIter<Node>;
-    type Item = Node;
-    fn into_iter(self) -> Self::IntoIter {
-        self.nodes.into_iter()
-    }
-}
+impl_node_rule_trait! {Midpoint, MidpointIter}
 
 #[cfg(test)]
 mod tests {

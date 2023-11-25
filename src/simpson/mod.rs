@@ -35,7 +35,7 @@
 
 pub mod iterators;
 
-use crate::{Node, NodeRule};
+use crate::{impl_node_rule_trait, Node};
 use iterators::SimpsonIter;
 
 /// A Simpson rule quadrature scheme.
@@ -99,38 +99,7 @@ impl Simpson {
     }
 }
 
-impl NodeRule for Simpson {
-    type Node = Node;
-    type Iter<'a> = SimpsonIter<'a>;
-
-    #[inline]
-    fn iter(&self) -> SimpsonIter<'_> {
-        SimpsonIter::new(self.nodes.iter())
-    }
-
-    #[inline]
-    fn as_nodes(&self) -> &[Node] {
-        &self.nodes
-    }
-
-    #[inline]
-    fn into_nodes(self) -> Vec<Node> {
-        self.nodes
-    }
-
-    #[inline]
-    fn degree(&self) -> usize {
-        self.nodes.len()
-    }
-}
-
-impl IntoIterator for Simpson {
-    type IntoIter = std::vec::IntoIter<Node>;
-    type Item = Node;
-    fn into_iter(self) -> Self::IntoIter {
-        self.nodes.into_iter()
-    }
-}
+impl_node_rule_trait! {Simpson, SimpsonIter}
 
 #[cfg(test)]
 mod tests {
