@@ -142,7 +142,7 @@ macro_rules! impl_node_weight_rule_trait {
     };
 }
 
-/// This macro defines the iterators used by the functions defined in the macro [`impl_data_api!`].
+/// This macro defines the iterators used by the functions defined in the [`impl_node_weight_rule_trait!`] macro.
 /// It takes in the names of the same structs as that macro,
 /// plus the name of the iterator that should be returned by the [`IntoIterator`] implementation.
 /// These iterators can only be created in the module where the macro is called
@@ -425,6 +425,11 @@ macro_rules! impl_node_rule_trait {
     };
 }
 
+/// This macro defines the iterators used by the functions defined by the [`impl_node_rule_trait`] macro.
+/// It takes in the names of the same structs as that macro,
+/// plus the name of the iterator that should be returned by the [`IntoIterator`] implementation.
+/// These iterators can only be created in the module where the macro is called
+/// or the module above it (due to the `pub(super)` marker on the constructors).
 #[macro_export]
 #[doc(hidden)]
 macro_rules! impl_node_rule_iterators {
@@ -465,7 +470,12 @@ macro_rules! impl_node_rule_iterators {
             }
 
             #[inline]
-            fn size_hint(&self) -> (::core::primitive::usize, ::core::option::Option<::core::primitive::usize>) {
+            fn size_hint(
+                &self,
+            ) -> (
+                ::core::primitive::usize,
+                ::core::option::Option<::core::primitive::usize>,
+            ) {
                 self.0.size_hint()
             }
         }
