@@ -42,7 +42,7 @@
 
 pub mod iterators;
 
-use crate::Node;
+use crate::{Node, NodeRule};
 use iterators::MidpointIter;
 
 /// A midpoint rule quadrature scheme.
@@ -78,26 +78,6 @@ impl Midpoint {
         }
     }
 
-    /// Returns an iterator over the nodes of the midpoint rule.
-    #[inline]
-    pub fn iter(&self) -> MidpointIter<'_> {
-        MidpointIter::new(self.nodes.iter())
-    }
-
-    /// Returns the nodes of the rule as a slice.
-    #[inline]
-    pub fn as_nodes(&self) -> &[Node] {
-        &self.nodes
-    }
-
-    /// Converts `self` into a vector of nodes.
-    ///
-    /// Simply returns the underlying vector with no computation or allocation.
-    #[inline]
-    pub fn into_nodes(self) -> Vec<Node> {
-        self.nodes
-    }
-
     /// Integrate over the domain [a, b].
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
@@ -112,6 +92,29 @@ impl Midpoint {
             .sum();
 
         sum * rect_width
+    }
+}
+
+impl NodeRule for Midpoint {
+    type Node = Node;
+    type Iter<'a> = MidpointIter<'a>;
+    #[inline]
+    fn iter(&self) -> MidpointIter<'_> {
+        MidpointIter::new(self.nodes.iter())
+    }
+
+    #[inline]
+    fn as_nodes(&self) -> &[Node] {
+        &self.nodes
+    }
+    #[inline]
+    fn into_nodes(self) -> Vec<Node> {
+        self.nodes
+    }
+
+    #[inline]
+    fn degree(&self) -> usize {
+        self.nodes.len()
     }
 }
 

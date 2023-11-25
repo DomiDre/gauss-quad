@@ -1,5 +1,7 @@
-//! This module contains two macros: [`impl_data_api!`] and [`impl_iterators!`].
-//! The first takes in the name of a quadrature rule struct that has a field named `node_weight_pairs`
+//! This module contains the traits [`NodeRule`] and [`NodeWeightRule`] as well as
+//! two macros: [`impl_data_api!`] and [`impl_iterators!`].
+//! The traits define the common API for accessing the data that underlies the quadrature rules.
+//! The first macro takes in the name of a quadrature rule struct that has a field named `node_weight_pairs`
 //! of the type `Vec<(Node, Weight)>`. It also needs the names that it should give the various structs
 //! that iterate over that data. It should be called in the module that defines the quadrature rule struct.
 //! The second macro defines the iterators that the first returns. It should be called somewhere it makes sense
@@ -8,6 +10,75 @@
 // The code in the macros uses fully qualified paths for every type, so it is quite verbose.
 // That is, instead of `usize` it uses `::core::primitive::usize` and so on. This makes it so that
 // the caller of the macro doesn't have to import anything into the module in order for the macro to compile.
+
+/// A node in a quadrature rule.
+pub type Node = f64;
+/// A weight in a quadrature rule.
+pub type Weight = f64;
+
+/// This trait defines the API for reading the underlying data in quadrature rules that have
+/// both nodes and weights.
+pub trait NodeWeightRule
+where
+    Self: IntoIterator,
+{
+    /// The type of the nodes.
+    type Node: Copy;
+    /// The type of the weights.
+    type Weight: Copy;
+    /// An iterator over node-weight-pairs of the quadrature rule.
+    type Iter<'a>: Iterator<Item = &'a (Self::Node, Self::Weight)>
+    where
+        Self: 'a;
+    /// An iterator over the nodes of the quadrature rule.
+    type Nodes<'a>: Iterator<Item = &'a Self::Node>
+    where
+        Self: 'a;
+    /// An iterator over the weights of the quadrature rule.
+    type Weights<'a>: Iterator<Item = &'a Self::Weight>
+    where
+        Self: 'a;
+    /// Returns an iterator over the node-weight-pairs of the quadrature rule.
+    fn iter(&self) -> Self::Iter<'_>;
+    /// Returns an iterator over the nodes of the quadrature rule.
+    fn nodes(&self) -> Self::Nodes<'_>;
+    /// Returns an iterator over the weights of the quadrature rule.
+    fn weights(&self) -> Self::Weights<'_>;
+    /// Returns a slice of the node-weight-pairs of the quadrature rule.
+    fn as_node_weight_pairs<'a>(&'a self) -> &'a [(Self::Node, Self::Weight)];
+    /// Converts the quadrature rule into a vector of node-weight-pairs.
+    ///
+    /// This function just returns the underlying data and does no
+    /// computation or cloning.
+    fn into_node_weight_pairs(self) -> Vec<(Self::Node, Self::Weight)>;
+    /// Returns the degree of the quadrature rule.
+    fn degree(&self) -> usize;
+}
+
+/// This trait defines the API for accessing the underlying nodes
+/// in rules that do not have weights.
+pub trait NodeRule
+where
+    Self: IntoIterator,
+{
+    /// The type of the nodes.
+    type Node: Copy;
+    /// An iterator over the nodes.
+    type Iter<'a>: Iterator<Item = &'a Self::Node>
+    where
+        Self: 'a;
+    /// Returns an iterator over the nodes.
+    fn iter(&self) -> Self::Iter<'_>;
+    /// Returns a slice of the nodes.
+    fn as_nodes<'a>(&'a self) -> &'a [Self::Node];
+    /// Converts the rule into a vector of nodes.
+    ///
+    /// This function just returns the underlying data and does no
+    /// computation or cloning.
+    fn into_nodes(self) -> Vec<Self::Node>;
+    /// Returns the number of nodes of the rule.
+    fn degree(&self) -> usize;
+}
 
 /// This macro implements the data access API for the given quadrature rule struct.
 /// It takes in the name of the quadrature rule struct as well as the names of the iterators

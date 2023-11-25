@@ -35,7 +35,7 @@
 
 pub mod iterators;
 
-use crate::Node;
+use crate::{Node, NodeRule};
 use iterators::SimpsonIter;
 
 /// A Simpson rule quadrature scheme.
@@ -62,26 +62,6 @@ impl Simpson {
         Self {
             nodes: (0..degree).map(|d| d as f64).collect(),
         }
-    }
-
-    /// Returns an iterator over the nodes of the rule.
-    #[inline]
-    pub fn iter(&self) -> SimpsonIter<'_> {
-        SimpsonIter::new(self.nodes.iter())
-    }
-
-    /// Returns a slice of all the nodes of the rule.
-    #[inline]
-    pub fn as_nodes(&self) -> &[Node] {
-        &self.nodes
-    }
-
-    /// Converts `self` into a vector of nodes.
-    ///
-    /// Simply returns the underlying vector without any computation or allocation.
-    #[inline]
-    pub fn into_nodes(self) -> Vec<Node> {
-        self.nodes
     }
 
     /// Integrate over the domain [a, b].
@@ -116,6 +96,31 @@ impl Simpson {
                 + 4.0 * integrand(a + (2.0 * n - 1.0) * h / 2.0)
                 + integrand(a)
                 + integrand(b))
+    }
+}
+
+impl NodeRule for Simpson {
+    type Node = Node;
+    type Iter<'a> = SimpsonIter<'a>;
+
+    #[inline]
+    fn iter(&self) -> SimpsonIter<'_> {
+        SimpsonIter::new(self.nodes.iter())
+    }
+
+    #[inline]
+    fn as_nodes(&self) -> &[Node] {
+        &self.nodes
+    }
+
+    #[inline]
+    fn into_nodes(self) -> Vec<Node> {
+        self.nodes
+    }
+
+    #[inline]
+    fn degree(&self) -> usize {
+        self.nodes.len()
     }
 }
 

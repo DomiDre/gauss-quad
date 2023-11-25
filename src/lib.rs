@@ -145,6 +145,8 @@ pub mod midpoint;
 pub mod simpson;
 
 #[doc(inline)]
+pub use data_api::{Node, NodeRule, NodeWeightRule, Weight};
+#[doc(inline)]
 pub use hermite::GaussHermite;
 #[doc(inline)]
 pub use jacobi::GaussJacobi;
@@ -156,47 +158,3 @@ pub use legendre::GaussLegendre;
 pub use midpoint::Midpoint;
 #[doc(inline)]
 pub use simpson::Simpson;
-
-/// A node in a quadrature rule.
-pub type Node = f64;
-/// A weight in a quadrature rule.
-pub type Weight = f64;
-
-/// This trait defines the API for reading the underlying data in quadrature rules that have
-/// both nodes and weights.
-pub trait NodeWeightRule
-where
-    Self: IntoIterator,
-{
-    /// The type of the nodes.
-    type Node;
-    /// The type of the weights.
-    type Weight;
-    /// An iterator over node-weight-pairs of the quadrature rule.
-    type Iter<'a>: Iterator<Item = &'a (Self::Node, Self::Weight)>
-    where
-        Self: 'a;
-    /// An iterator over the nodes of the quadrature rule.
-    type Nodes<'a>: Iterator<Item = &'a Self::Node>
-    where
-        Self: 'a;
-    /// An iterator over the weights of the quadrature rule.
-    type Weights<'a>: Iterator<Item = &'a Self::Weight>
-    where
-        Self: 'a;
-    /// Returns an iterator over the node-weight-pairs of the quadrature rule.
-    fn iter(&self) -> Self::Iter<'_>;
-    /// Returns an iterator over the nodes of the quadrature rule.
-    fn nodes(&self) -> Self::Nodes<'_>;
-    /// Returns an iterator over the weights of the quadrature rule.
-    fn weights(&self) -> Self::Weights<'_>;
-    /// Returns a slice of the node-weight-pairs of the quadrature rule.
-    fn as_node_weight_pairs<'a>(&'a self) -> &'a [(Self::Node, Self::Weight)];
-    /// Converts the quadrature rule into a vector of node-weight-pairs.
-    ///
-    /// This function just returns the underlying data and does no
-    /// computation or cloning.
-    fn into_node_weight_pairs(self) -> Vec<(Self::Node, Self::Weight)>;
-    /// Returns the degree of the quadrature rule.
-    fn degree(&self) -> usize;
-}
