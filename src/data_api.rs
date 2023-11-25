@@ -109,6 +109,7 @@ macro_rules! impl_node_weight_rule_trait {
             type Nodes<'a> = $quadrature_rule_nodes<'a>;
             type Weights<'a> = $quadrature_rule_weights<'a>;
             type Iter<'a> = $quadrature_rule_iter<'a>;
+
             #[inline]
             fn nodes(&self) -> Self::Nodes<'_> {
                 $quadrature_rule_nodes::new(self.node_weight_pairs.iter().map(|p| &p.0))
@@ -405,6 +406,7 @@ macro_rules! impl_node_rule_trait {
         impl $crate::NodeRule for $quadrature_rule {
             type Node = $crate::Node;
             type Iter<'a> = $quadrature_rule_iter<'a>;
+
             #[inline]
             fn iter(&self) -> Self::Iter<'_> {
                 $quadrature_rule_iter::new(self.nodes.iter())
@@ -414,6 +416,7 @@ macro_rules! impl_node_rule_trait {
             fn as_nodes(&self) -> &[Self::Node] {
                 &self.nodes
             }
+
             #[inline]
             fn into_nodes(self) -> Vec<Self::Node> {
                 self.nodes
