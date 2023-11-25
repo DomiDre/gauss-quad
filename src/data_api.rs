@@ -82,7 +82,7 @@ where
 
 /// This macro implements the functions of the [`NodeWeightRule`] trait for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Vec<Node, Weight>`.
-/// It takes in the name of the quadrature rule struct as well as the names of the iterators
+/// It takes in the name of the quadrature rule struct as well as the names if should give the iterators
 /// over its nodes, weights, and both.
 #[doc(hidden)]
 #[macro_export]
@@ -144,7 +144,7 @@ macro_rules! impl_node_weight_rule_trait {
 
 /// This macro defines the iterators used by the functions defined in the [`impl_node_weight_rule_trait!`] macro.
 /// It takes in the names of the same structs as that macro,
-/// plus the name of the iterator that should be returned by the [`IntoIterator`] implementation.
+/// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
 /// These iterators can only be created in the module where the macro is called
 /// or the module above it (due to the `pub(super)` marker on the constructors).
 #[doc(hidden)]
@@ -396,7 +396,7 @@ macro_rules! impl_node_weight_rule_iterators {
 /// This macro implements the functions of the [`NodeRule`] trait for
 /// the given rule struct that contans a field named `nodes`
 /// of the type `Vec<Node>`. It takes the name of the rule struct as well as the name
-/// of the iterator over its nodes.
+/// it should give the iterator over its nodes.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! impl_node_rule_trait {
@@ -430,7 +430,7 @@ macro_rules! impl_node_rule_trait {
 
 /// This macro defines the iterators used by the functions defined by the [`impl_node_rule_trait`] macro.
 /// It takes in the names of the same structs as that macro,
-/// plus the name of the iterator that should be returned by the [`IntoIterator`] implementation.
+/// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
 /// These iterators can only be created in the module where the macro is called
 /// or the module above it (due to the `pub(super)` marker on the constructors).
 #[macro_export]
