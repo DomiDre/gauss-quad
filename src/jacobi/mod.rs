@@ -22,7 +22,7 @@ pub mod iterators;
 use iterators::{GaussJacobiIter, GaussJacobiNodes, GaussJacobiWeights};
 
 use crate::gamma::gamma;
-use crate::{impl_data_api, DMatrixf64, Node, Weight};
+use crate::{impl_node_weight_rule_trait, DMatrixf64, Node, Weight};
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -163,7 +163,7 @@ impl GaussJacobi {
     }
 }
 
-impl_data_api! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter}
+impl_node_weight_rule_trait! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter}
 
 #[cfg(test)]
 mod tests {
