@@ -82,7 +82,8 @@ where
     fn degree(&self) -> usize;
 }
 
-/// This macro implements the data access API for the given quadrature rule struct.
+/// This macro implements the functions of the [`NodeWeightRule`] trait for the given quadrature rule struct that contains
+/// a field named `node_weight_pairs` of the type `Vec<Node, Weight>`.
 /// It takes in the name of the quadrature rule struct as well as the names of the iterators
 /// over its nodes, weights, and both.
 #[doc(hidden)]
