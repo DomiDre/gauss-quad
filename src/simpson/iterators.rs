@@ -5,7 +5,6 @@ use crate::Node;
 use core::{iter::FusedIterator, slice::Iter};
 
 /// An iterator of the nodes of a [`Simpson`](super::Simpson) instance.
-/// Created by the [`Simpson::iter`](super::Simpson::iter) function, see it for more information.
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 #[derive(Debug, Clone)]
 pub struct SimpsonIter<'a>(Iter<'a, Node>);
