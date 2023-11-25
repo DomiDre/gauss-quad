@@ -1,7 +1,8 @@
 //! This module contains the traits [`NodeRule`] and [`NodeWeightRule`] as well as
 //! two macros: [`impl_data_api!`] and [`impl_iterators!`].
 //! The traits define the common API for accessing the data that underlies the quadrature rules.
-//! The first macro takes in the name of a quadrature rule struct that has a field named `node_weight_pairs`
+//! The first macro implements the [`NodeWeightRule`] trait for a struct. It takes in the name of 
+//! a quadrature rule struct that has a field named `node_weight_pairs`
 //! of the type `Vec<(Node, Weight)>`. It also needs the names that it should give the various structs
 //! that iterate over that data. It should be called in the module that defines the quadrature rule struct.
 //! The second macro defines the iterators that the first returns. It should be called somewhere it makes sense
