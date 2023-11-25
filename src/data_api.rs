@@ -429,6 +429,8 @@ macro_rules! impl_node_rule_trait {
 #[doc(hidden)]
 macro_rules! impl_node_rule_iterators {
     ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
+        // region: QuadratureRuleIter
+
         /// An iterator of the nodes of the rule.
         #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
@@ -476,6 +478,8 @@ macro_rules! impl_node_rule_iterators {
 
         impl<'a> ::core::iter::ExactSizeIterator for $quadrature_rule_iter<'a> {}
         impl<'a> ::core::iter::FusedIterator for $quadrature_rule_iter<'a> {}
+
+        // endregion: QuadratureRuleIter
 
         // region: QuadratureRuleIntoIter
 
