@@ -322,7 +322,7 @@ macro_rules! impl_node_weight_rule_iterators {
             }
         }
 
-        impl<'a> ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
+        impl ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
             for $quadrature_rule_into_iter
         {
             #[inline]
