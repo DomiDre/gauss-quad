@@ -43,7 +43,7 @@
 pub mod iterators;
 
 use crate::{impl_node_rule_trait, Node};
-use iterators::MidpointIter;
+use iterators::{MidpointIntoIter, MidpointIter};
 
 /// A midpoint rule quadrature scheme.
 /// ```
@@ -95,7 +95,7 @@ impl Midpoint {
     }
 }
 
-impl_node_rule_trait! {Midpoint, MidpointIter}
+impl_node_rule_trait! {Midpoint, MidpointIter, MidpointIntoIter}
 
 #[cfg(test)]
 mod tests {

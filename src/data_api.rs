@@ -400,7 +400,15 @@ macro_rules! impl_node_weight_rule_iterators {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! impl_node_rule_trait {
-    ($quadrature_rule:ident, $quadrature_rule_iter:ident) => {
+    ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
+        impl ::core::iter::IntoIterator for $quadrature_rule {
+            type Item = $crate::Node;
+            type IntoIter = $quadrature_rule_into_iter;
+            fn into_iter(self) -> Self::IntoIter {
+                $quadrature_rule_into_iter::new(self.nodes.into_iter())
+            }
+        }
+
         impl $crate::NodeRule for $quadrature_rule {
             type Node = $crate::Node;
             type Iter<'a> = $quadrature_rule_iter<'a>;
@@ -548,14 +556,6 @@ macro_rules! impl_node_rule_iterators {
             #[inline]
             fn as_ref(&self) -> &[$crate::Node] {
                 self.0.as_ref()
-            }
-        }
-
-        impl ::core::iter::IntoIterator for $quadrature_rule {
-            type Item = $crate::Node;
-            type IntoIter = $quadrature_rule_into_iter;
-            fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_into_iter::new(self.nodes.into_iter())
             }
         }
 
