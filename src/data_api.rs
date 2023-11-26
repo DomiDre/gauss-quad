@@ -160,7 +160,7 @@ macro_rules! impl_node_weight_rule_trait {
 #[doc(hidden)]
 macro_rules! impl_slice_iterator_newtype_traits {
     ($iterator:ident$(<$a:lifetime>)?, $item:ty) => {
-        impl<$($a)?> ::core::iter::Iterator for $iterator<$($a)?> {
+        impl$(<$a>)? ::core::iter::Iterator for $iterator<$($a)?> {
             type Item = $item;
             fn next(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next()
@@ -172,14 +172,14 @@ macro_rules! impl_slice_iterator_newtype_traits {
             }
         }
 
-        impl<$($a)?> ::core::iter::DoubleEndedIterator for $iterator<$($a)?> {
+        impl$(<$a>)? ::core::iter::DoubleEndedIterator for $iterator$(<$a>)? {
             fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next_back()
             }
         }
 
-        impl<$($a)?> ::core::iter::ExactSizeIterator for $iterator<$($a)?> {}
-        impl<$($a)?> ::core::iter::FusedIterator for $iterator<$($a)?> {}
+        impl$(<$a>)? ::core::iter::ExactSizeIterator for $iterator$(<$a>)? {}
+        impl$(<$a>)? ::core::iter::FusedIterator for $iterator$(<$a>)? {}
     };
 }
 
