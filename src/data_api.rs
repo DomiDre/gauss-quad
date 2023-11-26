@@ -154,6 +154,35 @@ macro_rules! impl_node_weight_rule_trait {
     };
 }
 
+/// Implements the Iterator, DoubleEndedIterator, ExactSizeIterator and FusedIterator traits for a type
+/// that wraps an iterator that has those traits.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! impl_slice_iterator_newtype_traits {
+    ($iterator:ident$(<$a:lifetime>)?, $item:ty) => {
+        impl<$($a)*> ::core::iter::Iterator for $iterator<$($a)*> {
+            type Item = $item;
+            fn next(&mut self) -> ::core::option::Option<Self::Item> {
+                self.0.next()
+            }
+
+            #[inline]
+            fn size_hint(&self) -> (::core::primitive::usize, ::core::option::Option<::core::primitive::usize>) {
+                self.0.size_hint()
+            }
+        }
+
+        impl<$($a)*> ::core::iter::DoubleEndedIterator for $iterator<$($a)*> {
+            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
+                self.0.next_back()
+            }
+        }
+
+        impl<$($a)*> ::core::iter::ExactSizeIterator for $iterator<$($a)*> {}
+        impl<$($a)*> ::core::iter::FusedIterator for $iterator<$($a)*> {}
+    };
+}
+
 /// This macro defines the iterators used by the functions defined in the [`impl_node_weight_rule_trait!`] macro.
 /// It takes in the names of the same structs as that macro,
 /// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
@@ -194,31 +223,7 @@ macro_rules! impl_node_weight_rule_iterators {
             }
         }
 
-        impl<'a> ::core::iter::Iterator for $quadrature_rule_nodes<'a> {
-            type Item = &'a $crate::Node;
-            fn next(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next()
-            }
-
-            #[inline]
-            fn size_hint(
-                &self,
-            ) -> (
-                ::core::primitive::usize,
-                ::core::option::Option<::core::primitive::usize>,
-            ) {
-                self.0.size_hint()
-            }
-        }
-
-        impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_nodes<'a> {
-            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next_back()
-            }
-        }
-
-        impl<'a> ::core::iter::ExactSizeIterator for $quadrature_rule_nodes<'a> {}
-        impl<'a> ::core::iter::FusedIterator for $quadrature_rule_nodes<'a> {}
+        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_nodes<'a>, &'a $crate::Node}
 
         // endregion: QuadratureRuleNodes
 
@@ -246,31 +251,7 @@ macro_rules! impl_node_weight_rule_iterators {
             }
         }
 
-        impl<'a> ::core::iter::Iterator for $quadrature_rule_weights<'a> {
-            type Item = &'a $crate::Weight;
-            fn next(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next()
-            }
-
-            #[inline]
-            fn size_hint(
-                &self,
-            ) -> (
-                ::core::primitive::usize,
-                ::core::option::Option<::core::primitive::usize>,
-            ) {
-                self.0.size_hint()
-            }
-        }
-
-        impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_weights<'a> {
-            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next_back()
-            }
-        }
-
-        impl<'a> ::core::iter::ExactSizeIterator for $quadrature_rule_weights<'a> {}
-        impl<'a> ::core::iter::FusedIterator for $quadrature_rule_weights<'a> {}
+        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_weights<'a>, &'a $crate::Weight}
 
         // endregion: QuadratureRuleWeights
 
@@ -302,22 +283,7 @@ macro_rules! impl_node_weight_rule_iterators {
             }
         }
 
-        impl<'a> ::core::iter::Iterator for $quadrature_rule_iter<'a> {
-            /// Element `.0` is the node and element `.1` the corresponding weight.
-            type Item = &'a ($crate::Node, $crate::Weight);
-            fn next(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next()
-            }
-        }
-
-        impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_iter<'a> {
-            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next_back()
-            }
-        }
-
-        impl<'a> ::core::iter::ExactSizeIterator for $quadrature_rule_iter<'a> {}
-        impl<'a> ::core::iter::FusedIterator for $quadrature_rule_iter<'a> {}
+        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_iter<'a>, &'a ($crate::Node, $crate::Weight)}
 
         impl<'a> ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
             for $quadrature_rule_iter<'a>
@@ -339,32 +305,7 @@ macro_rules! impl_node_weight_rule_iterators {
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<($crate::Node, $crate::Weight)>);
 
-        impl ::core::iter::Iterator for $quadrature_rule_into_iter {
-            /// Element `.0` is the node and element `.1` the corresponding weight.
-            type Item = ($crate::Node, $crate::Weight);
-            fn next(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next()
-            }
-
-            #[inline]
-            fn size_hint(
-                &self,
-            ) -> (
-                ::core::primitive::usize,
-                ::core::option::Option<::core::primitive::usize>,
-            ) {
-                self.0.size_hint()
-            }
-        }
-
-        impl ::core::iter::DoubleEndedIterator for $quadrature_rule_into_iter {
-            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next_back()
-            }
-        }
-
-        impl ::core::iter::ExactSizeIterator for $quadrature_rule_into_iter {}
-        impl ::core::iter::FusedIterator for $quadrature_rule_into_iter {}
+        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_into_iter, ($crate::Node, $crate::Weight)}
 
         impl $quadrature_rule_into_iter {
             #[inline]
@@ -477,31 +418,7 @@ macro_rules! impl_node_rule_iterators {
             }
         }
 
-        impl<'a> Iterator for $quadrature_rule_iter<'a> {
-            type Item = &'a $crate::Node;
-            fn next(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next()
-            }
-
-            #[inline]
-            fn size_hint(
-                &self,
-            ) -> (
-                ::core::primitive::usize,
-                ::core::option::Option<::core::primitive::usize>,
-            ) {
-                self.0.size_hint()
-            }
-        }
-
-        impl<'a> ::core::iter::DoubleEndedIterator for $quadrature_rule_iter<'a> {
-            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next_back()
-            }
-        }
-
-        impl<'a> ::core::iter::ExactSizeIterator for $quadrature_rule_iter<'a> {}
-        impl<'a> ::core::iter::FusedIterator for $quadrature_rule_iter<'a> {}
+        $crate::impl_slice_iterator_newtype_traits! {$quadrature_rule_iter<'a>, &'a $crate::Node}
 
         // endregion: QuadratureRuleIter
 
@@ -529,31 +446,7 @@ macro_rules! impl_node_rule_iterators {
             }
         }
 
-        impl ::core::iter::Iterator for $quadrature_rule_into_iter {
-            type Item = $crate::Node;
-            fn next(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next()
-            }
-
-            #[inline]
-            fn size_hint(
-                &self,
-            ) -> (
-                ::core::primitive::usize,
-                ::core::option::Option<::core::primitive::usize>,
-            ) {
-                self.0.size_hint()
-            }
-        }
-
-        impl ::core::iter::DoubleEndedIterator for $quadrature_rule_into_iter {
-            fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
-                self.0.next_back()
-            }
-        }
-
-        impl ::core::iter::ExactSizeIterator for $quadrature_rule_into_iter {}
-        impl ::core::iter::FusedIterator for $quadrature_rule_into_iter {}
+        $crate::impl_slice_iterator_newtype_traits! {$quadrature_rule_into_iter, $crate::Node}
 
         impl<'a> ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_into_iter {
             #[inline]
