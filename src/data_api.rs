@@ -283,8 +283,6 @@ macro_rules! impl_node_weight_rule_iterators {
             }
         }
 
-        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_iter<'a>, &'a ($crate::Node, $crate::Weight)}
-
         impl<'a> ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
             for $quadrature_rule_iter<'a>
         {
@@ -293,6 +291,8 @@ macro_rules! impl_node_weight_rule_iterators {
                 self.0.as_ref()
             }
         }
+
+        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_iter<'a>, &'a ($crate::Node, $crate::Weight)}
 
         // endregion: QuadratureRuleIter
 
@@ -304,8 +304,6 @@ macro_rules! impl_node_weight_rule_iterators {
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<($crate::Node, $crate::Weight)>);
-
-        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_into_iter, ($crate::Node, $crate::Weight)}
 
         impl $quadrature_rule_into_iter {
             #[inline]
@@ -332,6 +330,8 @@ macro_rules! impl_node_weight_rule_iterators {
                 self.0.as_ref()
             }
         }
+
+        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_into_iter, ($crate::Node, $crate::Weight)}
 
         // endregion: QuadratureRuleIntoIter
     };
@@ -446,14 +446,14 @@ macro_rules! impl_node_rule_iterators {
             }
         }
 
-        $crate::impl_slice_iterator_newtype_traits! {$quadrature_rule_into_iter, $crate::Node}
-
         impl<'a> ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_into_iter {
             #[inline]
             fn as_ref(&self) -> &[$crate::Node] {
                 self.0.as_ref()
             }
         }
+
+        $crate::impl_slice_iterator_newtype_traits! {$quadrature_rule_into_iter, $crate::Node}
 
         // endregion: QuadratureRuleIntoIter
     };
