@@ -155,7 +155,8 @@ macro_rules! impl_node_weight_rule_trait {
 }
 
 /// Implements the Iterator, DoubleEndedIterator, ExactSizeIterator and FusedIterator traits for a type
-/// that wraps an iterator that has those traits.
+/// that wraps an iterator that has those traits. Takes in the name of the struct and optionally its lifetime
+/// as well as the type returned by the iterator.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! impl_slice_iterator_newtype_traits {
