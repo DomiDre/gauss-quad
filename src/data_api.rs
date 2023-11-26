@@ -83,7 +83,7 @@ where
 /// This macro implements the functions of the [`NodeWeightRule`] trait for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Vec<Node, Weight>`.
 /// It takes in the name of the quadrature rule struct as well as the names if should give the iterators
-/// over its nodes, weights, and both.
+/// over its nodes, weights, and both, as well as the iterator returned by the [`IntoIterator`] trait.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_node_weight_rule_trait {
@@ -196,7 +196,6 @@ macro_rules! impl_node_weight_rule_iterators {
         $quadrature_rule_nodes:ident,
         $quadrature_rule_weights:ident,
         $quadrature_rule_iter:ident,
-        // The name of the iterator that should be returned by the IntoIterator trait.
         $quadrature_rule_into_iter:ident
     ) => {
         // region: QuadratureRuleNodes
@@ -340,7 +339,7 @@ macro_rules! impl_node_weight_rule_iterators {
 /// This macro implements the functions of the [`NodeRule`] trait for
 /// the given rule struct that contans a field named `nodes`
 /// of the type `Vec<Node>`. It takes the name of the rule struct as well as the name
-/// it should give the iterator over its nodes.
+/// it should give the iterator over its nodes and the iterator returned by the [`IntoIterator`] trait.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! impl_node_rule_trait {
