@@ -446,7 +446,7 @@ macro_rules! impl_node_rule_iterators {
             }
         }
 
-        impl<'a> ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_into_iter {
+        impl ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_into_iter {
             #[inline]
             fn as_ref(&self) -> &[$crate::Node] {
                 self.0.as_ref()
