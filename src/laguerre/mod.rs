@@ -15,7 +15,9 @@
 //! ```
 
 pub mod iterators;
-use iterators::{GaussLaguerreIter, GaussLaguerreNodes, GaussLaguerreWeights};
+use iterators::{
+    GaussLaguerreIntoIter, GaussLaguerreIter, GaussLaguerreNodes, GaussLaguerreWeights,
+};
 
 use crate::gamma::gamma;
 use crate::{impl_node_weight_rule_trait, DMatrixf64, Node, Weight};
@@ -129,7 +131,7 @@ impl GaussLaguerre {
     }
 }
 
-impl_node_weight_rule_trait! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter}
+impl_node_weight_rule_trait! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
 #[cfg(test)]
 mod tests {

@@ -96,11 +96,23 @@ macro_rules! impl_node_weight_rule_trait {
         $quadrature_rule_weights:ident,
         // The name that the iterator returned when calling the `iter` function should have,
         // e.g. GaussLegendreIter.
-        $quadrature_rule_iter:ident
+        $quadrature_rule_iter:ident,
+        // The name of the iterator returned by the by the IntoIterator trait.
+        $quadrature_rule_into_iter:ident
     ) => {
         // Implements functions for accessing the underlying data of the quadrature rule struct
         // in a way the adheres to the API guidelines: <https://rust-lang.github.io/api-guidelines/naming.html>.
-        // The functions in this impl block all have an #[inline] directive because they are trivial.
+        // The functions in these impl blocks all have an #[inline] directive because they are trivial.
+
+        impl ::core::iter::IntoIterator for $quadrature_rule {
+            type IntoIter = $quadrature_rule_into_iter;
+            type Item = ($crate::Node, $crate::Weight);
+            #[inline]
+            fn into_iter(self) -> Self::IntoIter {
+                $quadrature_rule_into_iter::new(self.node_weight_pairs.into_iter())
+            }
+        }
+
         impl $crate::NodeWeightRule for $quadrature_rule {
             type Node = f64;
             type Weight = f64;
@@ -377,15 +389,6 @@ macro_rules! impl_node_weight_rule_iterators {
             #[inline]
             fn as_ref(&self) -> &[($crate::Node, $crate::Weight)] {
                 self.0.as_ref()
-            }
-        }
-
-        impl ::core::iter::IntoIterator for $quadrature_rule {
-            type IntoIter = $quadrature_rule_into_iter;
-            type Item = ($crate::Node, $crate::Weight);
-            #[inline]
-            fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_into_iter::new(self.node_weight_pairs.into_iter())
             }
         }
 
