@@ -64,19 +64,7 @@ impl GaussJacobi {
     /// # Errors
     /// Returns an error if `deg` is smaller than 2, or if `alpha` or `beta` are smaller than or equal to -1.
     pub fn new(deg: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
-        let degree_error = DegreeError::new(deg);
-        let alpha_error = ExponentError::new(alpha);
-        let beta_error = ExponentError::new(beta);
-        match (degree_error, alpha_error, beta_error) {
-            (None, None, None) => (),
-            _ => {
-                return Err(GaussJacobiError {
-                    degree_error,
-                    alpha_error,
-                    beta_error,
-                })
-            }
-        }
+        GaussJacobiError::validate_inputs(deg, alpha, beta)?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 
@@ -241,38 +229,78 @@ impl fmt::Display for DegreeError {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GaussJacobiError {
-    degree_error: Option<DegreeError>,
-    alpha_error: Option<ExponentError>,
-    beta_error: Option<ExponentError>,
+pub enum GaussJacobiError {
+    Degree(DegreeError),
+    Alpha(ExponentError),
+    Beta(ExponentError),
+    AlphaBeta(ExponentError, ExponentError),
+    DegreeAlpha(DegreeError, ExponentError),
+    DegreeBeta(DegreeError, ExponentError),
+    DegreeAlphaBeta(DegreeError, ExponentError, ExponentError),
 }
 
 impl GaussJacobiError {
-    pub const fn degree_error(&self) -> Option<DegreeError> {
-        self.degree_error
+    fn validate_inputs(deg: usize, alpha: f64, beta: f64) -> Result<(), Self> {
+        match (
+            DegreeError::new(deg),
+            ExponentError::new(alpha),
+            ExponentError::new(beta),
+        ) {
+            (None, None, None) => Ok(()),
+            (Some(de), None, None) => Err(Self::Degree(de)),
+            (None, Some(ae), None) => Err(Self::Alpha(ae)),
+            (None, None, Some(be)) => Err(Self::Beta(be)),
+            (None, Some(ae), Some(be)) => Err(Self::AlphaBeta(ae, be)),
+            (Some(de), Some(ae), None) => Err(Self::DegreeAlpha(de, ae)),
+            (Some(de), None, Some(be)) => Err(Self::DegreeBeta(de, be)),
+            (Some(de), Some(ae), Some(be)) => Err(Self::DegreeAlphaBeta(de, ae, be)),
+        }
     }
 
-    pub const fn alpha_error(&self) -> Option<ExponentError> {
-        self.alpha_error
+    /// Returns `deg` in the degree if there is one.
+    pub const fn degree_error(&self) -> Option<&DegreeError> {
+        match self {
+            Self::Degree(de)
+            | Self::DegreeAlpha(de, _)
+            | Self::DegreeBeta(de, _)
+            | Self::DegreeAlphaBeta(de, _, _) => Some(de),
+            _ => None,
+        }
     }
 
-    pub const fn beta_error(&self) -> Option<ExponentError> {
-        self.beta_error
+    /// Returns the error in `alpha` if there is one.
+    pub const fn alpha_error(&self) -> Option<&ExponentError> {
+        match self {
+            Self::Alpha(ae)
+            | Self::AlphaBeta(ae, _)
+            | Self::DegreeAlpha(_, ae)
+            | Self::DegreeAlphaBeta(_, ae, _) => Some(ae),
+            _ => None,
+        }
+    }
+
+    /// Returns the error in `beta` if there is one.
+    pub const fn beta_error(&self) -> Option<&ExponentError> {
+        match self {
+            Self::Beta(be)
+            | Self::AlphaBeta(_, be)
+            | Self::DegreeBeta(_, be)
+            | Self::DegreeAlphaBeta(_, _, be) => Some(be),
+            _ => None,
+        }
     }
 }
 
 impl fmt::Display for GaussJacobiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match (self.degree_error, self.alpha_error, self.beta_error) {
-            (Some(de), None, None) => write!(f, "deg {de}"),
-            (None, Some(ae), None) => write!(f, "alpha {ae}"),
-            (None, None, Some(be)) => write!(f, "beta {be}"),
-            (None, Some(ae), Some(be)) => write!(f, "alpha {ae} and beta {be}"),
-            (Some(de), Some(ae), None) => write!(f, "deg {de} and alpha {ae}"),
-            (Some(de), None, Some(be)) => write!(f, "deg {de} and beta {be}"),
-            (Some(de), Some(ae), Some(be)) => write!(f, "deg {de}, alpha {ae} and beta {be}"),
-
-            (None, None, None) => Ok(()),
+        match self {
+            Self::Degree(de) => write!(f, "deg {de}"),
+            Self::Alpha(ae) => write!(f, "alpha {ae}"),
+            Self::Beta(be) => write!(f, "beta {be}"),
+            Self::AlphaBeta(ae, be) => write!(f, "alpha {ae} and beta {be}"),
+            Self::DegreeAlpha(de, ae) => write!(f, "deg {de} and alpha {ae}"),
+            Self::DegreeBeta(de, be) => write!(f, "deg {de} and beta {be}"),
+            Self::DegreeAlphaBeta(de, ae, be) => write!(f, "deg {de}, alpha {ae} and beta {be}"),
         }
     }
 }
