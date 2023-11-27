@@ -59,7 +59,7 @@
 //! // Integrate on the domain [c, d]
 //! let double_x = gauss_jacobi.integrate(c, d, |x| 2.0 * x);
 //!
-//! let gauss_laguerre = GaussLaguerre::new(degree, alpha);
+//! let gauss_laguerre = GaussLaguerre::new(degree, alpha)?;
 //! // no explicit domain, Gauss-Laguerre integration is done on the domain [0, ∞).
 //! let piecewise = gauss_laguerre.integrate(|x| if x > 0.0 && x < 2.0 { x } else { 0.0 });
 //!
@@ -78,23 +78,24 @@
 //! `GaussLaguerre` is also defined as an improper integral over the domain [0, ∞).
 //! This means no domain bounds are needed in the `integrate` call.
 //! ```
-//! # use gauss_quad::GaussLaguerre;
+//! # use gauss_quad::laguerre::{GaussLaguerre, GaussLaguerreError};
 //! // initialize the quadrature rule
 //! let degree = 10;
 //! let alpha = 0.5;
-//! let quad = GaussLaguerre::new(degree, alpha);
+//! let quad = GaussLaguerre::new(degree, alpha)?;
 //!
 //! // use the rule to integrate a function
 //! let integral = quad.integrate(|x| x * x);
+//! # Ok::<(), GaussLaguerreError>(())
 //! ```
 //!
-//! ## Panics and errors
+//! ## Errors
 //! Quadrature rules are only defined for a certain set of input values.
 //! For example, every rule is only defined for degrees where `degree > 1`.
-//! ```should_panic
+//! ```
 //! # use gauss_quad::GaussLaguerre;
 //! let degree = 1;
-//! let quad = GaussLaguerre::new(degree, 0.1); // panics!
+//! assert!(GaussLaguerre::new(degree, 0.1).is_err());
 //! ```
 //!
 //! Specific rules may have other requirements.

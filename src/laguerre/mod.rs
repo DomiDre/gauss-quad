@@ -7,11 +7,13 @@
 //! # Examples
 //! ```
 //! use gauss_quad::laguerre::GaussLaguerre;
+//! # use gauss_quad::laguerre::GaussLaguerreError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussLaguerre::new(10, 1.0);
+//! let quad = GaussLaguerre::new(10, 1.0)?;
 //! let integral = quad.integrate(|x| x.powi(2));
 //! assert_abs_diff_eq!(integral, 6.0, epsilon = 1e-14);
+//! # Ok::<(), GaussLaguerreError>(())
 //! ```
 
 pub mod iterators;
@@ -26,16 +28,17 @@ use crate::{impl_data_api, DMatrixf64, Node, Weight};
 /// # Example
 /// Compute the factorial of 5:
 /// ```
-/// # use gauss_quad::GaussLaguerre;
+/// # use gauss_quad::laguerre::{GaussLaguerre, GaussLaguerreError};
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Laguerre rule with 10 nodes
-/// let quad = GaussLaguerre::new(10, 0.0);
+/// let quad = GaussLaguerre::new(10, 0.0)?;
 ///
 /// // numerically evaluate this integral,
 /// // which is a definition of the gamma function
 /// let fact_5 = quad.integrate(|x| x.powi(5));
 ///
 /// assert_abs_diff_eq!(fact_5, 1.0 * 2.0 * 3.0 * 4.0 * 5.0, epsilon = 1e-11);
+/// # Ok::<(), GaussLaguerreError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -56,15 +59,11 @@ impl GaussLaguerre {
     /// Root & weight finding are equivalent to eigenvalue problem.
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
-    /// # Panics
-    /// Panics if degree of quadrature is smaller than 2, or if alpha is smaller than -1
-    pub fn new(deg: usize, alpha: f64) -> GaussLaguerre {
-        if alpha < -1.0 {
-            panic!("Gauss-Laguerre quadrature needs alpha > -1.0");
-        }
-        if deg < 2 {
-            panic!("Degree of Gauss-Quadrature needs to be >= 2");
-        }
+    /// # Errors
+    ///
+    /// Returns an error if `deg` is smaller than 2, or if `alpha` is smaller than -1.
+    pub fn new(deg: usize, alpha: f64) -> Result<Self, GaussLaguerreError> {
+        GaussLaguerreError::validate_inputs(deg, alpha)?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 
@@ -101,10 +100,10 @@ impl GaussLaguerre {
             .collect();
         node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
-        GaussLaguerre {
+        Ok(GaussLaguerre {
             node_weight_pairs,
             alpha,
-        }
+        })
     }
 
     /// Perform quadrature of  
@@ -131,13 +130,104 @@ impl GaussLaguerre {
 
 impl_data_api! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter}
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ExponentError {
+    TooSmall(f64),
+    Infinite,
+    Nan,
+}
+
+use core::num::FpCategory;
+
+impl ExponentError {
+    fn new(exp: f64) -> Option<Self> {
+        match exp.classify() {
+            FpCategory::Infinite => Some(Self::Infinite),
+            FpCategory::Nan => Some(Self::Nan),
+            FpCategory::Normal | FpCategory::Subnormal | FpCategory::Zero => {
+                (exp <= -1.0).then(|| Self::TooSmall(exp))
+            }
+        }
+    }
+}
+
+use core::fmt;
+impl fmt::Display for ExponentError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::TooSmall(val) => write!(f, "must be larger than -1 but was {val}"),
+            Self::Infinite => write!(f, "must be finite but was infinite"),
+            Self::Nan => write!(f, "was NaN"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum DegreeError {
+    Zero,
+    One,
+}
+
+impl DegreeError {
+    const fn new(deg: usize) -> Option<Self> {
+        match deg {
+            0 => Some(Self::Zero),
+            1 => Some(Self::One),
+            _ => None,
+        }
+    }
+}
+
+impl fmt::Display for DegreeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "must be at least 2 but was ")?;
+        match self {
+            Self::Zero => write!(f, "0"),
+            Self::One => write!(f, "1"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum GaussLaguerreError {
+    Degree(DegreeError),
+    Alpha(ExponentError),
+    DegreeAlpha(DegreeError, ExponentError),
+}
+
+impl GaussLaguerreError {
+    fn validate_inputs(deg: usize, alpha: f64) -> Result<(), Self> {
+        match (DegreeError::new(deg), ExponentError::new(alpha)) {
+            (None, None) => Ok(()),
+            (Some(de), None) => Err(Self::Degree(de)),
+            (None, Some(ae)) => Err(Self::Alpha(ae)),
+            (Some(de), Some(ae)) => Err(Self::DegreeAlpha(de, ae)),
+        }
+    }
+}
+
+impl fmt::Display for GaussLaguerreError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Degree(de) => write!(f, "deg {de}"),
+            Self::Alpha(ae) => write!(f, "alpha {ae}"),
+            Self::DegreeAlpha(de, ae) => write!(f, "deg {de}, and alpha {ae}"),
+        }
+    }
+}
+
+impl std::error::Error for GaussLaguerreError {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn golub_welsch_2_alpha_5() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(2, 5.0).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(2, 5.0).unwrap().into_iter().unzip();
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
         let w_should = [82.677_868_380_553_63, 37.322_131_619_446_37];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -150,7 +240,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 0.0).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 0.0).unwrap().into_iter().unzip();
         let x_should = [
             0.415_774_556_783_479_1,
             2.294_280_360_279_042,
@@ -171,7 +261,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_1_5() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 1.5).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 1.5).unwrap().into_iter().unzip();
         let x_should = [
             1.220_402_317_558_883_8,
             3.808_880_721_467_068,
@@ -192,7 +282,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_negative() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(5, -0.9).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(5, -0.9).unwrap().into_iter().unzip();
         let x_should = [
             0.020_777_151_319_288_104,
             0.808_997_536_134_602_1,
