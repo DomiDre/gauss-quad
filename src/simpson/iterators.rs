@@ -3,4 +3,4 @@
 
 use crate::impl_node_rule_iterators;
 
-impl_node_rule_iterators! { SimpsonIter, SimpsonIntoIter}
+impl_node_rule_iterators! {SimpsonIter, SimpsonIntoIter}
