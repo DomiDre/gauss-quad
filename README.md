@@ -45,7 +45,7 @@ Then to calculate the integral of a function call
 let integral = quad.integrate(a, b, f(x));
 ```
 
-where a and b (both f64) are the integral bounds and the f(x) the integrand (fn(f64) -> f64).
+where a and b (both f64) are the integral bounds and the f(x) the integrand (Fn(f64) -> f64).
 For example to integrate a parabola from 0..1 one can use a lambda expression as integrand and call:
 
 ```
