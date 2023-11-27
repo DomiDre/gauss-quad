@@ -57,6 +57,10 @@ impl GaussHermite {
     /// 0 on the diagonal & sqrt(n/2) on the off-diagonal
     /// root & weight finding are equivalent to eigenvalue problem
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussHermiteError> {
         match deg {
             0 => return Err(GaussHermiteError::Zero),

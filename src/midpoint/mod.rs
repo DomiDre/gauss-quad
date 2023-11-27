@@ -67,8 +67,10 @@ impl Midpoint {
     /// Initialize a new midpoint rule with `degree` number of cells. The nodes are evenly spaced.
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
-    /// # Panics
-    /// Panics if degree is less than 1
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `degree` is less than 1.
     pub fn new(degree: usize) -> Result<Self, MidpointError> {
         if degree > 0 {
             Ok(Self {
@@ -124,6 +126,7 @@ impl IntoIterator for Midpoint {
     }
 }
 
+/// The error returned by [`Midpoint::new`] if given a degree of 0.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MidpointError();

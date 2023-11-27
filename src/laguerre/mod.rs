@@ -130,6 +130,8 @@ impl GaussLaguerre {
 
 impl_data_api! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter}
 
+/// Represents the different failure states caused by a bad `alpha` value in the call to
+/// [`GaussLaguerre::new`].
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ExponentError {
@@ -163,6 +165,8 @@ impl fmt::Display for ExponentError {
     }
 }
 
+/// Represents the possible failure states caused by a bad value for the `deg` parameter
+/// in [`GaussLaguerre::new`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DegreeError {
@@ -190,6 +194,7 @@ impl fmt::Display for DegreeError {
     }
 }
 
+/// The error returned by [`GaussLaguerre::new`] if given a `deg` less than 2 and/or an `alpha` of -1 or less.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussLaguerreError {

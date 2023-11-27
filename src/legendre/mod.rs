@@ -70,7 +70,7 @@ impl GaussLegendre {
     ///
     /// # Errors
     ///
-    /// Returns an error if given a `deg` of 0 or 1.
+    /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussLegendreError> {
         match deg {
             0 => Err(GaussLegendreError::Zero),

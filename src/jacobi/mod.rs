@@ -62,7 +62,8 @@ impl GaussJacobi {
     /// See Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
     /// # Errors
-    /// Returns an error if `deg` is smaller than 2, or if `alpha` or `beta` are smaller than or equal to -1.
+    ///
+    /// Returns an error if `deg` is smaller than 2, and/or if `alpha` and/or `beta` are smaller than or equal to -1.
     pub fn new(deg: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
         GaussJacobiError::validate_inputs(deg, alpha, beta)?;
 
@@ -167,6 +168,8 @@ impl GaussJacobi {
 
 impl_data_api! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter}
 
+/// Represents the different possible failure states due to passing
+/// a bad value of `alpha` or `beta` to [`GaussJacobi::new`].
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ExponentError {
@@ -200,6 +203,8 @@ impl fmt::Display for ExponentError {
     }
 }
 
+/// Represents the different failure states due to passing a bad value of `deg`
+/// to [`GaussJacobi::new`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DegreeError {
@@ -227,6 +232,8 @@ impl fmt::Display for DegreeError {
     }
 }
 
+/// The error returned by [`GaussJacobi::new`] if given a `deg` less than 2
+/// and/or an `alpha` and/or `beta` less than or equal to -1.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussJacobiError {
