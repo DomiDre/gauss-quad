@@ -1,4 +1,4 @@
-//! This crate contains the implementation of the iterators that
+//! This module contains the implementation of the iterators that
 //! can be returned by method calls on a [`Simpson`](super::Simpson) instance.
 
 use crate::Node;
