@@ -12,13 +12,15 @@
 //! # Example
 //! ```
 //! use gauss_quad::legendre::GaussLegendre;
+//! # use gauss_quad::legendre::GaussLegendreError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussLegendre::new(10);
+//! let quad = GaussLegendre::new(10)?;
 //! let integral = quad.integrate(-1.0, 1.0,
 //!     |x| 0.125 * (63.0 * x.powi(5) - 70.0 * x.powi(3) + 15.0 * x)
 //! );
 //! assert_abs_diff_eq!(integral, 0.0);
+//! # Ok::<(), GaussLegendreError>(())
 //! ```
 
 pub mod iterators;
@@ -35,24 +37,26 @@ use crate::{impl_data_api, Node, Weight};
 /// # Examples
 /// Basic usage:
 /// ```
-/// # use gauss_quad::GaussLegendre;
+/// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Legendre rule with 3 nodes
-/// let quad = GaussLegendre::new(3);
+/// let quad = GaussLegendre::new(3)?;
 ///
 /// // numerically integrate x^2 - 1/3 over the domain [0, 1]
 /// let integral = quad.integrate(0.0, 1.0, |x| x * x - 1.0 / 3.0);
 ///
 /// assert_abs_diff_eq!(integral, 0.0);
+/// # Ok::<(), GaussLegendreError>(())
 /// ```
 /// The nodes and weights are computed in `O(n)` time,
 /// so large quadrature rules are feasible:
 /// ```
-/// # use gauss_quad::GaussLegendre;
+/// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 /// # use approx::assert_abs_diff_eq;
-/// let quad = GaussLegendre::new(1_000_000);
+/// let quad = GaussLegendre::new(1_000_000)?;
 /// let integral = quad.integrate(-3.0, 3.0, |x| x.sin());
 /// assert_abs_diff_eq!(integral, 0.0);
+/// # Ok::<(), GaussLegendreError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -63,11 +67,19 @@ pub struct GaussLegendre {
 impl GaussLegendre {
     /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights
     /// with the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
-    pub fn new(deg: usize) -> Self {
-        Self {
-            node_weight_pairs: (1..deg + 1)
-                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
-                .collect(),
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if given a `deg` of 0 or 1.
+    pub fn new(deg: usize) -> Result<Self, GaussLegendreError> {
+        match deg {
+            0 => Err(GaussLegendreError::Zero),
+            1 => Err(GaussLegendreError::One),
+            _ => Ok(Self {
+                node_weight_pairs: (1..deg + 1)
+                    .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+                    .collect(),
+            }),
         }
     }
 
@@ -83,10 +95,11 @@ impl GaussLegendre {
     /// # Example
     /// Basic usage
     /// ```
-    /// # use gauss_quad::GaussLegendre;
+    /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
     /// # use approx::assert_abs_diff_eq;
-    /// let glq_rule = GaussLegendre::new(3);
+    /// let glq_rule = GaussLegendre::new(3)?;
     /// assert_abs_diff_eq!(glq_rule.integrate(-1.0, 1.0, |x| x.powi(5)), 0.0);
+    /// # Ok::<(), GaussLegendreError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
@@ -102,6 +115,30 @@ impl GaussLegendre {
 }
 
 impl_data_api! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter}
+
+/// The error returned by [`GaussLegendre::new`] if it's given a degree of 0 or 1.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum GaussLegendreError {
+    Zero,
+    One,
+}
+
+use core::fmt;
+impl fmt::Display for GaussLegendreError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "the degree of the Gauss-Legendre quadrature rule must be at least 2 but was "
+        )?;
+        match self {
+            Self::Zero => write!(f, "0"),
+            Self::One => write!(f, "1"),
+        }
+    }
+}
+
+impl std::error::Error for GaussLegendreError {}
 
 /// This algorithm is based on an expansion of Legendre polynomials in terms of Bessel functions
 /// where for large degrees only the first terms in the expansion matter. This means that
@@ -292,7 +329,7 @@ mod tests {
 
     #[test]
     fn check_degree_3() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).unwrap().into_iter().unzip();
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];

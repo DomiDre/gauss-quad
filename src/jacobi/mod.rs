@@ -8,14 +8,16 @@
 //! # Example
 //! ```
 //! use gauss_quad::jacobi::GaussJacobi;
+//! # use gauss_quad::jacobi::GaussJacobiError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussJacobi::new(10, 0.0, -1.0 / 3.0);
+//! let quad = GaussJacobi::new(10, 0.0, -1.0 / 3.0)?;
 //!
 //! // numerically integrate sin(x) / (1 + x)^(1/3), a function with a singularity at x = -1.
 //! let integral = quad.integrate(-1.0, 1.0, |x| x.sin());
 //!
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
+//! # Ok::<(), GaussJacobiError>(())
 //! ```
 
 pub mod iterators;
@@ -30,17 +32,18 @@ use crate::{impl_data_api, DMatrixf64, Node, Weight};
 ///
 /// # Examples
 /// ```
-/// # use gauss_quad::GaussJacobi;
+/// # use gauss_quad::jacobi::{GaussJacobi, GaussJacobiError};
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::E;
 /// // initialize the quadrature rule.
-/// let quad = GaussJacobi::new(10, -0.5, 0.0);
+/// let quad = GaussJacobi::new(10, -0.5, 0.0)?;
 ///
 /// // numerically integrate e^-x / sqrt(1 - x).
 /// let integral = quad.integrate(-1.0, 1.0, |x| (-x).exp());
 ///
 /// let dawson_function_of_sqrt_2 = 0.4525399074037225;
 /// assert_abs_diff_eq!(integral, 2.0 * E * dawson_function_of_sqrt_2, epsilon = 1e-14);
+/// # Ok::<(), GaussJacobiError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -58,14 +61,21 @@ impl GaussJacobi {
     /// Applies the Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights.
     /// See Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
-    /// # Panics
-    /// Panics if `deg` is smaller than 2, or if `alpha` or `beta` are smaller than or equal to -1.
-    pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
-        if alpha <= -1.0 || beta <= -1.0 {
-            panic!("Gauss-Jacobi quadrature needs alpha > -1.0 and beta > -1.0");
-        }
-        if deg < 2 {
-            panic!("Degree of Gauss-Quadrature needs to be >= 2");
+    /// # Errors
+    /// Returns an error if `deg` is smaller than 2, or if `alpha` or `beta` are smaller than or equal to -1.
+    pub fn new(deg: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
+        let degree_error = DegreeError::new(deg);
+        let alpha_error = ExponentError::new(alpha);
+        let beta_error = ExponentError::new(beta);
+        match (degree_error, alpha_error, beta_error) {
+            (None, None, None) => (),
+            _ => {
+                return Err(GaussJacobiError {
+                    degree_error,
+                    alpha_error,
+                    beta_error,
+                })
+            }
         }
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
@@ -122,11 +132,11 @@ impl GaussJacobi {
             node_weight_pairs[deg / 2].0 = 0.0;
         }
 
-        GaussJacobi {
+        Ok(GaussJacobi {
             node_weight_pairs,
             alpha,
             beta,
-        }
+        })
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -169,19 +179,118 @@ impl GaussJacobi {
 
 impl_data_api! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter}
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum ExponentError {
+    TooSmall(f64),
+    Infinite,
+    Nan,
+}
+
+use core::num::FpCategory;
+
+impl ExponentError {
+    fn new(exp: f64) -> Option<Self> {
+        match exp.classify() {
+            FpCategory::Infinite => Some(Self::Infinite),
+            FpCategory::Nan => Some(Self::Nan),
+            FpCategory::Normal | FpCategory::Subnormal | FpCategory::Zero => {
+                (exp <= -1.0).then(|| Self::TooSmall(exp))
+            }
+        }
+    }
+}
+
+use core::fmt;
+impl fmt::Display for ExponentError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::TooSmall(val) => write!(f, "must be larger than -1 but was {val}"),
+            Self::Infinite => write!(f, "must be finite but was infinite"),
+            Self::Nan => write!(f, "was NaN"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum DegreeError {
+    Zero,
+    One,
+}
+
+impl DegreeError {
+    const fn new(deg: usize) -> Option<Self> {
+        match deg {
+            0 => Some(Self::Zero),
+            1 => Some(Self::One),
+            _ => None,
+        }
+    }
+}
+
+impl fmt::Display for DegreeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "must be at least 2 but was ")?;
+        match self {
+            Self::Zero => write!(f, "0"),
+            Self::One => write!(f, "1"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GaussJacobiError {
+    degree_error: Option<DegreeError>,
+    alpha_error: Option<ExponentError>,
+    beta_error: Option<ExponentError>,
+}
+
+impl GaussJacobiError {
+    pub const fn degree_error(&self) -> Option<DegreeError> {
+        self.degree_error
+    }
+
+    pub const fn alpha_error(&self) -> Option<ExponentError> {
+        self.alpha_error
+    }
+
+    pub const fn beta_error(&self) -> Option<ExponentError> {
+        self.beta_error
+    }
+}
+
+impl fmt::Display for GaussJacobiError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match (self.degree_error, self.alpha_error, self.beta_error) {
+            (Some(de), None, None) => write!(f, "deg {de}"),
+            (None, Some(ae), None) => write!(f, "alpha {ae}"),
+            (None, None, Some(be)) => write!(f, "beta {be}"),
+            (None, Some(ae), Some(be)) => write!(f, "alpha {ae} and beta {be}"),
+            (Some(de), Some(ae), None) => write!(f, "deg {de} and alpha {ae}"),
+            (Some(de), None, Some(be)) => write!(f, "deg {de} and beta {be}"),
+            (Some(de), Some(ae), Some(be)) => write!(f, "deg {de}, alpha {ae} and beta {be}"),
+
+            (None, None, None) => Ok(()),
+        }
+    }
+}
+
+impl std::error::Error for GaussJacobiError {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    #[should_panic]
     fn check_alpha_beta_bounds() {
-        _ = GaussJacobi::new(10, -1.0, -1.0);
+        assert!(GaussJacobi::new(10, -1.0, -1.0).is_err());
     }
 
     #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 0.0).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 0.0).unwrap().into_iter().unzip();
         let x_should = [
             -0.906_179_845_938_664,
             -0.538_469_310_105_683_1,
@@ -206,7 +315,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_1_beta_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(2, 1.0, 0.0).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(2, 1.0, 0.0).unwrap().into_iter().unzip();
         let x_should = [-0.689_897_948_556_635_7, 0.289_897_948_556_635_64];
         let w_should = [1.272_165_526_975_908_7, 0.727_834_473_024_091_3];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -219,7 +328,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_1_beta_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 1.0, 0.0).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 1.0, 0.0).unwrap().into_iter().unzip();
         let x_should = [
             -0.920_380_285_897_062_6,
             -0.603_973_164_252_783_7,
@@ -244,7 +353,7 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_0_beta_1() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 1.0).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 1.0).unwrap().into_iter().unzip();
         let x_should = [
             -0.802_929_828_402_347_2,
             -0.390_928_546_707_272_2,
@@ -269,7 +378,10 @@ mod tests {
 
     #[test]
     fn golub_welsch_50_alpha_42_beta_23() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(50, 42.0, 23.0).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(50, 42.0, 23.0)
+            .unwrap()
+            .into_iter()
+            .unzip();
         let x_should = [
             -0.936_528_233_152_541_2,
             -0.914_340_864_546_088_5,
@@ -392,14 +504,12 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
     fn panics_for_too_small_alpha() {
-        GaussJacobi::new(3, -2.0, 1.0);
+        assert!(GaussJacobi::new(3, -2.0, 1.0).is_err());
     }
 
     #[test]
-    #[should_panic]
     fn panics_for_too_small_beta() {
-        GaussJacobi::new(3, 1.0, -2.0);
+        assert!(GaussJacobi::new(3, 1.0, -2.0).is_err());
     }
 }
