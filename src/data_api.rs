@@ -194,7 +194,6 @@ macro_rules! impl_slice_iterator_newtype_traits {
 #[macro_export]
 macro_rules! impl_node_weight_rule_iterators {
     (
-        $quadrature_rule:ident,
         $quadrature_rule_nodes:ident,
         $quadrature_rule_weights:ident,
         $quadrature_rule_iter:ident,
@@ -389,7 +388,7 @@ macro_rules! impl_node_rule_trait {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! impl_node_rule_iterators {
-    ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
+    ($quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
         // region: QuadratureRuleIter
 
         /// An iterator of the nodes of the rule.
