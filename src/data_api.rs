@@ -48,6 +48,15 @@ macro_rules! impl_node_weight_rule {
             }
         }
 
+        impl<'a> ::core::iter::IntoIterator for &'a $quadrature_rule {
+            type IntoIter = $quadrature_rule_iter<'a>;
+            type Item = &'a ($crate::Node, $crate::Weight);
+            #[inline]
+            fn into_iter(self) -> Self::IntoIter {
+                $quadrature_rule_iter::new(self.node_weight_pairs.iter())
+            }
+        }
+
         impl $quadrature_rule {
             /// Returns an iterator over the nodes of the quadrature rule.
             #[inline]
@@ -193,7 +202,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         // region: QuadratureRuleIter
 
-        /// An iterator over node-weight-pairs of the quadrature rule.
+        /// An iterator over the node-weight-pairs of the quadrature rule.
         ///
         /// Created by the `iter` function on the quadrature rule struct.
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
