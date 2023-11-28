@@ -284,6 +284,7 @@ macro_rules! impl_node_rule_trait {
         impl ::core::iter::IntoIterator for $quadrature_rule {
             type Item = $crate::Node;
             type IntoIter = $quadrature_rule_into_iter;
+            #[inline]
             fn into_iter(self) -> Self::IntoIter {
                 $quadrature_rule_into_iter::new(self.nodes.into_iter())
             }
