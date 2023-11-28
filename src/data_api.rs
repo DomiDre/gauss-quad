@@ -299,6 +299,15 @@ macro_rules! impl_node_rule_trait {
             }
         }
 
+        impl<'a> ::core::iter::IntoIterator for &'a $quadrature_rule {
+            type IntoIter = $quadrature_rule_iter<'a>;
+            type Item = &'a $crate::Node;
+            #[inline]
+            fn into_iter(self) -> Self::IntoIter {
+                $quadrature_rule_iter::new(self.nodes.iter())
+            }
+        }
+
         impl $quadrature_rule {
             /// Returns an iterator over the nodes of the rule.
             #[inline]
