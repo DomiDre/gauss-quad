@@ -311,7 +311,7 @@ macro_rules! impl_node_rule_trait {
                 self.nodes
             }
 
-            /// Returns the degree of the rule
+            /// Returns the degree of the rule.
             #[inline]
             pub fn degree(&self) -> usize {
                 self.nodes.len()
