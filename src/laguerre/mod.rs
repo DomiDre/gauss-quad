@@ -20,7 +20,7 @@ use iterators::{
 };
 
 use crate::gamma::gamma;
-use crate::{impl_node_weight_rule_trait, DMatrixf64, Node, Weight};
+use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight};
 
 /// A Gauss-Laguerre quadrature scheme.
 ///
@@ -131,7 +131,7 @@ impl GaussLaguerre {
     }
 }
 
-impl_node_weight_rule_trait! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
+impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
 #[cfg(test)]
 mod tests {

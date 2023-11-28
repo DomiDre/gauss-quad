@@ -145,7 +145,7 @@ pub mod midpoint;
 pub mod simpson;
 
 #[doc(inline)]
-pub use data_api::{Node, NodeRule, NodeWeightRule, Weight};
+pub use data_api::{Node, Weight};
 #[doc(inline)]
 pub use hermite::GaussHermite;
 #[doc(inline)]

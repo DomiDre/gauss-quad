@@ -1,12 +1,10 @@
-//! This module contains the traits [`NodeRule`] and [`NodeWeightRule`] as well as
-//! macros that can be used to implement them.
-//! The traits define the common API for accessing the data that underlies the quadrature rules.
-//! The [`impl_node_weight_rule_trait!`] macro implements the [`NodeWeightRule`] trait for a struct.
+//! The macros in this module define the common API for accessing the data that underlies the quadrature rules.
+//! The [`impl_node_weight_rule!`] macro implements the API for a for a struct with both nodes and weights.
 //! It should be called in the module that defines the quadrature rule struct.
-//! The [`impl_node_weight_rule_iterators!`] macro defines the iterators that the trait returns.
+//! The [`impl_node_weight_rule_iterators!`] macro defines the iterators that somce of the functions return.
 //! It should be called somewhere it makes sense for the iterators to be defined, e.g. a sub-module.
 //! The [`impl_node_rule_trait!`] and [`impl_node_rule_iterators!`] do the same thing as the previous
-//! macros but for the [`NodeRule`] trait.
+//! macros but for a struct with only nodes and no weights.
 
 // The code in the macros uses fully qualified paths for every type, so it is quite verbose.
 // That is, instead of `usize` it uses `::core::primitive::usize` and so on. This makes it so that
@@ -17,77 +15,13 @@ pub type Node = f64;
 /// A weight in a quadrature rule.
 pub type Weight = f64;
 
-/// This trait defines the API for reading the underlying data in quadrature rules that have
-/// both nodes and weights.
-pub trait NodeWeightRule
-where
-    Self: IntoIterator<Item = (Node, Weight)>,
-{
-    /// The type of the nodes.
-    type Node;
-    /// The type of the weights.
-    type Weight;
-    /// An iterator over the node-weight-pairs of the quadrature rule.
-    type Iter<'a>: Iterator<Item = &'a (Self::Node, Self::Weight)>
-    where
-        Self: 'a;
-    /// An iterator over the nodes of the quadrature rule.
-    type Nodes<'a>: Iterator<Item = &'a Self::Node>
-    where
-        Self: 'a;
-    /// An iterator over the weights of the quadrature rule.
-    type Weights<'a>: Iterator<Item = &'a Self::Weight>
-    where
-        Self: 'a;
-    /// Returns an iterator over the node-weight-pairs of the quadrature rule.
-    fn iter(&self) -> Self::Iter<'_>;
-    /// Returns an iterator over the nodes of the quadrature rule.
-    fn nodes(&self) -> Self::Nodes<'_>;
-    /// Returns an iterator over the weights of the quadrature rule.
-    fn weights(&self) -> Self::Weights<'_>;
-    /// Returns a slice of the node-weight-pairs of the quadrature rule.
-    fn as_node_weight_pairs(&self) -> &[(Self::Node, Self::Weight)];
-    /// Converts the quadrature rule into a vector of node-weight-pairs.
-    ///
-    /// This function just returns the underlying data and does no
-    /// computation or cloning.
-    fn into_node_weight_pairs(self) -> Vec<(Self::Node, Self::Weight)>;
-    /// Returns the degree of the quadrature rule.
-    fn degree(&self) -> usize;
-}
-
-/// This trait defines the API for accessing the underlying nodes
-/// in rules that do not have weights.
-pub trait NodeRule
-where
-    Self: IntoIterator<Item = Node>,
-{
-    /// The type of the nodes.
-    type Node;
-    /// An iterator over the nodes.
-    type Iter<'a>: Iterator<Item = &'a Self::Node>
-    where
-        Self: 'a;
-    /// Returns an iterator over the nodes.
-    fn iter(&self) -> Self::Iter<'_>;
-    /// Returns a slice of the nodes.
-    fn as_nodes(&self) -> &[Self::Node];
-    /// Converts the rule into a vector of nodes.
-    ///
-    /// This function just returns the underlying data and does no
-    /// computation or cloning.
-    fn into_nodes(self) -> Vec<Self::Node>;
-    /// Returns the number of nodes of the rule.
-    fn degree(&self) -> usize;
-}
-
-/// This macro implements the functions of the [`NodeWeightRule`] trait for the given quadrature rule struct that contains
+/// This macro implements the data access API for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Vec<Node, Weight>`.
 /// It takes in the name of the quadrature rule struct as well as the names if should give the iterators
 /// over its nodes, weights, and both, as well as the iterator returned by the [`IntoIterator`] trait.
 #[doc(hidden)]
 #[macro_export]
-macro_rules! impl_node_weight_rule_trait {
+macro_rules! impl_node_weight_rule {
     (
         // The name of the quadrature rule struct, e.g. GaussLegendre.
         $quadrature_rule:ident,
@@ -114,41 +48,43 @@ macro_rules! impl_node_weight_rule_trait {
             }
         }
 
-        impl $crate::NodeWeightRule for $quadrature_rule {
-            type Node = f64;
-            type Weight = f64;
-            type Nodes<'a> = $quadrature_rule_nodes<'a>;
-            type Weights<'a> = $quadrature_rule_weights<'a>;
-            type Iter<'a> = $quadrature_rule_iter<'a>;
-
+        impl $quadrature_rule {
+            /// Returns an iterator over the nodes of the quadrature rule.
             #[inline]
-            fn nodes(&self) -> Self::Nodes<'_> {
+            pub fn nodes(&self) -> $quadrature_rule_nodes<'_> {
                 $quadrature_rule_nodes::new(self.node_weight_pairs.iter().map(|p| &p.0))
             }
 
+            /// Returns an iterator over the weights of the quadrature rule.
             #[inline]
-            fn weights(&self) -> Self::Weights<'_> {
+            pub fn weights(&self) -> $quadrature_rule_weights<'_> {
                 $quadrature_rule_weights::new(self.node_weight_pairs.iter().map(|p| &p.1))
             }
 
+            /// Returns an iterator over the node-weight pairs of the quadrature rule.
             #[inline]
-            fn iter(&self) -> Self::Iter<'_> {
+            pub fn iter(&self) -> $quadrature_rule_iter<'_> {
                 $quadrature_rule_iter::new(self.node_weight_pairs.iter())
             }
 
+            /// Returns a slice if all the node-weight pairs of the quadrature rule.
             #[inline]
-            fn as_node_weight_pairs(&self) -> &[(Self::Node, Self::Weight)] {
+            pub fn as_node_weight_pairs(&self) -> &[($crate::Node, $crate::Weight)] {
                 &self.node_weight_pairs
             }
 
+            /// Converts the quadrature rule into a vector of node-weight pairs.
+            /// 
+            /// This function just returns the underlying vector without any computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            fn into_node_weight_pairs(self) -> ::std::vec::Vec<(Self::Node, Self::Weight)> {
+            pub fn into_node_weight_pairs(self) -> ::std::vec::Vec<($crate::Node, $crate::Weight)> {
                 self.node_weight_pairs
             }
 
+            /// Returns the degree of the quadrature rule.
             #[inline]
-            fn degree(&self) -> ::core::primitive::usize {
+            pub fn degree(&self) -> ::core::primitive::usize {
                 self.node_weight_pairs.len()
             }
         }
@@ -185,7 +121,7 @@ macro_rules! impl_slice_iterator_newtype_traits {
     };
 }
 
-/// This macro defines the iterators used by the functions defined in the [`impl_node_weight_rule_trait!`] macro.
+/// This macro defines the iterators used by the functions defined in the [`impl_node_weight_rule!`] macro.
 /// It takes in the names of the same structs as that macro,
 /// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
 /// These iterators can only be created in the module where the macro is called
@@ -337,10 +273,10 @@ macro_rules! impl_node_weight_rule_iterators {
     };
 }
 
-/// This macro implements the functions of the [`NodeRule`] trait for
-/// the given rule struct that contans a field named `nodes`
-/// of the type `Vec<Node>`. It takes the name of the rule struct as well as the name
-/// it should give the iterator over its nodes and the iterator returned by the [`IntoIterator`] trait.
+/// This macro implements the data access API for rules that have only nodes and no weights.
+/// It takes in the name of the a rule struct that contans a field with the name `nodes`
+/// of the type `Vec<Node>`. As well as the names it should give the iterator over its
+/// nodes and the iterator returned by the [`IntoIterator`] trait.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! impl_node_rule_trait {
@@ -353,27 +289,30 @@ macro_rules! impl_node_rule_trait {
             }
         }
 
-        impl $crate::NodeRule for $quadrature_rule {
-            type Node = $crate::Node;
-            type Iter<'a> = $quadrature_rule_iter<'a>;
-
+        impl $quadrature_rule {
+            /// Returns an iterator over the nodes of the rule.
             #[inline]
-            fn iter(&self) -> Self::Iter<'_> {
+            pub fn iter(&self) -> $quadrature_rule_iter<'_> {
                 $quadrature_rule_iter::new(self.nodes.iter())
             }
 
+            /// Returns a slice of all the nodes of the rule.
             #[inline]
-            fn as_nodes(&self) -> &[Self::Node] {
+            pub fn as_nodes(&self) -> &[$crate::Node] {
                 &self.nodes
             }
 
+            /// Converts the rule into a vector of nodes.
+            /// 
+            /// This function just returns the underlying data without any computation or cloning.
             #[inline]
-            fn into_nodes(self) -> Vec<Self::Node> {
+            pub fn into_nodes(self) -> Vec<$crate::Node> {
                 self.nodes
             }
 
+            /// Returns the degree of the rule
             #[inline]
-            fn degree(&self) -> usize {
+            pub fn degree(&self) -> usize {
                 self.nodes.len()
             }
         }

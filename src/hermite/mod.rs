@@ -18,7 +18,7 @@
 pub mod iterators;
 use iterators::{GaussHermiteIntoIter, GaussHermiteIter, GaussHermiteNodes, GaussHermiteWeights};
 
-use crate::{impl_node_weight_rule_trait, DMatrixf64, Node, Weight, PI};
+use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight, PI};
 
 /// A Gauss-Hermite quadrature scheme.
 ///
@@ -97,7 +97,7 @@ impl GaussHermite {
     }
 }
 
-impl_node_weight_rule_trait! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
+impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
 
 #[cfg(test)]
 mod tests {
