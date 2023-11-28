@@ -59,9 +59,9 @@ impl GaussJacobi {
     /// See Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
     /// # Panics
-    /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
+    /// Panics if `deg` is smaller than 2, or if `alpha` or `beta` are smaller than or equal to -1.
     pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
-        if alpha < -1.0 || beta < -1.0 {
+        if alpha <= -1.0 || beta <= -1.0 {
             panic!("Gauss-Jacobi quadrature needs alpha > -1.0 and beta > -1.0");
         }
         if deg < 2 {
@@ -104,11 +104,15 @@ impl GaussJacobi {
             .iter()
             .copied()
             .zip(
-                (eigen.eigenvectors.row(0).map(|x| x * x) * scale_factor)
+                eigen
+                    .eigenvectors
+                    .row(0)
+                    .map(|x| x * x * scale_factor)
                     .iter()
                     .copied(),
             )
             .collect();
+
         node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         // TO FIX: implement correction
@@ -168,6 +172,13 @@ impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, Gauss
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    #[should_panic]
+    fn check_alpha_beta_bounds() {
+        _ = GaussJacobi::new(10, -1.0, -1.0);
+    }
+
     #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
         let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5, 0.0, 0.0).into_iter().unzip();

@@ -75,7 +75,10 @@ impl GaussHermite {
                 .iter()
                 .copied()
                 .zip(
-                    (eigen.eigenvectors.row(0).map(|x| x * x) * PI.sqrt())
+                    eigen
+                        .eigenvectors
+                        .row(0)
+                        .map(|x| x * x * PI.sqrt())
                         .iter()
                         .copied(),
                 )
