@@ -74,7 +74,7 @@ macro_rules! impl_node_weight_rule {
             }
 
             /// Converts the quadrature rule into a vector of node-weight pairs.
-            /// 
+            ///
             /// This function just returns the underlying vector without any computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
@@ -303,7 +303,7 @@ macro_rules! impl_node_rule_trait {
             }
 
             /// Converts the rule into a vector of nodes.
-            /// 
+            ///
             /// This function just returns the underlying data without any computation or cloning.
             #[inline]
             pub fn into_nodes(self) -> Vec<$crate::Node> {
