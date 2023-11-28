@@ -1,4 +1,4 @@
-//! This crate contains the implementation of the iterators that
+//! This module contains the implementation of the iterators that
 //! can be returned by method calls on a [`Simpson`](super::Simpson) instance.
 
 use crate::Node;
@@ -22,6 +22,13 @@ impl<'a> SimpsonIter<'a> {
     #[inline]
     pub fn as_slice(&self) -> &'a [Node] {
         self.0.as_slice()
+    }
+}
+
+impl<'a> AsRef<[Node]> for SimpsonIter<'a> {
+    #[inline]
+    fn as_ref(&self) -> &[Node] {
+        self.0.as_ref()
     }
 }
 
