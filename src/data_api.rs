@@ -39,6 +39,10 @@ macro_rules! impl_node_weight_rule {
         // in a way the adheres to the API guidelines: <https://rust-lang.github.io/api-guidelines/naming.html>.
         // The functions in these impl blocks all have an #[inline] directive because they are trivial.
 
+        // Lets the user do
+        // for (node, weight) in QuadratuleRule::new(...) {
+        //     ...
+        // }
         impl ::core::iter::IntoIterator for $quadrature_rule {
             type IntoIter = $quadrature_rule_into_iter;
             type Item = ($crate::Node, $crate::Weight);
@@ -48,6 +52,12 @@ macro_rules! impl_node_weight_rule {
             }
         }
 
+        // Lets the user do
+        // let rule = QuadratureRule::new(...);
+        // for &(node, weight) in &rule {
+        //     ...
+        // }
+        // rule.integrate(...) // <-- still available
         impl<'a> ::core::iter::IntoIterator for &'a $quadrature_rule {
             type IntoIter = $quadrature_rule_iter<'a>;
             type Item = &'a ($crate::Node, $crate::Weight);
@@ -100,7 +110,7 @@ macro_rules! impl_node_weight_rule {
     };
 }
 
-/// Implements the Iterator, DoubleEndedIterator, ExactSizeIterator and FusedIterator traits for a type
+/// Implements the Iterator, DoubleEndedIterator, ExactSizeIterator and FusedIterator traits for a struct
 /// that wraps an iterator that has those traits. Takes in the name of the struct and optionally its lifetime
 /// as well as the type returned by the iterator.
 #[macro_export]
@@ -150,6 +160,8 @@ macro_rules! impl_node_weight_rule_iterators {
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_nodes<'a>(
+            // This horrible type is just the fully qualified path of the type returned
+            // by `slice.iter().map(|(x, _)| x)`.
             ::std::iter::Map<
                 ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                 fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
@@ -178,6 +190,7 @@ macro_rules! impl_node_weight_rule_iterators {
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_weights<'a>(
+            // Same as the previous horrible type, but maps out the weight instead of the node.
             ::std::iter::Map<
                 ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                 fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
@@ -290,6 +303,10 @@ macro_rules! impl_node_weight_rule_iterators {
 #[doc(hidden)]
 macro_rules! impl_node_rule_trait {
     ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
+        // Lets the user do
+        // for node in QuadratureRule::new(...) {
+        //    ...
+        // }
         impl ::core::iter::IntoIterator for $quadrature_rule {
             type Item = $crate::Node;
             type IntoIter = $quadrature_rule_into_iter;
@@ -299,6 +316,12 @@ macro_rules! impl_node_rule_trait {
             }
         }
 
+        // Lets the user do
+        // let rule = QuadratureRule::new(...);
+        // for &node in &rule {
+        //     ...
+        // }
+        // rule.integrate(...) // <--- still available
         impl<'a> ::core::iter::IntoIterator for &'a $quadrature_rule {
             type IntoIter = $quadrature_rule_iter<'a>;
             type Item = &'a $crate::Node;
