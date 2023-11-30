@@ -43,8 +43,8 @@
 
 pub mod iterators;
 
-use crate::Node;
-use iterators::MidpointIter;
+use crate::{impl_node_rule_trait, Node};
+use iterators::{MidpointIntoIter, MidpointIter};
 
 /// A midpoint rule quadrature scheme.
 /// ```
@@ -81,26 +81,6 @@ impl Midpoint {
         }
     }
 
-    /// Returns an iterator over the nodes of the midpoint rule.
-    #[inline]
-    pub fn iter(&self) -> MidpointIter<'_> {
-        MidpointIter::new(self.nodes.iter())
-    }
-
-    /// Returns the nodes of the rule as a slice.
-    #[inline]
-    pub fn as_nodes(&self) -> &[Node] {
-        &self.nodes
-    }
-
-    /// Converts `self` into a vector of nodes.
-    ///
-    /// Simply returns the underlying vector with no computation or allocation.
-    #[inline]
-    pub fn into_nodes(self) -> Vec<Node> {
-        self.nodes
-    }
-
     /// Integrate over the domain [a, b].
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
@@ -118,13 +98,7 @@ impl Midpoint {
     }
 }
 
-impl IntoIterator for Midpoint {
-    type IntoIter = std::vec::IntoIter<Node>;
-    type Item = Node;
-    fn into_iter(self) -> Self::IntoIter {
-        self.nodes.into_iter()
-    }
-}
+impl_node_rule_trait! {Midpoint, MidpointIter, MidpointIntoIter}
 
 /// The error returned by [`Midpoint::new`] if given a degree of 0.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

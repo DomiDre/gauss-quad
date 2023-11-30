@@ -24,11 +24,13 @@
 //! ```
 
 pub mod iterators;
-use iterators::{GaussLegendreIter, GaussLegendreNodes, GaussLegendreWeights};
+use iterators::{
+    GaussLegendreIntoIter, GaussLegendreIter, GaussLegendreNodes, GaussLegendreWeights,
+};
 
 use bogaert::NodeWeightPair;
 
-use crate::{impl_data_api, Node, Weight};
+use crate::{impl_node_weight_rule, Node, Weight};
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -114,7 +116,7 @@ impl GaussLegendre {
     }
 }
 
-impl_data_api! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter}
+impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
 
 /// The error returned by [`GaussLegendre::new`] if it's given a degree of 0 or 1.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
