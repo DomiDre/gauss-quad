@@ -1,7 +1,7 @@
 //! Numerical integration using the Gauss-Jacobi quadrature rule.
 //!
 //! This rule can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [-1, 1],
-//! where f(x) is a smooth function on [1, 1], alpha > -1 and beta > -1.
+//! where f(x) is a smooth function on [-1, 1], alpha > -1 and beta > -1.
 //! The domain can be changed to any [a, b] through a linear transformation (which is done in this module),
 //! and this enables the approximation of integrals with singularities at the end points of the domain.
 //!
@@ -33,8 +33,7 @@ use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight};
 /// # use gauss_quad::GaussJacobi;
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::E;
-/// // initialize the quadrature rule to integrate the closure divided by `sqrt(b - x)`
-/// // where b is the larger end of the integration domain.
+/// // initialize the quadrature rule.
 /// let quad = GaussJacobi::new(10, -0.5, 0.0);
 ///
 /// // numerically integrate e^-x / sqrt(2 - x) over the range [0, 2].
