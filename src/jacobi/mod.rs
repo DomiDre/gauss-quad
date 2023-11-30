@@ -33,14 +33,14 @@ use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight};
 /// # use gauss_quad::GaussJacobi;
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::E;
-/// // initialize the quadrature rule.
+/// // initialize the quadrature rule to integrate the closure divided by `sqrt(b - x)`
+/// // where b is the larger end of the integration domain.
 /// let quad = GaussJacobi::new(10, -0.5, 0.0);
 ///
-/// // numerically integrate e^-x / sqrt(1 - x).
-/// let integral = quad.integrate(-1.0, 1.0, |x| (-x).exp());
+/// // numerically integrate e^-x / sqrt(2 - x) over the range [0, 2].
+/// let integral = quad.integrate(0.0, 2.0, |x| (-x).exp());
 ///
-/// let dawson_function_of_sqrt_2 = 0.4525399074037225;
-/// assert_abs_diff_eq!(integral, 2.0 * E * dawson_function_of_sqrt_2, epsilon = 1e-14);
+/// assert_abs_diff_eq!(integral, 0.9050798148074449, epsilon = 1e-14);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -138,7 +138,7 @@ impl GaussJacobi {
     }
 
     /// Perform quadrature of integrand from `a` to `b`. This will integrate  
-    /// (1 - x)^`alpha` * (1 + x)^`beta` * `integrand`  
+    /// `(1 - x)^alpha * (1 + x)^beta * integrand(x)`  
     /// where `alpha` and `beta` were given in the call to [`init`](Self::new).
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
