@@ -19,10 +19,10 @@
 //! ```
 
 pub mod iterators;
-use iterators::{GaussJacobiIter, GaussJacobiNodes, GaussJacobiWeights};
+use iterators::{GaussJacobiIntoIter, GaussJacobiIter, GaussJacobiNodes, GaussJacobiWeights};
 
 use crate::gamma::gamma;
-use crate::{impl_data_api, DMatrixf64, Node, Weight};
+use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight};
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -167,11 +167,12 @@ impl GaussJacobi {
     }
 }
 
-impl_data_api! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter}
+impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::assert_abs_diff_eq;
 
     #[test]
     #[should_panic]

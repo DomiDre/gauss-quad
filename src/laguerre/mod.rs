@@ -15,10 +15,12 @@
 //! ```
 
 pub mod iterators;
-use iterators::{GaussLaguerreIter, GaussLaguerreNodes, GaussLaguerreWeights};
+use iterators::{
+    GaussLaguerreIntoIter, GaussLaguerreIter, GaussLaguerreNodes, GaussLaguerreWeights,
+};
 
 use crate::gamma::gamma;
-use crate::{impl_data_api, DMatrixf64, Node, Weight};
+use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight};
 
 /// A Gauss-Laguerre quadrature scheme.
 ///
@@ -129,7 +131,7 @@ impl GaussLaguerre {
     }
 }
 
-impl_data_api! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter}
+impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
 #[cfg(test)]
 mod tests {
