@@ -63,8 +63,10 @@ pub struct GaussLegendre {
 }
 
 impl GaussLegendre {
-    /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights
-    /// with the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969).
+    /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights.
+    ///
+    /// Uses the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969), which has linear time
+    /// complexity.
     pub fn new(deg: usize) -> Self {
         Self {
             node_weight_pairs: (1..deg + 1)
