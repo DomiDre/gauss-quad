@@ -7,6 +7,7 @@ This update is mostly about changing the API to adhere to the [Rust API guidelin
  - Changed the name of all constructors from `init` to `new`.
  - The fields of the structs are now private.
  - A set of functions have been implemented that access the node and weight data of the quadrature rule structs in various ways.
+ - The `nodes_and_weights` functions have been removed. To achieve the same effect you can do `QuadratureRule::new(...).into_node_weight_pairs()` if you wish to have a `Vec<(f64, f64)>` of nodes and their corrensponding weights, or you can do `QuadratureRule::new(...).into_iter().unzip()` if you wish to have the nodes and weights separate.
  - The crate no longer exports the `DMatrixf64` type alias.
  - The crate no longer re-exports the `core::f64::consts::PI` constant.
 
