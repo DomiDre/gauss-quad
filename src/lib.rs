@@ -145,6 +145,8 @@ pub mod midpoint;
 pub mod simpson;
 
 #[doc(inline)]
+pub use data_api::{Node, Weight};
+#[doc(inline)]
 pub use hermite::GaussHermite;
 #[doc(inline)]
 pub use jacobi::GaussJacobi;
@@ -156,8 +158,3 @@ pub use legendre::GaussLegendre;
 pub use midpoint::Midpoint;
 #[doc(inline)]
 pub use simpson::Simpson;
-
-/// A node in a quadrature rule.
-pub type Node = f64;
-/// A weight in a quadrature rule.
-pub type Weight = f64;
