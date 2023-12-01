@@ -1,7 +1,7 @@
 //! Numerical integration using the Gauss-Jacobi quadrature rule.
 //!
 //! This rule can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [-1, 1],
-//! where f(x) is a smooth function on [1, 1], alpha > -1 and beta > -1.
+//! where f(x) is a smooth function on [-1, 1], alpha > -1 and beta > -1.
 //! The domain can be changed to any [a, b] through a linear transformation (which is done in this module),
 //! and this enables the approximation of integrals with singularities at the end points of the domain.
 //!
@@ -19,10 +19,10 @@
 //! ```
 
 pub mod iterators;
-use iterators::{GaussJacobiIter, GaussJacobiNodes, GaussJacobiWeights};
+use iterators::{GaussJacobiIntoIter, GaussJacobiIter, GaussJacobiNodes, GaussJacobiWeights};
 
 use crate::gamma::gamma;
-use crate::{impl_data_api, DMatrixf64, Node, Weight};
+use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight};
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -36,11 +36,10 @@ use crate::{impl_data_api, DMatrixf64, Node, Weight};
 /// // initialize the quadrature rule.
 /// let quad = GaussJacobi::new(10, -0.5, 0.0);
 ///
-/// // numerically integrate e^-x / sqrt(1 - x).
-/// let integral = quad.integrate(-1.0, 1.0, |x| (-x).exp());
+/// // numerically integrate e^-x / sqrt(2 - x) over the range [0, 2].
+/// let integral = quad.integrate(0.0, 2.0, |x| (-x).exp());
 ///
-/// let dawson_function_of_sqrt_2 = 0.4525399074037225;
-/// assert_abs_diff_eq!(integral, 2.0 * E * dawson_function_of_sqrt_2, epsilon = 1e-14);
+/// assert_abs_diff_eq!(integral, 0.9050798148074449, epsilon = 1e-14);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -59,9 +58,9 @@ impl GaussJacobi {
     /// See Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
     /// # Panics
-    /// Panics if degree of quadrature is smaller than 2, or if alpha or beta are smaller than -1
+    /// Panics if `deg` is smaller than 2, or if `alpha` or `beta` are smaller than or equal to -1.
     pub fn new(deg: usize, alpha: f64, beta: f64) -> GaussJacobi {
-        if alpha < -1.0 || beta < -1.0 {
+        if alpha <= -1.0 || beta <= -1.0 {
             panic!("Gauss-Jacobi quadrature needs alpha > -1.0 and beta > -1.0");
         }
         if deg < 2 {
@@ -113,9 +112,6 @@ impl GaussJacobi {
             )
             .collect();
 
-        // TODO: ADDED THIS PRINT ONLY FOR THE FAILING TEST, REMOVE AFTER FIXING
-        println!("{deg}, {alpha}, {beta}, {node_weight_pairs:?}");
-
         node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
         // TO FIX: implement correction
@@ -141,7 +137,7 @@ impl GaussJacobi {
     }
 
     /// Perform quadrature of integrand from `a` to `b`. This will integrate  
-    /// (1 - x)^`alpha` * (1 + x)^`beta` * `integrand`  
+    /// `(1 - x)^alpha * (1 + x)^beta * integrand(x)`  
     /// where `alpha` and `beta` were given in the call to [`init`](Self::new).
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
@@ -170,7 +166,7 @@ impl GaussJacobi {
     }
 }
 
-impl_data_api! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter}
+impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
 #[cfg(test)]
 mod tests {
@@ -182,10 +178,9 @@ mod tests {
     }
 
     #[test]
-    fn found_nans_2() {
-        // This should succeed according to the documentation of GaussJacobi::new(), but
-        // line 73 divides by (2 + alpha + beta): a division by zero if alpha = beta = -1.
-        _ = GaussJacobi::new(10, -1., -1.);
+    #[should_panic]
+    fn check_alpha_beta_bounds() {
+        _ = GaussJacobi::new(10, -1.0, -1.0);
     }
 
     #[test]
