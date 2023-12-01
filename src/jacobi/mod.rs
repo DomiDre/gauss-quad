@@ -127,7 +127,7 @@ impl GaussJacobi {
             node_weight_pairs[deg / 2].0 = 0.0;
         }
 
-        GaussJacobi {
+        Self {
             node_weight_pairs,
             alpha,
             beta,
@@ -152,11 +152,9 @@ impl GaussJacobi {
         let result: f64 = self
             .node_weight_pairs
             .iter()
-            .map(|(x_val, w_val)| {
-                integrand(GaussJacobi::argument_transformation(*x_val, a, b)) * w_val
-            })
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
             .sum();
-        GaussJacobi::scale_factor(a, b) * result
+        Self::scale_factor(a, b) * result
     }
 
     /// Returns the value of the `alpha` parameter.
