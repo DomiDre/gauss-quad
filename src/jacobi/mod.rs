@@ -101,6 +101,8 @@ impl GaussJacobi {
                 / gamma(alpha + beta + 1.0)
                 / (alpha + beta + 1.0);
 
+        println!("scale factor = {scale_factor}");
+
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
         let mut node_weight_pairs: Vec<(f64, f64)> = eigen
             .eigenvalues
