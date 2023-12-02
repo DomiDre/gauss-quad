@@ -6,6 +6,9 @@ fn benches(c: &mut Criterion) {
     let mut group = c.benchmark_group("legendre");
     for deg in [3, 10, 40, 200, 1_000, 10_000, 100_000, 1_000_000] {
         let rule = GaussLegendre::new(deg);
+        group.bench_function(&format!("constructor, degree {deg}"), |b| {
+            b.iter(|| black_box(GaussLegendre::new(deg)))
+        });
         group.bench_function(&format!("cheap integrand, degree {deg}"), |b| {
             b.iter(|| black_box(rule.integrate(-1.0, 1.0, |x| x * x - x - 1.0)))
         });
