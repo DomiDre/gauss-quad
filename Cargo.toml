@@ -44,3 +44,7 @@ harness = false
 [[bench]]
 name = "jacobi"
 harness = false
+
+[[bench]]
+name = "midpoint"
+harness = false
