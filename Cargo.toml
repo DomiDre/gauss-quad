@@ -20,9 +20,15 @@ serde = {version = "1.0.192", default_features = false, features = ["alloc", "de
 
 [dev-dependencies]
 approx = "0.5.1"
+criterion = {version = "0.5", features = ["html_reports"]}
 
 [features]
 serde = ["dep:serde"]
 
 [package.metadata.docs.rs]
 all-features = true
+
+
+[[bench]]
+name = "bench_legendre"
+harness = false
