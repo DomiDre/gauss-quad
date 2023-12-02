@@ -1,0 +1,19 @@
+use core::hint::black_box;
+use criterion::{criterion_group, criterion_main, Criterion};
+use gauss_quad::GaussHermite;
+
+fn benches(c: &mut Criterion) {
+    let mut group = c.benchmark_group("hermite");
+    for deg in [3, 10, 40, 200, 1_000] {
+        let rule = GaussHermite::new(deg);
+        group.bench_function(&format!("degree {deg}, cheap integrand"), |b| {
+            b.iter(|| black_box(rule.integrate(|x| x * x - x - 1.0)))
+        });
+        group.bench_function(&format!("degree {deg}, expensive integrand"), |b| {
+            b.iter(|| black_box(rule.integrate(|x| (x.sin().powi(2) + 2.0).ln().cos().acos())))
+        });
+    }
+}
+
+criterion_group!(bench, benches);
+criterion_main!(bench);
