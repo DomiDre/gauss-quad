@@ -106,6 +106,15 @@ mod tests {
     use super::*;
 
     #[test]
+    fn iterator_sanity_check() {
+        let rule = Simpson::new(10);
+        let data = rule.as_nodes();
+        for (node, x) in rule.iter().zip(data.iter()) {
+            assert_eq!(node, x);
+        }
+    }
+
+    #[test]
     fn check_simpson_integration() {
         let quad = Simpson::new(2);
         let integral = quad.integrate(0.0, 1.0, |x| x * x);

@@ -102,6 +102,15 @@ mod tests {
     use super::*;
 
     #[test]
+    fn iterator_sanity_check() {
+        let rule = Midpoint::new(10);
+        let data = rule.as_nodes();
+        for (node, x) in rule.iter().zip(data.iter()) {
+            assert_eq!(node, x);
+        }
+    }
+
+    #[test]
     fn check_midpoint_integration() {
         let quad = Midpoint::new(100);
         let integral = quad.integrate(0.0, 1.0, |x| x * x);

@@ -139,6 +139,22 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     #[test]
+    fn iterator_sanity_check() {
+        let rule = GaussLaguerre::new(10, -1.0 / 3.0);
+        let data = rule.as_node_weight_pairs();
+        for (node, x) in rule.nodes().zip(data.iter().map(|(x, _)| x)) {
+            assert_eq!(node, x);
+        }
+        for (weight, w) in rule.weights().zip(data.iter().map(|(_, w)| w)) {
+            assert_eq!(weight, w);
+        }
+        for ((node, weight), (x, w)) in rule.iter().zip(data.iter()) {
+            assert_eq!(node, x);
+            assert_eq!(weight, w);
+        }
+    }
+
+    #[test]
     fn golub_welsch_2_alpha_5() {
         let rule = GaussLaguerre::new(2, 5.0);
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
