@@ -56,6 +56,10 @@ pub struct Simpson {
 
 impl Simpson {
     /// Initialize a new Simpson rule with `degree` being the number of intervals.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `degree` is less than 1.
     pub fn new(degree: usize) -> Self {
         assert!(degree >= 1, "Degree of Simpson rule needs to be >= 1");
 
