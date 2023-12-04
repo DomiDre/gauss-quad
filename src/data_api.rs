@@ -169,7 +169,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         impl<'a> $quadrature_rule_nodes<'a> {
             #[inline]
-            fn new(
+            const fn new(
                 iter_map: ::std::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                     fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
@@ -198,7 +198,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         impl<'a> $quadrature_rule_weights<'a> {
             #[inline]
-            fn new(
+            const fn new(
                 iter_map: ::std::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                     fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
@@ -225,7 +225,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         impl<'a> $quadrature_rule_iter<'a> {
             #[inline]
-            fn new(
+            const fn new(
                 node_weight_pairs: ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
             ) -> Self {
                 Self(node_weight_pairs)
@@ -264,7 +264,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         impl $quadrature_rule_into_iter {
             #[inline]
-            fn new(
+            const fn new(
                 node_weight_pairs: ::std::vec::IntoIter<($crate::Node, $crate::Weight)>,
             ) -> Self {
                 Self(node_weight_pairs)
@@ -377,7 +377,7 @@ macro_rules! impl_node_rule_iterators {
 
         impl<'a> $quadrature_rule_iter<'a> {
             #[inline]
-            fn new(iter: ::core::slice::Iter<'a, $crate::Node>) -> Self {
+            const fn new(iter: ::core::slice::Iter<'a, $crate::Node>) -> Self {
                 Self(iter)
             }
 
@@ -412,7 +412,7 @@ macro_rules! impl_node_rule_iterators {
 
         impl $quadrature_rule_into_iter {
             #[inline]
-            fn new(iter: ::std::vec::IntoIter<$crate::Node>) -> Self {
+            const fn new(iter: ::std::vec::IntoIter<$crate::Node>) -> Self {
                 Self(iter)
             }
 
