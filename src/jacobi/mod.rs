@@ -172,8 +172,9 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     #[test]
-    fn iterator_sanity_check() {
+    fn sanity_check() {
         let rule = GaussJacobi::new(10, -1.0 / 3.0, -1.0 / 4.0);
+        assert_eq!(rule.degree(), 10);
         let data = rule.as_node_weight_pairs();
         for (node, x) in rule.nodes().zip(data.iter().map(|(x, _)| x)) {
             assert_eq!(node, x);

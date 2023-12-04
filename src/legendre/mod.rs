@@ -115,8 +115,9 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     #[test]
-    fn iterator_sanity_check() {
+    fn sanity_check() {
         let rule = GaussLegendre::new(10);
+        assert_eq!(rule.degree(), 10);
         let data = rule.as_node_weight_pairs();
         for (node, x) in rule.nodes().zip(data.iter().map(|(x, _)| x)) {
             assert_eq!(node, x);

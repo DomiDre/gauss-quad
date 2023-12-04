@@ -102,8 +102,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn iterator_sanity_check() {
+    fn sanity_check() {
         let rule = Midpoint::new(10);
+        assert_eq!(rule.degree(), 10);
         let data = rule.as_nodes();
         for (node, x) in rule.iter().zip(data.iter()) {
             assert_eq!(node, x);
