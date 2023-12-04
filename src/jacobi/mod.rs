@@ -138,7 +138,7 @@ impl GaussJacobi {
 
     /// Perform quadrature of integrand from `a` to `b`. This will integrate  
     /// `(1 - x)^alpha * (1 + x)^beta * integrand(x)`  
-    /// where `alpha` and `beta` were given in the call to [`init`](Self::new).
+    /// where `alpha` and `beta` were given in the call to [`new`](Self::new).
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
