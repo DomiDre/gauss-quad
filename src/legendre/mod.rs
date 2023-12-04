@@ -23,14 +23,9 @@
 
 mod bogaert;
 
-pub mod iterators;
-use iterators::{
-    GaussLegendreIntoIter, GaussLegendreIter, GaussLegendreNodes, GaussLegendreWeights,
-};
-
 use bogaert::NodeWeightPair;
 
-use crate::{impl_node_weight_rule, Node, Weight};
+use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight};
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -108,6 +103,8 @@ impl GaussLegendre {
 }
 
 impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
+
+impl_node_weight_rule_iterators! {GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
 
 #[cfg(test)]
 mod tests {

@@ -15,10 +15,7 @@
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
 //! ```
 
-pub mod iterators;
-use iterators::{GaussHermiteIntoIter, GaussHermiteIter, GaussHermiteNodes, GaussHermiteWeights};
-
-use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight, PI};
+use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight, PI};
 
 /// A Gauss-Hermite quadrature scheme.
 ///
@@ -101,6 +98,8 @@ impl GaussHermite {
 }
 
 impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
+
+impl_node_weight_rule_iterators! {GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
 
 #[cfg(test)]
 mod tests {

@@ -40,10 +40,7 @@
 //! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
 //! ```
 
-pub mod iterators;
-
-use crate::{impl_node_rule_trait, Node};
-use iterators::{MidpointIntoIter, MidpointIter};
+use crate::{impl_node_rule_iterators, impl_node_rule_trait, Node};
 
 /// A midpoint rule quadrature scheme.
 /// ```
@@ -96,6 +93,8 @@ impl Midpoint {
 }
 
 impl_node_rule_trait! {Midpoint, MidpointIter, MidpointIntoIter}
+
+impl_node_rule_iterators! {MidpointIter, MidpointIntoIter}
 
 #[cfg(test)]
 mod tests {
