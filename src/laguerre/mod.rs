@@ -65,11 +65,11 @@ impl GaussLaguerre {
     ///
     /// Returns an error if `deg` is smaller than 2, or if `alpha` is smaller than -1.
     pub fn new(deg: usize, alpha: f64) -> Result<Self, GaussLaguerreError> {
-        match (deg < 2, !(alpha.is_finite() && alpha > -1.0)) {
-            (false, false) => Ok(()),
-            (true, false) => Err(GaussLaguerreError::Degree),
-            (false, true) => Err(GaussLaguerreError::Alpha),
-            (true, true) => Err(GaussLaguerreError::DegreeAlpha),
+        match (deg >= 2, (alpha.is_finite() && alpha > -1.0)) {
+            (true, true) => Ok(()),
+            (false, true) => Err(GaussLaguerreError::Degree),
+            (true, false) => Err(GaussLaguerreError::Alpha),
+            (false, false) => Err(GaussLaguerreError::DegreeAlpha),
         }?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
