@@ -66,18 +66,18 @@ impl GaussJacobi {
     /// Returns an error if `deg` is smaller than 2, and/or if `alpha` and/or `beta` are smaller than or equal to -1.
     pub fn new(deg: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
         match (
-            deg < 2,
-            !(alpha.is_finite() && alpha > -1.0),
-            !(beta.is_finite() && beta > -1.0),
+            deg >= 2,
+            (alpha.is_finite() && alpha > -1.0),
+            (beta.is_finite() && beta > -1.0),
         ) {
-            (false, false, false) => Ok(()),
-            (true, false, false) => Err(GaussJacobiError::Degree),
-            (false, true, false) => Err(GaussJacobiError::Alpha),
-            (false, false, true) => Err(GaussJacobiError::Beta),
-            (false, true, true) => Err(GaussJacobiError::AlphaBeta),
-            (true, true, false) => Err(GaussJacobiError::DegreeAlpha),
-            (true, false, true) => Err(GaussJacobiError::DegreeBeta),
-            (true, true, true) => Err(GaussJacobiError::DegreeAlphaBeta),
+            (true, true, true) => Ok(()),
+            (false, true, true) => Err(GaussJacobiError::Degree),
+            (true, false, true) => Err(GaussJacobiError::Alpha),
+            (true, true, false) => Err(GaussJacobiError::Beta),
+            (true, false, false) => Err(GaussJacobiError::AlphaBeta),
+            (false, false, true) => Err(GaussJacobiError::DegreeAlpha),
+            (false, true, false) => Err(GaussJacobiError::DegreeBeta),
+            (false, false, false) => Err(GaussJacobiError::DegreeAlphaBeta),
         }?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
