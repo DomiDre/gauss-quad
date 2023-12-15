@@ -172,22 +172,14 @@ impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, Gauss
 /// a bad value of `alpha` or `beta` to [`GaussJacobi::new`].
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum ExponentError {
-    TooSmall(f64),
-    Infinite,
-    Nan,
-}
-
-use core::num::FpCategory;
+pub struct ExponentError;
 
 impl ExponentError {
     fn new(exp: f64) -> Option<Self> {
-        match exp.classify() {
-            FpCategory::Infinite => Some(Self::Infinite),
-            FpCategory::Nan => Some(Self::Nan),
-            FpCategory::Normal | FpCategory::Subnormal | FpCategory::Zero => {
-                (exp <= -1.0).then(|| Self::TooSmall(exp))
-            }
+        if exp.is_finite() && exp > 1.0 {
+            None
+        } else {
+            Some(Self)
         }
     }
 }
@@ -195,28 +187,20 @@ impl ExponentError {
 use core::fmt;
 impl fmt::Display for ExponentError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::TooSmall(val) => write!(f, "must be larger than -1 but was {val}"),
-            Self::Infinite => write!(f, "must be finite but was infinite"),
-            Self::Nan => write!(f, "was NaN"),
-        }
+        write!(f, "must be a finite value larger than -1")
     }
 }
 
 /// Represents the different failure states due to passing a bad value of `deg`
 /// to [`GaussJacobi::new`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum DegreeError {
-    Zero,
-    One,
-}
+pub struct DegreeError;
 
 impl DegreeError {
     const fn new(deg: usize) -> Option<Self> {
         match deg {
-            0 => Some(Self::Zero),
-            1 => Some(Self::One),
+            0 | 1 => Some(Self),
             _ => None,
         }
     }
@@ -224,11 +208,7 @@ impl DegreeError {
 
 impl fmt::Display for DegreeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "must be at least 2 but was ")?;
-        match self {
-            Self::Zero => write!(f, "0"),
-            Self::One => write!(f, "1"),
-        }
+        write!(f, "must be at least 2")
     }
 }
 
