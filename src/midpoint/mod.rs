@@ -77,7 +77,7 @@ impl Midpoint {
                 nodes: (0..degree).map(|d| d as f64).collect(),
             })
         } else {
-            Err(MidpointError())
+            Err(MidpointError)
         }
     }
 
@@ -103,7 +103,7 @@ impl_node_rule_trait! {Midpoint, MidpointIter, MidpointIntoIter}
 /// The error returned by [`Midpoint::new`] if given a degree of 0.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MidpointError();
+pub struct MidpointError;
 
 use core::fmt;
 impl fmt::Display for MidpointError {

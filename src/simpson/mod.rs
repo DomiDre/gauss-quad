@@ -68,7 +68,7 @@ impl Simpson {
                 nodes: (0..degree).map(|d| d as f64).collect(),
             })
         } else {
-            Err(SimpsonError())
+            Err(SimpsonError)
         }
     }
 
@@ -112,7 +112,7 @@ impl_node_rule_trait! {Simpson, SimpsonIter, SimpsonIntoIter}
 /// The error returned by [`Simpson::new`] if given a degree of 0.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SimpsonError();
+pub struct SimpsonError;
 
 use core::fmt;
 impl fmt::Display for SimpsonError {
