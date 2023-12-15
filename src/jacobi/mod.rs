@@ -65,7 +65,20 @@ impl GaussJacobi {
     ///
     /// Returns an error if `deg` is smaller than 2, and/or if `alpha` and/or `beta` are smaller than or equal to -1.
     pub fn new(deg: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
-        GaussJacobiError::validate_inputs(deg, alpha, beta)?;
+        match (
+            deg < 2,
+            !(alpha.is_finite() && alpha > -1.0),
+            !(beta.is_finite() && beta > -1.0),
+        ) {
+            (false, false, false) => Ok(()),
+            (true, false, false) => Err(GaussJacobiError::Degree),
+            (false, true, false) => Err(GaussJacobiError::Alpha),
+            (false, false, true) => Err(GaussJacobiError::Beta),
+            (false, true, true) => Err(GaussJacobiError::AlphaBeta),
+            (true, true, false) => Err(GaussJacobiError::DegreeAlpha),
+            (true, false, true) => Err(GaussJacobiError::DegreeBeta),
+            (true, true, true) => Err(GaussJacobiError::DegreeAlphaBeta),
+        }?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 
@@ -182,24 +195,6 @@ pub enum GaussJacobiError {
     DegreeAlphaBeta,
 }
 
-impl GaussJacobiError {
-    fn validate_inputs(deg: usize, alpha: f64, beta: f64) -> Result<(), Self> {
-        match (
-            deg < 2,
-            !(alpha.is_finite() && alpha > -1.0),
-            !(beta.is_finite() && beta > -1.0),
-        ) {
-            (false, false, false) => Ok(()),
-            (true, false, false) => Err(Self::Degree),
-            (false, true, false) => Err(Self::Alpha),
-            (false, false, true) => Err(Self::Beta),
-            (false, true, true) => Err(Self::AlphaBeta),
-            (true, true, false) => Err(Self::DegreeAlpha),
-            (true, false, true) => Err(Self::DegreeBeta),
-            (true, true, true) => Err(Self::DegreeAlphaBeta),
-        }
-    }
-}
 use std::fmt;
 impl fmt::Display for GaussJacobiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
