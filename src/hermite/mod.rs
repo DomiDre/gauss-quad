@@ -62,7 +62,7 @@ impl GaussHermite {
     ///
     /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussHermiteError> {
-        if deg == 0 || deg == 1 {
+        if deg < 2 {
             return Err(GaussHermiteError);
         }
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
