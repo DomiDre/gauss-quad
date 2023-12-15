@@ -170,7 +170,7 @@ impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, Gauss
 
 /// The error returned by [`GaussJacobi::new`] if given a `deg` less than 2
 /// and/or an `alpha` and/or `beta` less than or equal to -1.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussJacobiError {
     Degree,
