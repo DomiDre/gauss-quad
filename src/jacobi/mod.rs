@@ -223,7 +223,7 @@ impl GaussJacobiError {
     }
 }
 
-use std::fmt;
+use core::fmt;
 impl fmt::Display for GaussJacobiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         const DEGREE_LIMIT: &str = "must be at least 2";
