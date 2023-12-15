@@ -194,6 +194,35 @@ pub enum GaussJacobiError {
     DegreeAlphaBeta,
 }
 
+impl GaussJacobiError {
+    /// Returns true if the given `deg` was bad.
+    #[inline]
+    pub const fn bad_degree(&self) -> bool {
+        matches!(
+            self,
+            Self::Degree | Self::DegreeAlpha | Self::DegreeBeta | Self::DegreeAlphaBeta
+        )
+    }
+
+    /// Returns true if the given `alpha` exponent was bad.
+    #[inline]
+    pub const fn bad_alpha(&self) -> bool {
+        matches!(
+            self,
+            Self::Alpha | Self::DegreeAlpha | Self::AlphaBeta | Self::DegreeAlphaBeta
+        )
+    }
+
+    /// Returns true if the given `beta` exponent was bad.
+    #[inline]
+    pub const fn bad_beta(&self) -> bool {
+        matches!(
+            self,
+            Self::Beta | Self::DegreeBeta | Self::AlphaBeta | Self::DegreeAlphaBeta
+        )
+    }
+}
+
 use std::fmt;
 impl fmt::Display for GaussJacobiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
