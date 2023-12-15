@@ -337,6 +337,12 @@ mod tests {
     }
 
     #[test]
+    fn check_legendre_error() {
+        assert!(GaussLegendre::new(0).is_err());
+        assert!(GaussLegendre::new(1).is_err());
+    }
+
+    #[test]
     fn check_derives() {
         let quad = GaussLegendre::new(10);
         let quad_clone = quad.clone();

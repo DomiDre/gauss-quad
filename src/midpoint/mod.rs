@@ -126,6 +126,11 @@ mod tests {
     }
 
     #[test]
+    fn check_midpoint_error() {
+        assert!(Midpoint::new(0).is_err());
+    }
+
+    #[test]
     fn check_derives() {
         let quad = Midpoint::new(10);
         let quad_clone = quad.clone();

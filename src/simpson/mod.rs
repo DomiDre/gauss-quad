@@ -135,6 +135,11 @@ mod tests {
     }
 
     #[test]
+    fn check_simpson_error() {
+        assert!(Simpson::new(0).is_err());
+    }
+
+    #[test]
     fn check_derives() {
         let quad = Simpson::new(10);
         let quad_clone = quad.clone();

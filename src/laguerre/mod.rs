@@ -260,6 +260,38 @@ mod tests {
     }
 
     #[test]
+    fn check_laguerre_error() {
+        assert_eq!(
+            GaussLaguerre::new(0, -0.25),
+            Err(GaussLaguerreError::Degree)
+        );
+        assert_eq!(
+            GaussLaguerre::new(1, -0.25),
+            Err(GaussLaguerreError::Degree)
+        );
+
+        assert_eq!(GaussLaguerre::new(5, -1.0), Err(GaussLaguerreError::Alpha));
+        assert_eq!(GaussLaguerre::new(5, -2.0), Err(GaussLaguerreError::Alpha));
+
+        assert_eq!(
+            GaussLaguerre::new(0, -1.0),
+            Err(GaussLaguerreError::DegreeAlpha)
+        );
+        assert_eq!(
+            GaussLaguerre::new(0, -2.0),
+            Err(GaussLaguerreError::DegreeAlpha)
+        );
+        assert_eq!(
+            GaussLaguerre::new(1, -1.0),
+            Err(GaussLaguerreError::DegreeAlpha)
+        );
+        assert_eq!(
+            GaussLaguerre::new(1, -2.0),
+            Err(GaussLaguerreError::DegreeAlpha)
+        );
+    }
+
+    #[test]
     fn check_derives() {
         let quad = GaussLaguerre::new(10, 1.0);
         let quad_clone = quad.clone();

@@ -151,6 +151,12 @@ mod tests {
     }
 
     #[test]
+    fn check_hermite_error() {
+        assert!(GaussHermite::new(0).is_err());
+        assert!(GaussHermite::new(1).is_err());
+    }
+
+    #[test]
     fn check_derives() {
         let quad = GaussHermite::new(10);
         let quad_clone = quad.clone();

@@ -469,12 +469,99 @@ mod tests {
     }
 
     #[test]
-    fn panics_for_too_small_alpha() {
-        assert!(GaussJacobi::new(3, -2.0, 1.0).is_err());
-    }
+    fn check_jacobi_error() {
+        assert_eq!(GaussJacobi::new(3, -2.0, 1.0), Err(GaussJacobiError::Alpha));
+        assert_eq!(GaussJacobi::new(3, -1.0, 1.0), Err(GaussJacobiError::Alpha));
 
-    #[test]
-    fn panics_for_too_small_beta() {
-        assert!(GaussJacobi::new(3, 1.0, -2.0).is_err());
+        assert_eq!(GaussJacobi::new(3, 1.0, -2.0), Err(GaussJacobiError::Beta));
+        assert_eq!(GaussJacobi::new(3, 1.0, -1.0), Err(GaussJacobiError::Beta));
+
+        assert_eq!(
+            GaussJacobi::new(3, -2.0, -2.0),
+            Err(GaussJacobiError::AlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(3, -1.0, -2.0),
+            Err(GaussJacobiError::AlphaBeta)
+        );
+
+        assert_eq!(
+            GaussJacobi::new(3, -2.0, -1.0),
+            Err(GaussJacobiError::AlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(3, -1.0, -1.0),
+            Err(GaussJacobiError::AlphaBeta)
+        );
+
+        assert_eq!(GaussJacobi::new(0, 0.5, 0.5), Err(GaussJacobiError::Degree));
+        assert_eq!(GaussJacobi::new(1, 0.5, 0.5), Err(GaussJacobiError::Degree));
+
+        assert_eq!(
+            GaussJacobi::new(0, -1.0, 0.5),
+            Err(GaussJacobiError::DegreeAlpha)
+        );
+        assert_eq!(
+            GaussJacobi::new(0, -2.0, 0.5),
+            Err(GaussJacobiError::DegreeAlpha)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -1.0, 0.5),
+            Err(GaussJacobiError::DegreeAlpha)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -2.0, 0.5),
+            Err(GaussJacobiError::DegreeAlpha)
+        );
+
+        assert_eq!(
+            GaussJacobi::new(0, 0.5, -1.0),
+            Err(GaussJacobiError::DegreeBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(0, 0.5, -2.0),
+            Err(GaussJacobiError::DegreeBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, 0.5, -1.0),
+            Err(GaussJacobiError::DegreeBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, 0.5, -2.0),
+            Err(GaussJacobiError::DegreeBeta)
+        );
+
+        assert_eq!(
+            GaussJacobi::new(0, -1.0, -1.0),
+            Err(GaussJacobiError::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(0, -2.0, -2.0),
+            Err(GaussJacobiError::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -1.0, -1.0),
+            Err(GaussJacobiError::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -2.0, -2.0),
+            Err(GaussJacobiError::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(0, -1.0, -2.0),
+            Err(GaussJacobiError::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(0, -2.0, -1.0),
+            Err(GaussJacobiError::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -1.0, -2.0),
+            Err(GaussJacobiError::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -2.0, -1.0),
+            Err(GaussJacobiError::DegreeAlphaBeta)
+        );
     }
 }
