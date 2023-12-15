@@ -1,7 +1,7 @@
 //! Numerical integration using the Gauss-Jacobi quadrature rule.
 //!
 //! This rule can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [-1, 1],
-//! where f(x) is a smooth function on [1, 1], alpha > -1 and beta > -1.
+//! where f(x) is a smooth function on [-1, 1], alpha > -1 and beta > -1.
 //! The domain can be changed to any [a, b] through a linear transformation (which is done in this module),
 //! and this enables the approximation of integrals with singularities at the end points of the domain.
 //!
@@ -38,11 +38,10 @@ use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight};
 /// // initialize the quadrature rule.
 /// let quad = GaussJacobi::new(10, -0.5, 0.0)?;
 ///
-/// // numerically integrate e^-x / sqrt(1 - x).
-/// let integral = quad.integrate(-1.0, 1.0, |x| (-x).exp());
+/// // numerically integrate e^-x / sqrt(2 - x) over the range [0, 2].
+/// let integral = quad.integrate(0.0, 2.0, |x| (-x).exp());
 ///
-/// let dawson_function_of_sqrt_2 = 0.4525399074037225;
-/// assert_abs_diff_eq!(integral, 2.0 * E * dawson_function_of_sqrt_2, epsilon = 1e-14);
+/// assert_abs_diff_eq!(integral, 0.9050798148074449, epsilon = 1e-14);
 /// # Ok::<(), GaussJacobiError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
@@ -133,7 +132,7 @@ impl GaussJacobi {
             node_weight_pairs[deg / 2].0 = 0.0;
         }
 
-        Ok(GaussJacobi {
+        Ok(Self {
             node_weight_pairs,
             alpha,
             beta,
@@ -149,7 +148,7 @@ impl GaussJacobi {
     }
 
     /// Perform quadrature of integrand from `a` to `b`. This will integrate  
-    /// (1 - x)^`alpha` * (1 + x)^`beta` * `integrand`  
+    /// `(1 - x)^alpha * (1 + x)^beta * integrand(x)`  
     /// where `alpha` and `beta` were given in the call to [`init`](Self::new).
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
@@ -158,11 +157,9 @@ impl GaussJacobi {
         let result: f64 = self
             .node_weight_pairs
             .iter()
-            .map(|(x_val, w_val)| {
-                integrand(GaussJacobi::argument_transformation(*x_val, a, b)) * w_val
-            })
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
             .sum();
-        GaussJacobi::scale_factor(a, b) * result
+        Self::scale_factor(a, b) * result
     }
 
     /// Returns the value of the `alpha` parameter.
