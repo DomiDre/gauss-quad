@@ -168,126 +168,53 @@ impl GaussJacobi {
 
 impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
-/// Represents the different possible failure states due to passing
-/// a bad value of `alpha` or `beta` to [`GaussJacobi::new`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ExponentError;
-
-impl ExponentError {
-    fn new(exp: f64) -> Option<Self> {
-        if exp.is_finite() && exp > 1.0 {
-            None
-        } else {
-            Some(Self)
-        }
-    }
-}
-
-use core::fmt;
-impl fmt::Display for ExponentError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "must be a finite value larger than -1")
-    }
-}
-
-/// Represents the different failure states due to passing a bad value of `deg`
-/// to [`GaussJacobi::new`].
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DegreeError;
-
-impl DegreeError {
-    const fn new(deg: usize) -> Option<Self> {
-        match deg {
-            0 | 1 => Some(Self),
-            _ => None,
-        }
-    }
-}
-
-impl fmt::Display for DegreeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "must be at least 2")
-    }
-}
-
 /// The error returned by [`GaussJacobi::new`] if given a `deg` less than 2
 /// and/or an `alpha` and/or `beta` less than or equal to -1.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussJacobiError {
-    Degree(DegreeError),
-    Alpha(ExponentError),
-    Beta(ExponentError),
-    AlphaBeta(ExponentError, ExponentError),
-    DegreeAlpha(DegreeError, ExponentError),
-    DegreeBeta(DegreeError, ExponentError),
-    DegreeAlphaBeta(DegreeError, ExponentError, ExponentError),
+    Degree,
+    Alpha,
+    Beta,
+    AlphaBeta,
+    DegreeAlpha,
+    DegreeBeta,
+    DegreeAlphaBeta,
 }
 
 impl GaussJacobiError {
     fn validate_inputs(deg: usize, alpha: f64, beta: f64) -> Result<(), Self> {
         match (
-            DegreeError::new(deg),
-            ExponentError::new(alpha),
-            ExponentError::new(beta),
+            deg < 2,
+            !(alpha.is_finite() && alpha > -1.0),
+            !(beta.is_finite() && beta > -1.0),
         ) {
-            (None, None, None) => Ok(()),
-            (Some(de), None, None) => Err(Self::Degree(de)),
-            (None, Some(ae), None) => Err(Self::Alpha(ae)),
-            (None, None, Some(be)) => Err(Self::Beta(be)),
-            (None, Some(ae), Some(be)) => Err(Self::AlphaBeta(ae, be)),
-            (Some(de), Some(ae), None) => Err(Self::DegreeAlpha(de, ae)),
-            (Some(de), None, Some(be)) => Err(Self::DegreeBeta(de, be)),
-            (Some(de), Some(ae), Some(be)) => Err(Self::DegreeAlphaBeta(de, ae, be)),
-        }
-    }
-
-    /// Returns the error in the degree if there is one.
-    pub const fn degree_error(&self) -> Option<&DegreeError> {
-        match self {
-            Self::Degree(de)
-            | Self::DegreeAlpha(de, _)
-            | Self::DegreeBeta(de, _)
-            | Self::DegreeAlphaBeta(de, _, _) => Some(de),
-            _ => None,
-        }
-    }
-
-    /// Returns the error in `alpha` if there is one.
-    pub const fn alpha_error(&self) -> Option<&ExponentError> {
-        match self {
-            Self::Alpha(ae)
-            | Self::AlphaBeta(ae, _)
-            | Self::DegreeAlpha(_, ae)
-            | Self::DegreeAlphaBeta(_, ae, _) => Some(ae),
-            _ => None,
-        }
-    }
-
-    /// Returns the error in `beta` if there is one.
-    pub const fn beta_error(&self) -> Option<&ExponentError> {
-        match self {
-            Self::Beta(be)
-            | Self::AlphaBeta(_, be)
-            | Self::DegreeBeta(_, be)
-            | Self::DegreeAlphaBeta(_, _, be) => Some(be),
-            _ => None,
+            (false, false, false) => Ok(()),
+            (true, false, false) => Err(Self::Degree),
+            (false, true, false) => Err(Self::Alpha),
+            (false, false, true) => Err(Self::Beta),
+            (false, true, true) => Err(Self::AlphaBeta),
+            (true, true, false) => Err(Self::DegreeAlpha),
+            (true, false, true) => Err(Self::DegreeBeta),
+            (true, true, true) => Err(Self::DegreeAlphaBeta),
         }
     }
 }
-
+use std::fmt;
 impl fmt::Display for GaussJacobiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        const DEGREE_LIMIT: &str = "must be at least 2";
+        const EXPONENT_LIMIT: &str = "must be finite and larger than -1.0";
         match self {
-            Self::Degree(de) => write!(f, "deg {de}"),
-            Self::Alpha(ae) => write!(f, "alpha {ae}"),
-            Self::Beta(be) => write!(f, "beta {be}"),
-            Self::AlphaBeta(ae, be) => write!(f, "alpha {ae} and beta {be}"),
-            Self::DegreeAlpha(de, ae) => write!(f, "deg {de} and alpha {ae}"),
-            Self::DegreeBeta(de, be) => write!(f, "deg {de} and beta {be}"),
-            Self::DegreeAlphaBeta(de, ae, be) => write!(f, "deg {de}, alpha {ae} and beta {be}"),
+            Self::Degree => write!(f, "degree {DEGREE_LIMIT}"),
+            Self::Alpha => write!(f, "alpha {EXPONENT_LIMIT}"),
+            Self::Beta => write!(f, "beta {EXPONENT_LIMIT}"),
+            Self::AlphaBeta => write!(f, "alpha and beta {EXPONENT_LIMIT}"),
+            Self::DegreeAlpha => write!(f, "degree {DEGREE_LIMIT} and alpha {EXPONENT_LIMIT}"),
+            Self::DegreeBeta => write!(f, "degree {DEGREE_LIMIT} and beta {EXPONENT_LIMIT}"),
+            Self::DegreeAlphaBeta => {
+                write!(f, "degree {DEGREE_LIMIT}, alpha and beta {EXPONENT_LIMIT}")
+            }
         }
     }
 }
