@@ -119,9 +119,8 @@ impl GaussJacobi {
                 eigen
                     .eigenvectors
                     .row(0)
-                    .map(|x| x * x * scale_factor)
                     .iter()
-                    .copied(),
+                    .map(|x| x * x * scale_factor),
             )
             .collect();
 
