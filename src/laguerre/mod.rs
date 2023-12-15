@@ -65,7 +65,12 @@ impl GaussLaguerre {
     ///
     /// Returns an error if `deg` is smaller than 2, or if `alpha` is smaller than -1.
     pub fn new(deg: usize, alpha: f64) -> Result<Self, GaussLaguerreError> {
-        GaussLaguerreError::validate_inputs(deg, alpha)?;
+        match (deg < 2, !(alpha.is_finite() && alpha > -1.0)) {
+            (false, false) => Ok(()),
+            (true, false) => Err(GaussLaguerreError::Degree),
+            (false, true) => Err(GaussLaguerreError::Alpha),
+            (true, true) => Err(GaussLaguerreError::DegreeAlpha),
+        }?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 
@@ -132,96 +137,38 @@ impl GaussLaguerre {
 
 impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
-/// Represents the different failure states caused by a bad `alpha` value in the call to
-/// [`GaussLaguerre::new`].
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+/// The error returned by [`GaussLaguerre::new`] if given a `deg` less than 2 and/or an `alpha` of -1 or less.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum ExponentError {
-    TooSmall(f64),
-    Infinite,
-    Nan,
+pub enum GaussLaguerreError {
+    Degree,
+    Alpha,
+    DegreeAlpha,
 }
 
-use core::num::FpCategory;
+impl GaussLaguerreError {
+    /// Returns true if the given `deg` was bad.
+    #[inline]
+    pub const fn bad_degree(&self) -> bool {
+        matches!(self, Self::Degree | Self::DegreeAlpha)
+    }
 
-impl ExponentError {
-    fn new(exp: f64) -> Option<Self> {
-        match exp.classify() {
-            FpCategory::Infinite => Some(Self::Infinite),
-            FpCategory::Nan => Some(Self::Nan),
-            FpCategory::Normal | FpCategory::Subnormal | FpCategory::Zero => {
-                (exp <= -1.0).then(|| Self::TooSmall(exp))
-            }
-        }
+    /// Returns true if the given `alpha` was bad.
+    #[inline]
+    pub const fn bad_alpha(&self) -> bool {
+        matches!(self, Self::Alpha | Self::DegreeAlpha)
     }
 }
 
 use core::fmt;
-impl fmt::Display for ExponentError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::TooSmall(val) => write!(f, "must be larger than -1 but was {val}"),
-            Self::Infinite => write!(f, "must be finite but was infinite"),
-            Self::Nan => write!(f, "was NaN"),
-        }
-    }
-}
-
-/// Represents the possible failure states caused by a bad value for the `deg` parameter
-/// in [`GaussLaguerre::new`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum DegreeError {
-    Zero,
-    One,
-}
-
-impl DegreeError {
-    const fn new(deg: usize) -> Option<Self> {
-        match deg {
-            0 => Some(Self::Zero),
-            1 => Some(Self::One),
-            _ => None,
-        }
-    }
-}
-
-impl fmt::Display for DegreeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "must be at least 2 but was ")?;
-        match self {
-            Self::Zero => write!(f, "0"),
-            Self::One => write!(f, "1"),
-        }
-    }
-}
-
-/// The error returned by [`GaussLaguerre::new`] if given a `deg` less than 2 and/or an `alpha` of -1 or less.
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum GaussLaguerreError {
-    Degree(DegreeError),
-    Alpha(ExponentError),
-    DegreeAlpha(DegreeError, ExponentError),
-}
-
-impl GaussLaguerreError {
-    fn validate_inputs(deg: usize, alpha: f64) -> Result<(), Self> {
-        match (DegreeError::new(deg), ExponentError::new(alpha)) {
-            (None, None) => Ok(()),
-            (Some(de), None) => Err(Self::Degree(de)),
-            (None, Some(ae)) => Err(Self::Alpha(ae)),
-            (Some(de), Some(ae)) => Err(Self::DegreeAlpha(de, ae)),
-        }
-    }
-}
-
 impl fmt::Display for GaussLaguerreError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        const DEGREE_LIMIT: &str = "degree must be at least 2";
+        const ALPHA_LIMIT: &str = "alpha must be larger than -1.0";
         match self {
-            Self::Degree(de) => write!(f, "deg {de}"),
-            Self::Alpha(ae) => write!(f, "alpha {ae}"),
-            Self::DegreeAlpha(de, ae) => write!(f, "deg {de}, and alpha {ae}"),
+            Self::Degree => write!(f, "{DEGREE_LIMIT}"),
+            Self::Alpha => write!(f, "{ALPHA_LIMIT}"),
+            Self::DegreeAlpha => write!(f, "{DEGREE_LIMIT}, and {ALPHA_LIMIT}"),
         }
     }
 }
