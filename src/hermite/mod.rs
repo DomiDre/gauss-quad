@@ -62,10 +62,8 @@ impl GaussHermite {
     ///
     /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussHermiteError> {
-        match deg {
-            0 => return Err(GaussHermiteError::Zero),
-            1 => return Err(GaussHermiteError::One),
-            _ => (),
+        if deg == 0 || deg == 1 {
+            return Err(GaussHermiteError);
         }
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
         // Initialize symmetric companion matrix
@@ -117,22 +115,15 @@ impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, Ga
 /// The error returned by [`GaussHermite::new`] if it is given a degree of 0 or 1.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum GaussHermiteError {
-    Zero,
-    One,
-}
+pub struct GaussHermiteError;
 
 use core::fmt;
 impl fmt::Display for GaussHermiteError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "the degree of the Gauss-Hermite quadrature rule must be at least 2 but was "
-        )?;
-        match self {
-            Self::Zero => write!(f, "0"),
-            Self::One => write!(f, "1"),
-        }
+            "the degree of the Gauss-Hermite quadrature rule must be at least 2"
+        )
     }
 }
 
