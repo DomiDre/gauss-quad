@@ -264,7 +264,7 @@ impl GaussJacobiError {
         }
     }
 
-    /// Returns `deg` in the degree if there is one.
+    /// Returns the error in the degree if there is one.
     pub const fn degree_error(&self) -> Option<&DegreeError> {
         match self {
             Self::Degree(de)
