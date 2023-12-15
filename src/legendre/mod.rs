@@ -74,15 +74,15 @@ impl GaussLegendre {
     ///
     /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussLegendreError> {
-        match deg {
-            0 => Err(GaussLegendreError::Zero),
-            1 => Err(GaussLegendreError::One),
-            _ => Ok(Self {
-                node_weight_pairs: (1..deg + 1)
-                    .map(|k| NodeWeightPair::new(deg, k).into_tuple())
-                    .collect(),
-            }),
+        if deg < 2 {
+            return Err(GaussLegendreError);
         }
+
+        Ok(Self {
+            node_weight_pairs: (1..deg + 1)
+                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+                .collect(),
+        })
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -121,22 +121,15 @@ impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights,
 /// The error returned by [`GaussLegendre::new`] if it's given a degree of 0 or 1.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum GaussLegendreError {
-    Zero,
-    One,
-}
+pub struct GaussLegendreError;
 
 use core::fmt;
 impl fmt::Display for GaussLegendreError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "the degree of the Gauss-Legendre quadrature rule must be at least 2 but was "
-        )?;
-        match self {
-            Self::Zero => write!(f, "0"),
-            Self::One => write!(f, "1"),
-        }
+            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
+        )
     }
 }
 
