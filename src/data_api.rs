@@ -127,6 +127,26 @@ macro_rules! impl_slice_iterator_newtype_traits {
             fn size_hint(&self) -> (::core::primitive::usize, ::core::option::Option<::core::primitive::usize>) {
                 self.0.size_hint()
             }
+
+            // These methods by default call the `next` method a lot to access data.
+            // This isn't needed in our case, since the data underlying the iterator is
+            // a slice, which has O(1) access to any element. As a result we reimplement them
+            // and just delegate to the inbuilt method.
+
+            #[inline]
+            fn nth(&mut self, index: usize) -> ::core::option::Option<Self::Item> {
+                self.0.nth(index)
+            }
+
+            #[inline]
+            fn count(self) -> ::core::primitive::usize {
+                self.0.count()
+            }
+
+            #[inline]
+            fn last(self) -> ::core::option::Option<Self::Item> {
+                self.0.last()
+            }
         }
 
         impl$(<$a>)? ::core::iter::DoubleEndedIterator for $iterator$(<$a>)? {
