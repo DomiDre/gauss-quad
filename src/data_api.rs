@@ -3,7 +3,7 @@
 //! It should be called in the module that defines the quadrature rule struct.
 //! The [`impl_node_weight_rule_iterators!`] macro defines the iterators that somce of the functions return.
 //! It should be called somewhere it makes sense for the iterators to be defined, e.g. a sub-module.
-//! The [`impl_node_rule_trait!`] and [`impl_node_rule_iterators!`] do the same thing as the previous
+//! The [`impl_node_rule!`] and [`impl_node_rule_iterators!`] do the same thing as the previous
 //! macros but for a struct with only nodes and no weights.
 
 // The code in the macros uses fully qualified paths for every type, so it is quite verbose.
@@ -301,7 +301,7 @@ macro_rules! impl_node_weight_rule_iterators {
 /// nodes and the iterator returned by the [`IntoIterator`] trait.
 #[macro_export]
 #[doc(hidden)]
-macro_rules! impl_node_rule_trait {
+macro_rules! impl_node_rule {
     ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
         // Lets the user do
         // for node in QuadratureRule::new(...) {
@@ -361,7 +361,7 @@ macro_rules! impl_node_rule_trait {
     };
 }
 
-/// This macro defines the iterators used by the functions defined by the [`impl_node_rule_trait`] macro.
+/// This macro defines the iterators used by the functions defined by the [`impl_node_rule`] macro.
 /// It takes in the names of the same structs as that macro,
 /// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
 /// These iterators can only be created in the module where the macro is called

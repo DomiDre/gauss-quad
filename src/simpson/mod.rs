@@ -35,7 +35,7 @@
 
 pub mod iterators;
 
-use crate::{impl_node_rule_trait, Node};
+use crate::{impl_node_rule, Node};
 use iterators::{SimpsonIntoIter, SimpsonIter};
 
 /// A Simpson rule quadrature scheme.
@@ -103,7 +103,7 @@ impl Simpson {
     }
 }
 
-impl_node_rule_trait! {Simpson, SimpsonIter, SimpsonIntoIter}
+impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
 
 #[cfg(test)]
 mod tests {
