@@ -112,18 +112,36 @@ impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights,
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::assert_abs_diff_eq;
+
+    #[test]
+    fn sanity_check() {
+        let rule = GaussLegendre::new(10);
+        assert_eq!(rule.degree(), 10);
+        let data = rule.as_node_weight_pairs();
+        for (node, x) in rule.nodes().zip(data.iter().map(|(x, _)| x)) {
+            assert_eq!(node, x);
+        }
+        for (weight, w) in rule.weights().zip(data.iter().map(|(_, w)| w)) {
+            assert_eq!(weight, w);
+        }
+        for ((node, weight), (x, w)) in rule.iter().zip(data.iter()) {
+            assert_eq!(node, x);
+            assert_eq!(weight, w);
+        }
+    }
 
     #[test]
     fn check_degree_3() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).into_iter().unzip();
+        let rule = GaussLegendre::new(3);
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];
-        for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i]);
+        for (&node, should) in rule.nodes().zip(x_should) {
+            assert_abs_diff_eq!(node, should);
         }
-        for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i]);
+        for (&weight, should) in rule.weights().zip(w_should) {
+            assert_abs_diff_eq!(weight, should);
         }
     }
 
