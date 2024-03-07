@@ -135,7 +135,7 @@ macro_rules! impl_slice_iterator_newtype_traits {
             // and just delegate to the inbuilt method.
 
             #[inline]
-            fn nth(&mut self, index: usize) -> ::core::option::Option<Self::Item> {
+            fn nth(&mut self, index: ::core::primitive::usize) -> ::core::option::Option<Self::Item> {
                 self.0.nth(index)
             }
 
