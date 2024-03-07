@@ -157,7 +157,12 @@ macro_rules! impl_slice_iterator_newtype_traits {
             }
         }
 
-        impl$(<$a>)? ::core::iter::ExactSizeIterator for $iterator$(<$a>)? {}
+        impl$(<$a>)? ::core::iter::ExactSizeIterator for $iterator$(<$a>)? {
+            #[inline]
+            fn len(&self) -> ::core::primitive::usize {
+                self.0.len()
+            }
+        }
         impl$(<$a>)? ::core::iter::FusedIterator for $iterator$(<$a>)? {}
     };
 }
