@@ -20,11 +20,8 @@
 //! # Ok::<(), GaussJacobiError>(())
 //! ```
 
-pub mod iterators;
-use iterators::{GaussJacobiIntoIter, GaussJacobiIter, GaussJacobiNodes, GaussJacobiWeights};
-
 use crate::gamma::gamma;
-use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight};
+use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight};
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -176,6 +173,8 @@ impl GaussJacobi {
 }
 
 impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
+
+impl_node_weight_rule_iterators! {GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
 /// The error returned by [`GaussJacobi::new`] if given a `deg` less than 2
 /// and/or an `alpha` and/or `beta` less than or equal to -1.
