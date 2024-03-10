@@ -12,13 +12,15 @@
 //! # Example
 //! ```
 //! use gauss_quad::legendre::GaussLegendre;
+//! # use gauss_quad::legendre::GaussLegendreError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussLegendre::new(10);
+//! let quad = GaussLegendre::new(10)?;
 //! let integral = quad.integrate(-1.0, 1.0,
 //!     |x| 0.125 * (63.0 * x.powi(5) - 70.0 * x.powi(3) + 15.0 * x)
 //! );
 //! assert_abs_diff_eq!(integral, 0.0);
+//! # Ok::<(), GaussLegendreError>(())
 //! ```
 
 mod bogaert;
@@ -34,24 +36,26 @@ use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight
 /// # Examples
 /// Basic usage:
 /// ```
-/// # use gauss_quad::GaussLegendre;
+/// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Legendre rule with 3 nodes
-/// let quad = GaussLegendre::new(3);
+/// let quad = GaussLegendre::new(3)?;
 ///
 /// // numerically integrate x^2 - 1/3 over the domain [0, 1]
 /// let integral = quad.integrate(0.0, 1.0, |x| x * x - 1.0 / 3.0);
 ///
 /// assert_abs_diff_eq!(integral, 0.0);
+/// # Ok::<(), GaussLegendreError>(())
 /// ```
 /// The nodes and weights are computed in `O(n)` time,
 /// so large quadrature rules are feasible:
 /// ```
-/// # use gauss_quad::GaussLegendre;
+/// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 /// # use approx::assert_abs_diff_eq;
-/// let quad = GaussLegendre::new(1_000_000);
+/// let quad = GaussLegendre::new(1_000_000)?;
 /// let integral = quad.integrate(-3.0, 3.0, |x| x.sin());
 /// assert_abs_diff_eq!(integral, 0.0);
+/// # Ok::<(), GaussLegendreError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -64,12 +68,20 @@ impl GaussLegendre {
     ///
     /// Uses the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969), which has linear time
     /// complexity.
-    pub fn new(deg: usize) -> Self {
-        Self {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `deg` is smaller than 2.
+    pub fn new(deg: usize) -> Result<Self, GaussLegendreError> {
+        if deg < 2 {
+            return Err(GaussLegendreError);
+        }
+
+        Ok(Self {
             node_weight_pairs: (1..deg + 1)
                 .map(|k| NodeWeightPair::new(deg, k).into_tuple())
                 .collect(),
-        }
+        })
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -84,10 +96,11 @@ impl GaussLegendre {
     /// # Example
     /// Basic usage
     /// ```
-    /// # use gauss_quad::GaussLegendre;
+    /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
     /// # use approx::assert_abs_diff_eq;
-    /// let glq_rule = GaussLegendre::new(3);
+    /// let glq_rule = GaussLegendre::new(3)?;
     /// assert_abs_diff_eq!(glq_rule.integrate(-1.0, 1.0, |x| x.powi(5)), 0.0);
+    /// # Ok::<(), GaussLegendreError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
@@ -106,13 +119,30 @@ impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights,
 
 impl_node_weight_rule_iterators! {GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
 
+/// The error returned by [`GaussLegendre::new`] if it's given a degree of 0 or 1.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GaussLegendreError;
+
+use core::fmt;
+impl fmt::Display for GaussLegendreError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
+        )
+    }
+}
+
+impl std::error::Error for GaussLegendreError {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn check_degree_3() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).unwrap().into_iter().unzip();
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];
@@ -122,6 +152,12 @@ mod tests {
         for (i, w_val) in w_should.iter().enumerate() {
             approx::assert_abs_diff_eq!(*w_val, w[i]);
         }
+    }
+
+    #[test]
+    fn check_legendre_error() {
+        assert!(GaussLegendre::new(0).is_err());
+        assert!(GaussLegendre::new(1).is_err());
     }
 
     #[test]

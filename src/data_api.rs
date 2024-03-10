@@ -3,7 +3,7 @@
 //! It should be called in the module that defines the quadrature rule struct.
 //! The [`impl_node_weight_rule_iterators!`] macro defines the iterators that somce of the functions return.
 //! It should be called somewhere it makes sense for the iterators to be defined, e.g. a sub-module.
-//! The [`impl_node_rule_trait!`] and [`impl_node_rule_iterators!`] do the same thing as the previous
+//! The [`impl_node_rule!`] and [`impl_node_rule_iterators!`] do the same thing as the previous
 //! macros but for a struct with only nodes and no weights.
 
 // The code in the macros uses fully qualified paths for every type, so it is quite verbose.
@@ -119,6 +119,7 @@ macro_rules! impl_slice_iterator_newtype_traits {
     ($iterator:ident$(<$a:lifetime>)?, $item:ty) => {
         impl$(<$a>)? ::core::iter::Iterator for $iterator<$($a)?> {
             type Item = $item;
+            #[inline]
             fn next(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next()
             }
@@ -127,15 +128,41 @@ macro_rules! impl_slice_iterator_newtype_traits {
             fn size_hint(&self) -> (::core::primitive::usize, ::core::option::Option<::core::primitive::usize>) {
                 self.0.size_hint()
             }
+
+            // These methods by default call the `next` method a lot to access data.
+            // This isn't needed in our case, since the data underlying the iterator is
+            // a slice, which has O(1) access to any element. As a result we reimplement them
+            // and just delegate to the inbuilt method.
+
+            #[inline]
+            fn nth(&mut self, index: ::core::primitive::usize) -> ::core::option::Option<Self::Item> {
+                self.0.nth(index)
+            }
+
+            #[inline]
+            fn count(self) -> ::core::primitive::usize {
+                self.0.count()
+            }
+
+            #[inline]
+            fn last(self) -> ::core::option::Option<Self::Item> {
+                self.0.last()
+            }
         }
 
         impl$(<$a>)? ::core::iter::DoubleEndedIterator for $iterator$(<$a>)? {
+            #[inline]
             fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next_back()
             }
         }
 
-        impl$(<$a>)? ::core::iter::ExactSizeIterator for $iterator$(<$a>)? {}
+        impl$(<$a>)? ::core::iter::ExactSizeIterator for $iterator$(<$a>)? {
+            #[inline]
+            fn len(&self) -> ::core::primitive::usize {
+                self.0.len()
+            }
+        }
         impl$(<$a>)? ::core::iter::FusedIterator for $iterator$(<$a>)? {}
     };
 }
@@ -300,7 +327,7 @@ macro_rules! impl_node_weight_rule_iterators {
 /// nodes and the iterator returned by the [`IntoIterator`] trait.
 #[macro_export]
 #[doc(hidden)]
-macro_rules! impl_node_rule_trait {
+macro_rules! impl_node_rule {
     ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
         // Lets the user do
         // for node in QuadratureRule::new(...) {
@@ -360,7 +387,7 @@ macro_rules! impl_node_rule_trait {
     };
 }
 
-/// This macro defines the iterators used by the functions defined by the [`impl_node_rule_trait`] macro.
+/// This macro defines the iterators used by the functions defined by the [`impl_node_rule`] macro.
 /// It takes in the names of the same structs as that macro,
 /// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
 /// These iterators can only be created in the module where the macro is called.

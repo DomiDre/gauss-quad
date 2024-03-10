@@ -19,7 +19,7 @@ To use the crate, the desired quadrature rule has to be included in the program,
 The general call structure is to first initialize the n-point quadrature rule setting the degree n via
 
 ```
- let quad = QUADRATURE_RULE::new(n);
+ let quad = QUADRATURE_RULE::new(n)?;
 ```
 
 where QUADRATURE_RULE can currently be set to calculate either:
@@ -36,7 +36,7 @@ where QUADRATURE_RULE can currently be set to calculate either:
 For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
 
 ```
- let quad = GaussLaguerre::new(n, alpha);
+ let quad = GaussLaguerre::new(n, alpha)?;
 ```
 
 Then to calculate the integral of a function call
@@ -45,7 +45,7 @@ Then to calculate the integral of a function call
 let integral = quad.integrate(a, b, f(x));
 ```
 
-where a and b (both f64) are the integral bounds and the f(x) the integrand (fn(f64) -> f64).
+where a and b (both f64) are the integral bounds and the f(x) the integrand (Fn(f64) -> f64).
 For example to integrate a parabola from 0..1 one can use a lambda expression as integrand and call:
 
 ```

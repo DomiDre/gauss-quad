@@ -5,9 +5,9 @@ use gauss_quad::Midpoint;
 fn benches(c: &mut Criterion) {
     let mut group = c.benchmark_group("midpoint");
     for deg in [3, 10, 40, 200, 1_000] {
-        let rule = Midpoint::new(deg);
+        let rule = Midpoint::new(deg).unwrap();
         group.bench_function(&format!("constructor, degree {deg}"), |b| {
-            b.iter(|| black_box(Midpoint::new(deg)))
+            b.iter(|| black_box(Midpoint::new(deg).unwrap()))
         });
         group.bench_function(&format!("cheap integrand, degree {deg}"), |b| {
             b.iter(|| black_box(rule.integrate(-1.0, 1.0, |x| x * x - x - 1.0)))
