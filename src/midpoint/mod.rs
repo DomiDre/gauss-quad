@@ -8,7 +8,7 @@
 //!  value at the midpoint.
 //!
 //! ```
-//! use gauss_quad::midpoint::Midpoint;
+//! use gauss_quad::midpoint::{Midpoint, MidpointError};
 //! use approx::assert_abs_diff_eq;
 //!
 //! use core::f64::consts::PI;
@@ -16,7 +16,7 @@
 //! let eps = 0.001;
 //!
 //! let n = 30;
-//! let quad = Midpoint::new(n);
+//! let quad = Midpoint::new(n)?;
 //!
 //! // integrate some functions
 //! let two_thirds = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -27,7 +27,7 @@
 //!
 //! // some functions need more steps than others
 //! let m = 100;
-//! let better_quad = Midpoint::new(m);
+//! let better_quad = Midpoint::new(m)?;
 //!
 //! let piecewise = better_quad.integrate(-5.0, 5.0, |x|
 //!     if x > 1.0 && x < 2.0 {
@@ -38,6 +38,7 @@
 //! );
 //!
 //! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
+//! # Ok::<(), MidpointError>(())
 //! ```
 
 pub mod iterators;
@@ -47,16 +48,13 @@ use iterators::{MidpointIntoIter, MidpointIter};
 
 /// A midpoint rule quadrature scheme.
 /// ```
-/// # extern crate gauss_quad;
-/// # use gauss_quad::Midpoint;
-/// # fn main() {
-/// #
+/// # use gauss_quad::midpoint::{Midpoint, MidpointError};
 /// // initialize a midpoint rule with 100 cells
-/// let quad: Midpoint = Midpoint::new(100);
+/// let quad: Midpoint = Midpoint::new(100)?;
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the midpoint rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
-/// # }
+/// # Ok::<(), MidpointError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -69,12 +67,17 @@ impl Midpoint {
     /// Initialize a new midpoint rule with `degree` number of cells. The nodes are evenly spaced.
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
-    /// # Panics
-    /// Panics if degree is less than 1
-    pub fn new(degree: usize) -> Self {
-        assert!(degree >= 1, "Degree of Midpoint rule needs to be >= 1");
-        Self {
-            nodes: (0..degree).map(|d| d as f64).collect(),
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `degree` is less than 1.
+    pub fn new(degree: usize) -> Result<Self, MidpointError> {
+        if degree > 0 {
+            Ok(Self {
+                nodes: (0..degree).map(|d| d as f64).collect(),
+            })
+        } else {
+            Err(MidpointError)
         }
     }
 
@@ -97,15 +100,34 @@ impl Midpoint {
 
 impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
 
+/// The error returned by [`Midpoint::new`] if given a degree of 0.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct MidpointError;
+
+use core::fmt;
+impl fmt::Display for MidpointError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "the degree of the midpoint rule needs to be at least 1")
+    }
+}
+
+impl std::error::Error for MidpointError {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn check_midpoint_integration() {
-        let quad = Midpoint::new(100);
+        let quad = Midpoint::new(100).unwrap();
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
+    }
+
+    #[test]
+    fn check_midpoint_error() {
+        assert!(Midpoint::new(0).is_err());
     }
 
     #[test]
