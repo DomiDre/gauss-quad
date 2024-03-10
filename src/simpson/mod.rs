@@ -34,7 +34,7 @@
 //! # Ok::<(), SimpsonError>(())
 //! ```
 
-use crate::{impl_node_rule_iterators, impl_node_rule_trait, Node};
+use crate::{impl_node_rule_iterators, impl_node_rule, Node};
 
 /// A Simpson rule quadrature scheme.
 /// ```
@@ -104,9 +104,7 @@ impl Simpson {
     }
 }
 
-impl_node_rule_trait! {Simpson, SimpsonIter, SimpsonIntoIter}
-
-impl_node_rule_iterators! {SimpsonIter, SimpsonIntoIter}
+impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
 
 /// The error returned by [`Simpson::new`] if given a degree of 0.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

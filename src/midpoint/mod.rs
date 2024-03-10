@@ -41,7 +41,7 @@
 //! # Ok::<(), MidpointError>(())
 //! ```
 
-use crate::{impl_node_rule_iterators, impl_node_rule_trait, Node};
+use crate::{impl_node_rule_iterators, impl_node_rule, Node};
 
 /// A midpoint rule quadrature scheme.
 /// ```
@@ -95,9 +95,7 @@ impl Midpoint {
     }
 }
 
-impl_node_rule_trait! {Midpoint, MidpointIter, MidpointIntoIter}
-
-impl_node_rule_iterators! {MidpointIter, MidpointIntoIter}
+impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
 
 /// The error returned by [`Midpoint::new`] if given a degree of 0.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
