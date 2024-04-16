@@ -170,8 +170,7 @@ macro_rules! impl_slice_iterator_newtype_traits {
 /// This macro defines the iterators used by the functions defined in the [`impl_node_weight_rule!`] macro.
 /// It takes in the names of the same structs as that macro,
 /// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
-/// These iterators can only be created in the module where the macro is called
-/// or the module above it (due to the `pub(super)` marker on the constructors).
+/// These iterators can only be created in the module where the macro is called.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_node_weight_rule_iterators {
@@ -197,7 +196,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         impl<'a> $quadrature_rule_nodes<'a> {
             #[inline]
-            pub(super) fn new(
+            const fn new(
                 iter_map: ::std::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                     fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
@@ -226,7 +225,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         impl<'a> $quadrature_rule_weights<'a> {
             #[inline]
-            pub(super) fn new(
+            const fn new(
                 iter_map: ::std::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                     fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
@@ -253,7 +252,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         impl<'a> $quadrature_rule_iter<'a> {
             #[inline]
-            pub(super) fn new(
+            const fn new(
                 node_weight_pairs: ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
             ) -> Self {
                 Self(node_weight_pairs)
@@ -292,7 +291,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         impl $quadrature_rule_into_iter {
             #[inline]
-            pub(super) fn new(
+            const fn new(
                 node_weight_pairs: ::std::vec::IntoIter<($crate::Node, $crate::Weight)>,
             ) -> Self {
                 Self(node_weight_pairs)
@@ -391,8 +390,7 @@ macro_rules! impl_node_rule {
 /// This macro defines the iterators used by the functions defined by the [`impl_node_rule`] macro.
 /// It takes in the names of the same structs as that macro,
 /// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
-/// These iterators can only be created in the module where the macro is called
-/// or the module above it (due to the `pub(super)` marker on the constructors).
+/// These iterators can only be created in the module where the macro is called.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! impl_node_rule_iterators {
@@ -406,7 +404,7 @@ macro_rules! impl_node_rule_iterators {
 
         impl<'a> $quadrature_rule_iter<'a> {
             #[inline]
-            pub(super) fn new(iter: ::core::slice::Iter<'a, $crate::Node>) -> Self {
+            const fn new(iter: ::core::slice::Iter<'a, $crate::Node>) -> Self {
                 Self(iter)
             }
 
@@ -441,7 +439,7 @@ macro_rules! impl_node_rule_iterators {
 
         impl $quadrature_rule_into_iter {
             #[inline]
-            pub(super) fn new(iter: ::std::vec::IntoIter<$crate::Node>) -> Self {
+            const fn new(iter: ::std::vec::IntoIter<$crate::Node>) -> Self {
                 Self(iter)
             }
 

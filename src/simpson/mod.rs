@@ -34,10 +34,7 @@
 //! # Ok::<(), SimpsonError>(())
 //! ```
 
-pub mod iterators;
-
-use crate::{impl_node_rule, Node};
-use iterators::{SimpsonIntoIter, SimpsonIter};
+use crate::{impl_node_rule_iterators, impl_node_rule, Node};
 
 /// A Simpson rule quadrature scheme.
 /// ```
@@ -122,6 +119,8 @@ impl fmt::Display for SimpsonError {
 }
 
 impl std::error::Error for SimpsonError {}
+
+impl_node_rule_iterators! {SimpsonIter, SimpsonIntoIter}
 
 #[cfg(test)]
 mod tests {

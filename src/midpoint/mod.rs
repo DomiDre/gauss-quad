@@ -41,10 +41,7 @@
 //! # Ok::<(), MidpointError>(())
 //! ```
 
-pub mod iterators;
-
-use crate::{impl_node_rule, Node};
-use iterators::{MidpointIntoIter, MidpointIter};
+use crate::{impl_node_rule_iterators, impl_node_rule, Node};
 
 /// A midpoint rule quadrature scheme.
 /// ```
@@ -113,6 +110,8 @@ impl fmt::Display for MidpointError {
 }
 
 impl std::error::Error for MidpointError {}
+
+impl_node_rule_iterators! {MidpointIter, MidpointIntoIter}
 
 #[cfg(test)]
 mod tests {
