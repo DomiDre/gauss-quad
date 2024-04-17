@@ -34,7 +34,7 @@
 //! # Ok::<(), SimpsonError>(())
 //! ```
 
-use crate::{impl_node_rule_iterators, impl_node_rule, Node};
+use crate::{impl_node_rule, impl_node_rule_iterators, Node};
 
 /// A Simpson rule quadrature scheme.
 /// ```

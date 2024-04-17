@@ -41,7 +41,7 @@
 //! # Ok::<(), MidpointError>(())
 //! ```
 
-use crate::{impl_node_rule_iterators, impl_node_rule, Node};
+use crate::{impl_node_rule, impl_node_rule_iterators, Node};
 
 /// A midpoint rule quadrature scheme.
 /// ```

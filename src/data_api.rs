@@ -86,7 +86,7 @@ macro_rules! impl_node_weight_rule {
                 $quadrature_rule_iter::new(self.node_weight_pairs.iter())
             }
 
-            /// Returns a slice if all the node-weight pairs of the quadrature rule.
+            /// Returns a slice of all the node-weight pairs of the quadrature rule.
             #[inline]
             pub fn as_node_weight_pairs(&self) -> &[($crate::Node, $crate::Weight)] {
                 &self.node_weight_pairs
