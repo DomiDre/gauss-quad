@@ -137,6 +137,10 @@
 
 // Only enable the nighlty `doc_cfg` feature when
 // the `docsrs` configuration attribute is defined.
+// The config in Cargo.toml means that this is defined when we are on docs.rs 
+// or if the environment variable RUSTDOCFLAGS is set to ["--cfg", "docsrs"].
+// This lets us do #[cfg_attr(docsrs, doc(cfg(feature = "...")))] to get a tag
+// on docs.rs that says "available on crate feature ... only".
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 use nalgebra::{Dyn, Matrix, VecStorage};
