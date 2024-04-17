@@ -23,6 +23,9 @@
 //! # Ok::<(), GaussLegendreError>(())
 //! ```
 
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator, IntoParallelIterator};
+
 mod bogaert;
 
 use bogaert::NodeWeightPair;
@@ -84,6 +87,25 @@ impl GaussLegendre {
         })
     }
 
+    /// Same as [`new`](GaussLegendre::new) but runs in parallel.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `deg` is smaller than 2.
+    #[cfg(feature = "rayon")]
+    pub fn par_new(deg: usize) -> Result<Self, GaussLegendreError> {
+        if deg < 2 {
+            return Err(GaussLegendreError);
+        }
+
+        Ok(Self {
+            node_weight_pairs: (1..deg + 1)
+                .into_par_iter()
+                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+                .collect(),
+        })
+    }
+
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
         0.5 * ((b - a) * x + (b + a))
     }
@@ -109,6 +131,31 @@ impl GaussLegendre {
         let result: f64 = self
             .node_weight_pairs
             .iter()
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
+            .sum();
+        Self::scale_factor(a, b) * result
+    }
+
+    /// Same as [`integrate`](GaussLegendre::integrate) but runs in parallel.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+    /// # use approx::assert_abs_diff_eq;
+    /// let glq_rule = GaussLegendre::par_new(1_000_000)?;
+    ///
+    /// assert_abs_diff_eq!(glq_rule.par_integrate(0.0, 1.0, |x| x.ln()), -1.0, epsilon = 1e-12);
+    /// # Ok::<(), GaussLegendreError>(())
+    /// ```
+    #[cfg(feature = "rayon")]
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let result: f64 = self
+            .node_weight_pairs
+            .par_iter()
             .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
             .sum();
         Self::scale_factor(a, b) * result

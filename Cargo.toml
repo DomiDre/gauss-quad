@@ -17,6 +17,7 @@ crate-type = ["lib", "cdylib"]
 [dependencies]
 nalgebra = {version = "0.32", default_features = false, features = ["std"]}
 serde = {version = "1.0.192", default_features = false, features = ["alloc", "derive"], optional = true}
+rayon = {version = "1.10", optional = true}
 
 [dev-dependencies]
 approx = "0.5.1"
@@ -24,6 +25,7 @@ criterion = {version = "0.5", features = ["html_reports"]}
 
 [features]
 serde = ["dep:serde"]
+rayon = ["dep:rayon"]
 
 [package.metadata.docs.rs]
 all-features = true
