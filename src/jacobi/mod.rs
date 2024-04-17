@@ -20,6 +20,9 @@
 //! # Ok::<(), GaussJacobiError>(())
 //! ```
 
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+
 use crate::gamma::gamma;
 use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight};
 
@@ -154,6 +157,21 @@ impl GaussJacobi {
         let result: f64 = self
             .node_weight_pairs
             .iter()
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
+            .sum();
+        Self::scale_factor(a, b) * result
+    }
+
+    #[cfg(feature = "rayon")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
+    /// Same as [`integrate`](GaussJacobi::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let result: f64 = self
+            .node_weight_pairs
+            .par_iter()
             .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
             .sum();
         Self::scale_factor(a, b) * result

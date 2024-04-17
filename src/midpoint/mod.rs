@@ -41,6 +41,9 @@
 //! # Ok::<(), MidpointError>(())
 //! ```
 
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+
 use crate::{impl_node_rule, impl_node_rule_iterators, Node};
 
 /// A midpoint rule quadrature scheme.
@@ -88,6 +91,24 @@ impl Midpoint {
         let sum: f64 = self
             .nodes
             .iter()
+            .map(|&node| integrand(a + rect_width * (0.5 + node)))
+            .sum();
+
+        sum * rect_width
+    }
+
+    #[cfg(feature = "rayon")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
+    /// Same as [`integrate`](Midpoint::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let rect_width = (b - a) / self.nodes.len() as f64;
+
+        let sum: f64 = self
+            .nodes
+            .par_iter()
             .map(|&node| integrand(a + rect_width * (0.5 + node)))
             .sum();
 

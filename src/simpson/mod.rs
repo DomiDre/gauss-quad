@@ -34,6 +34,9 @@
 //! # Ok::<(), SimpsonError>(())
 //! ```
 
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
+
 use crate::{impl_node_rule, impl_node_rule_iterators, Node};
 
 /// A Simpson rule quadrature scheme.
@@ -91,6 +94,39 @@ impl Simpson {
         let sum_over_midpoints: f64 = self
             .nodes
             .iter()
+            .skip(1)
+            .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+            .sum();
+
+        h / 6.0
+            * (2.0 * sum_over_interval_edges
+                + 4.0 * sum_over_midpoints
+                + 4.0 * integrand(a + (2.0 * n - 1.0) * h / 2.0)
+                + integrand(a)
+                + integrand(b))
+    }
+
+    #[cfg(feature = "rayon")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
+    /// Same as [`integrate`](Simpson::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let n = self.nodes.len() as f64;
+
+        let h = (b - a) / n;
+
+        let sum_over_interval_edges: f64 = self
+            .nodes
+            .par_iter()
+            .skip(1)
+            .map(|&node| integrand(a + node * h))
+            .sum();
+
+        let sum_over_midpoints: f64 = self
+            .nodes
+            .par_iter()
             .skip(1)
             .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
             .sum();

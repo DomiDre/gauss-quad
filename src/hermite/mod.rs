@@ -17,6 +17,9 @@
 //! # Ok::<(), GaussHermiteError>(())
 //! ```
 
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+
 use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight, PI};
 
 /// A Gauss-Hermite quadrature scheme.
@@ -101,6 +104,21 @@ impl GaussHermite {
         let result: f64 = self
             .node_weight_pairs
             .iter()
+            .map(|(x_val, w_val)| integrand(*x_val) * w_val)
+            .sum();
+        result
+    }
+
+    #[cfg(feature = "rayon")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
+    /// Same as [`integrate`](GaussHermite::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let result: f64 = self
+            .node_weight_pairs
+            .par_iter()
             .map(|(x_val, w_val)| integrand(*x_val) * w_val)
             .sum();
         result
