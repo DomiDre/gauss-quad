@@ -24,7 +24,7 @@
 //! ```
 
 #[cfg(feature = "rayon")]
-use rayon::prelude::{IntoParallelRefIterator, ParallelIterator, IntoParallelIterator};
+use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 mod bogaert;
 
@@ -87,12 +87,13 @@ impl GaussLegendre {
         })
     }
 
+    #[cfg(feature = "rayon")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
     /// Same as [`new`](GaussLegendre::new) but runs in parallel.
     ///
     /// # Errors
     ///
     /// Returns an error if `deg` is smaller than 2.
-    #[cfg(feature = "rayon")]
     pub fn par_new(deg: usize) -> Result<Self, GaussLegendreError> {
         if deg < 2 {
             return Err(GaussLegendreError);
@@ -136,6 +137,8 @@ impl GaussLegendre {
         Self::scale_factor(a, b) * result
     }
 
+    #[cfg(feature = "rayon")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
     /// Same as [`integrate`](GaussLegendre::integrate) but runs in parallel.
     ///
     /// # Example
@@ -148,7 +151,6 @@ impl GaussLegendre {
     /// assert_abs_diff_eq!(glq_rule.par_integrate(0.0, 1.0, |x| x.ln()), -1.0, epsilon = 1e-12);
     /// # Ok::<(), GaussLegendreError>(())
     /// ```
-    #[cfg(feature = "rayon")]
     pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64 + Sync,

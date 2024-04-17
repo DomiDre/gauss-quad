@@ -134,6 +134,10 @@
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
 
+// Only enable the nighlty `doc_cfg` feature when
+// the `docsrs` configuration attribute is defined.
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 use nalgebra::{Dyn, Matrix, VecStorage};
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 use core::f64::consts::PI;

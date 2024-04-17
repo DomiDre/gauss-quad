@@ -27,8 +27,12 @@ criterion = {version = "0.5", features = ["html_reports"]}
 serde = ["dep:serde"]
 rayon = ["dep:rayon"]
 
+# docs.rs specific configuration
 [package.metadata.docs.rs]
+# Document all features
 all-features = true
+# Defines the configuration attribute `docsrs` which will be passed to rustdoc when running on docs.rs
+rustdoc-args = ["--cfg", "docsrs"]
 
 
 [[bench]]
