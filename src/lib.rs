@@ -133,7 +133,7 @@
 //! # Features
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.  
-//! `rayon`: enables parallel versions of the `integrate` function on the quadrature rule structs.
+//! `rayon`: enables parallel versions of the `integrate` functions on the quadrature rule structs.
 
 // Only enable the nighlty `doc_cfg` feature when
 // the `docsrs` configuration attribute is defined.
