@@ -8,6 +8,7 @@
 //! * Gauss-Jacobi
 //! * Gauss-Laguerre
 //! * Gauss-Hermite
+//! * Gauss-Chebyshev
 //! * Midpoint
 //! * Simpson
 //!
