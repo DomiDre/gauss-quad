@@ -8,17 +8,16 @@
 //! Integrate x^2 * e^(-x^2)
 //! ```
 //! use gauss_quad::hermite::GaussHermite;
+//! # use gauss_quad::hermite::GaussHermiteError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussHermite::new(10);
+//! let quad = GaussHermite::new(10)?;
 //! let integral = quad.integrate(|x| x.powi(2));
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
+//! # Ok::<(), GaussHermiteError>(())
 //! ```
 
-pub mod iterators;
-use iterators::{GaussHermiteIntoIter, GaussHermiteIter, GaussHermiteNodes, GaussHermiteWeights};
-
-use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight, PI};
+use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight, PI};
 
 /// A Gauss-Hermite quadrature scheme.
 ///
@@ -26,16 +25,17 @@ use crate::{impl_node_weight_rule, DMatrixf64, Node, Weight, PI};
 /// # Example
 /// Integrate e^(-x^2) * cos(x)
 /// ```
-/// # use gauss_quad::GaussHermite;
+/// # use gauss_quad::hermite::{GaussHermite, GaussHermiteError};
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::{E, PI};
 /// // initialize a Gauss-Hermite rule with 20 nodes
-/// let quad = GaussHermite::new(20);
+/// let quad = GaussHermite::new(20)?;
 ///
 /// // numerically integrate a function over (-∞, ∞) using the Gauss-Hermite rule
 /// let integral = quad.integrate(|x| x.cos());
 ///
 /// assert_abs_diff_eq!(integral, PI.sqrt() / E.powf(0.25), epsilon = 1e-14);
+/// # Ok::<(), GaussHermiteError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -54,7 +54,14 @@ impl GaussHermite {
     /// 0 on the diagonal & sqrt(n/2) on the off-diagonal
     /// root & weight finding are equivalent to eigenvalue problem
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
-    pub fn new(deg: usize) -> GaussHermite {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `deg` is smaller than 2.
+    pub fn new(deg: usize) -> Result<Self, GaussHermiteError> {
+        if deg < 2 {
+            return Err(GaussHermiteError);
+        }
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
         // Initialize symmetric companion matrix
         for idx in 0..deg - 1 {
@@ -69,7 +76,7 @@ impl GaussHermite {
         let eigen = companion_matrix.symmetric_eigen();
 
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
-        GaussHermite {
+        Ok(GaussHermite {
             node_weight_pairs: eigen
                 .eigenvalues
                 .iter()
@@ -83,7 +90,7 @@ impl GaussHermite {
                         .copied(),
                 )
                 .collect(),
-        }
+        })
     }
 
     /// Perform quadrature of e^(-x^2) * `integrand` over the domain (-∞, ∞).
@@ -102,13 +109,32 @@ impl GaussHermite {
 
 impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
 
+impl_node_weight_rule_iterators! {GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
+
+/// The error returned by [`GaussHermite::new`] if it is given a degree of 0 or 1.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GaussHermiteError;
+
+use core::fmt;
+impl fmt::Display for GaussHermiteError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "the degree of the Gauss-Hermite quadrature rule must be at least 2"
+        )
+    }
+}
+
+impl std::error::Error for GaussHermiteError {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn golub_welsch_3() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3).into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3).unwrap().into_iter().unzip();
         let x_should = [1.224_744_871_391_589, 0.0, -1.224_744_871_391_589];
         let w_should = [
             0.295_408_975_150_919_35,
@@ -121,6 +147,12 @@ mod tests {
         for (i, w_val) in w_should.iter().enumerate() {
             approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
         }
+    }
+
+    #[test]
+    fn check_hermite_error() {
+        assert!(GaussHermite::new(0).is_err());
+        assert!(GaussHermite::new(1).is_err());
     }
 
     #[test]
