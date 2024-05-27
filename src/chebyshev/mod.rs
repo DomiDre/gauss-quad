@@ -40,7 +40,7 @@ impl fmt::Display for GaussChebyshevError {
 
 impl std::error::Error for GaussChebyshevError {}
 
-/// Determines which form of function the Gauss-Chebyshev quadrature rule should integrate.
+/// Determines which form of function the [`GaussChebyshev`] quadrature rule struct should integrate.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussChebyshevForm {
