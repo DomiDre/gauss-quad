@@ -29,7 +29,7 @@ pub struct GaussChebyshev {
     form: GaussChebyshevForm,
 }
 
-/// The error returned when attempting to create a [`GaussChebyshev`] struct with a degree of less than 2.
+/// The error returned when attempting to create a [`GaussChebyshev`] struct with a degree less than 2.
 #[derive(Debug, Clone, Copy, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussChebyshevError;
