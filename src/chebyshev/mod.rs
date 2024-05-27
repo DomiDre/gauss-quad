@@ -10,7 +10,7 @@ use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight
 use core::{f64::consts::PI, fmt};
 
 /// A Gauss-Chebyshev quadrature scheme used to integrate functions of the form
-/// (1 - x^2)^`a` f(x) where `a` is either 1/2 or -1/2, on finite intervals.
+/// (1 - x^2)^`a` f(x) where `a` is either -1/2 or 1/2, on finite intervals.
 ///
 /// # Example
 ///
