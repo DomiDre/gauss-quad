@@ -28,7 +28,7 @@ pub struct GaussChebyshev {
 }
 
 /// The error returned when attempting to create a [`GaussChebyshev`] struct with a degree of less than 2.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussChebyshevError;
 
@@ -41,7 +41,7 @@ impl fmt::Display for GaussChebyshevError {
 impl std::error::Error for GaussChebyshevError {}
 
 /// Determines which form of function the [`GaussChebyshev`] quadrature rule struct should integrate.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussChebyshevForm {
     /// Integrate functions of the form `f(x) * sqrt(1 + x^2)`
