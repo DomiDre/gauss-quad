@@ -1,6 +1,6 @@
 //! Numerical integration using the Chebyshev-Gauss quadrature rule.
 //!
-//! This rule can integrate formulas on the form (1 - x^2)^`v` f(x) where `v` is either 1/2 or -1/2.
+//! This rule can integrate formulas on the form (1 - x^2)^`a` f(x) where `a` is either 1/2 or -1/2.
 
 // We could use this to delegate some special cases of GaussJacobi.
 
@@ -9,7 +9,7 @@ use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight
 use core::{f64::consts::PI, fmt};
 
 /// A Gauss-Chebyshev quadrature scheme used to integrate functions of the form
-/// (1 - x^2)^`v` f(x) where `v` is either 1/2 or -1/2.
+/// (1 - x^2)^`a` f(x) where `a` is either 1/2 or -1/2.
 ///
 /// # Example
 ///
