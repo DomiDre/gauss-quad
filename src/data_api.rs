@@ -155,6 +155,11 @@ macro_rules! impl_slice_iterator_newtype_traits {
             fn next_back(&mut self) -> ::core::option::Option<Self::Item> {
                 self.0.next_back()
             }
+
+            #[inline]
+            fn nth_back(&mut self, n: ::core::primitive::usize) -> ::core::option::Option<Self::Item> {
+                self.0.nth_back(n)
+            }
         }
 
         impl$(<$a>)? ::core::iter::ExactSizeIterator for $iterator$(<$a>)? {
