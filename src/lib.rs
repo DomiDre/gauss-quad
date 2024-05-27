@@ -138,6 +138,7 @@ use nalgebra::{Dyn, Matrix, VecStorage};
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 use core::f64::consts::PI;
 
+pub mod chebyshev;
 mod data_api;
 mod gamma;
 #[cfg(test)]
@@ -149,6 +150,8 @@ pub mod legendre;
 pub mod midpoint;
 pub mod simpson;
 
+#[doc(inline)]
+pub use chebyshev::GaussChebyshev;
 #[doc(inline)]
 pub use data_api::{Node, Weight};
 #[doc(inline)]
