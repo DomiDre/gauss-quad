@@ -2,7 +2,6 @@
 //!
 //! This rule can integrate formulas on the form (1 - x^2)^`v` f(x) where `v` is either 1/2 or -1/2.
 
-
 // We could use this to delegate some special cases of GaussJacobi.
 
 use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight};
@@ -47,9 +46,9 @@ impl std::error::Error for GaussChebyshevError {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussChebyshevForm {
-    /// Integrate functions of the form `f(x) * sqrt(1 + x^2)`
+    /// Integrate functions of the form `f(x) * sqrt(1 - x^2)`
     Multiply,
-    /// Integrate functions of the form `f(x) / sqrt(1 + x^2)`
+    /// Integrate functions of the form `f(x) / sqrt(1 - x^2)`
     Divide,
 }
 
@@ -86,7 +85,8 @@ impl GaussChebyshev {
         })
     }
 
-    /// Returns the form of the rule.
+    /// Returns the form of the rule, that is, whether it is designed for integrating functions of the form
+    /// f(x) * sqrt(1 - x^2) or f(x) / sqrt(1 - x^2).
     pub const fn form(&self) -> GaussChebyshevForm {
         self.form
     }
