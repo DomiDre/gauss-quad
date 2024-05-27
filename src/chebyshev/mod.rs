@@ -2,7 +2,7 @@
 //!
 //! This rule can integrate formulas on the form (1 - x^2)^`v` f(x) where `v` is either 1/2 or -1/2.
 
-use crate::{Node, Weight};
+use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight};
 
 use core::{f64::consts::PI, fmt};
 
@@ -88,11 +88,6 @@ impl GaussChebyshev {
         self.form
     }
 
-    /// Returns the degree of the rule.
-    pub fn degree(&self) -> usize {
-        self.node_weight_pairs.len()
-    }
-
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
         0.5 * ((b - a) * x + (b + a))
     }
@@ -123,3 +118,7 @@ impl GaussChebyshev {
         result * Self::scale_factor(a, b)
     }
 }
+
+impl_node_weight_rule! {GaussChebyshev, GaussChebyshevNodes, GaussChebyshevWeights, GaussChebyshevIter, GaussChebyshevIntoIter}
+
+impl_node_weight_rule_iterators! {GaussChebyshevNodes, GaussChebyshevWeights, GaussChebyshevIter, GaussChebyshevIntoIter}
