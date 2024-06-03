@@ -135,13 +135,12 @@
 //! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.  
 //! `rayon`: enables parallel versions of the `integrate` functions on the quadrature rule structs.
 
-// Only enable the nighlty `doc_cfg` feature when
+// Only enable the nighlty `doc_auto_cfg` feature when
 // the `docsrs` configuration attribute is defined.
 // The config in Cargo.toml means that this is defined when we are on docs.rs (which uses the nightly compiler)
 // or if the environment variable RUSTDOCFLAGS is set as `RUSTDOCFLAGS="--cfg docsrs"`.
-// This lets us do #[cfg_attr(docsrs, doc(cfg(feature = "...")))] to get a tag
-// on docs.rs that says "available on crate feature ... only".
-#![cfg_attr(docsrs, feature(doc_cfg))]
+// This lets us get a tag on docs.rs that says "Available on crate feature ... only".
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;

@@ -88,7 +88,6 @@ impl GaussLegendre {
     }
 
     #[cfg(feature = "rayon")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
     /// Same as [`new`](GaussLegendre::new) but runs in parallel.
     ///
     /// # Errors
@@ -138,7 +137,6 @@ impl GaussLegendre {
     }
 
     #[cfg(feature = "rayon")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
     /// Same as [`integrate`](GaussLegendre::integrate) but runs in parallel.
     ///
     /// # Example

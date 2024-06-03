@@ -127,7 +127,6 @@ impl GaussLaguerre {
     }
 
     #[cfg(feature = "rayon")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
     /// Same as [`integrate`](GaussLaguerre::integrate) but runs in parallel.
     pub fn par_integrate<F>(&self, integrand: F) -> f64
     where

@@ -107,7 +107,6 @@ impl Simpson {
     }
 
     #[cfg(feature = "rayon")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "rayon")))]
     /// Same as [`integrate`](Simpson::integrate) but runs in parallel.
     pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
