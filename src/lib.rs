@@ -137,7 +137,7 @@
 //! ```
 //! # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 //! # use approx::assert_relative_eq;
-//! let rule = GaussLegendre::new(5)?;
+//! let rule = GaussLegendre::new(2)?;
 //! let double_int = rule.integrate(-1.0, 1.0, |x| rule.integrate(-1.0, 1.0, |y| x * x * y));
 //! assert_relative_eq!(double_int, 0.0);
 //! # Ok::<(), GaussLegendreError>(())
