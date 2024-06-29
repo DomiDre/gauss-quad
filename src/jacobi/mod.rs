@@ -1,9 +1,8 @@
 //! Numerical integration using the Gauss-Jacobi quadrature rule.
 //!
-//! This rule can integrate integrands of the form (1 - x)^alpha * (1 + x)^beta * f(x) over the domain [-1, 1],
-//! where f(x) is a smooth function on [-1, 1], alpha > -1 and beta > -1.
-//! The domain can be changed to any [a, b] through a linear transformation (which is done in this module),
-//! and this enables the approximation of integrals with singularities at the end points of the domain.
+//! This rule can integrate expressions of the form (1 - x)^alpha * (1 + x)^beta * f(x),
+//! where f(x) is a smooth function on a finite domain, alpha > -1 and beta > -1, and where f(x) is transformed from the domain [a, b] to the domain [-1, 1].
+//! This enables the approximation of integrals with singularities at the end points of the domain.
 //!
 //! # Example
 //! ```
@@ -28,7 +27,10 @@ use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, 
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
-/// These rules can approximate integrals with singularities at the end points of the domain, [a, b].
+/// This rule can integrate expressions of the form (1 - x)^alpha * (1 + x)^beta * f(x),
+/// where f(x) is a smooth function on a finite domain, alpha > -1 and beta > -1,
+/// and where f(x) is transformed from the domain [a, b] to the domain [-1, 1].
+/// This enables the approximation of integrals with singularities at the end points of the domain.
 ///
 /// # Examples
 /// ```
@@ -38,7 +40,6 @@ use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, 
 /// // initialize the quadrature rule.
 /// let quad = GaussJacobi::new(10, -0.5, 0.0)?;
 ///
-/// // numerically integrate e^-x / sqrt(2 - x) over the range [0, 2].
 /// let integral = quad.integrate(0.0, 2.0, |x| (-x).exp());
 ///
 /// assert_abs_diff_eq!(integral, 0.9050798148074449, epsilon = 1e-14);
@@ -149,7 +150,7 @@ impl GaussJacobi {
 
     /// Perform quadrature of integrand from `a` to `b`. This will integrate  
     /// `(1 - x)^alpha * (1 + x)^beta * integrand(x)`  
-    /// where `alpha` and `beta` were given in the call to [`new`](Self::new).
+    /// where `alpha` and `beta` were given in the call to [`new`](Self::new), and f(x) is transformed from the domain [a, b] to the domain [-1, 1].
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
