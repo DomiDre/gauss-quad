@@ -138,13 +138,13 @@
 //! # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 //! # use approx::assert_relative_eq;
 //! let rule = GaussLegendre::new(2)?;
-//! let double_int = rule.integrate(-1.0, 1.0, |x| rule.integrate(-1.0, 1.0, |y| x * x * y));
-//! assert_relative_eq!(double_int, 0.0);
+//! let double_int = rule.integrate(0.0, 1.0, |x| rule.integrate(0.0, 1.0, |y| x * x * y));
+//! assert_relative_eq!(double_int, 1.0 / 6.0);
 //! # Ok::<(), GaussLegendreError>(())
 //! ```
 //! However, the time complexity of the integration then scales with the number of nodes to
 //! the power of the depth of the integral, e.g. O(n^(3)) for triple integrals.
-//! 
+//!
 //! # Features
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
