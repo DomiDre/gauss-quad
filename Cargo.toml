@@ -1,6 +1,6 @@
 [package]
 name = "gauss-quad"
-version = "0.1.8"
+version = "0.1.9"
 authors = ["DomiDre <dominiquedresen@gmail.com>", "Johanna Sörngård (jsorngard@gmail.com)"]
 keywords = ["gaussian", "quadrature", "numerics", "integration"]
 categories = ["Mathematics"]
@@ -15,7 +15,7 @@ repository = "https://github.com/domidre/gauss-quad"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
-nalgebra = "0.30"
+nalgebra = "0.33"
 
 [dev-dependencies]
 approx = "0.5.1"
