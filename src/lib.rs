@@ -126,8 +126,8 @@
 //! let integral = quad.integrate(left_bound, right_bound, |x| x * x);
 //! ```
 
-use nalgebra::{Dynamic, Matrix, VecStorage};
-pub type DMatrixf64 = Matrix<f64, Dynamic, Dynamic, VecStorage<f64, Dynamic, Dynamic>>;
+use nalgebra::{Dyn, Matrix, VecStorage};
+pub type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 #[doc(inline)]
 pub use core::f64::consts::PI;
 
