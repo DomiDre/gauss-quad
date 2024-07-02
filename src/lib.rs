@@ -110,9 +110,6 @@
 //! ```
 //! Make sure to read the specific quadrature rule's documentation before using it.
 //!
-//! Error handling is very simple: bad input values will cause the program to panic
-//! and abort with a short error message.
-//!
 //! ## Passing functions to quadrature rules
 //! The `integrate` method expects functions of the form `Fn(f64) -> f64`, i.e. functions of
 //! one parameter.
