@@ -68,7 +68,7 @@
 //!
 //! let gauss_hermite = GaussHermite::new(degree)?;
 //! // again, no explicit domain since integration is done over the domain (-∞, ∞).
-//! let constant = gauss_hermite.integrate(|x| x * x - x - 1.0);
+//! let golden_polynomial = gauss_hermite.integrate(|x| x * x - x - 1.0);
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 //!
