@@ -150,6 +150,7 @@
 //! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
 
 use nalgebra::{Dyn, Matrix, VecStorage};
+
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 use core::f64::consts::PI;
 
