@@ -141,7 +141,7 @@
 //! # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 //! # use approx::assert_relative_eq;
 //! let rule = GaussLegendre::new(2)?;
-//! // integrate x^2*x over the unit square
+//! // integrate x^2*y over the unit square
 //! let double_int = rule.integrate(0.0, 1.0, |x| rule.integrate(0.0, 1.0, |y| x * x * y));
 //! assert_relative_eq!(double_int, 1.0 / 6.0);
 //! # Ok::<(), GaussLegendreError>(())
