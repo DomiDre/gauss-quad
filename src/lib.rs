@@ -90,6 +90,7 @@
 //! ```
 //!
 //! ## Errors
+//! 
 //! Quadrature rules are only defined for a certain set of input values.
 //! For example, every rule is only defined for degrees where `degree > 1`.
 //! ```
@@ -142,7 +143,8 @@
 //! However, the time complexity of the integration then scales with the number of nodes to
 //! the power of the depth of the integral, e.g. O(n^(3)) for triple integrals.
 //!
-//! # Features
+//! ## Features
+//! 
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 
