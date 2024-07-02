@@ -12,6 +12,7 @@
 //! * Simpson
 //!
 //! ## Using **gauss-quad**
+//!
 //! To use any of the quadrature rules in your project, first initialize the rule with
 //! a specified degree and then you can use it for integration, e.g.:
 //! ```
@@ -35,6 +36,7 @@
 //! ```
 //!
 //! ## Setting up a quadrature rule
+//!
 //! Using a quadrature rule takes two steps:
 //! 1. Initialization
 //! 2. Integration
@@ -70,6 +72,7 @@
 //! ```
 //!
 //! ## Specific quadrature rules
+//!
 //! Different rules may take different parameters.
 //!
 //! For example, the `GaussLaguerre` rule requires both a `degree` and an `alpha`
@@ -90,7 +93,7 @@
 //! ```
 //!
 //! ## Errors
-//! 
+//!
 //! Quadrature rules are only defined for a certain set of input values.
 //! For example, every rule is only defined for degrees where `degree > 1`.
 //! ```
@@ -144,7 +147,7 @@
 //! the power of the depth of the integral, e.g. O(n^(3)) for triple integrals.
 //!
 //! ## Features
-//! 
+//!
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 
