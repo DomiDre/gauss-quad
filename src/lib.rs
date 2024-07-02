@@ -144,7 +144,7 @@
 //!
 //! # Features
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
-//! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
+//! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 
