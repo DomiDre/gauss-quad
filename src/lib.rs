@@ -3,6 +3,7 @@
 //! **gauss-quad** is a Gaussian quadrature library for numerical integration.
 //!
 //! ## Quadrature rules
+//!
 //! **gauss-quad** implements the following quadrature rules:
 //! * Gauss-Legendre
 //! * Gauss-Jacobi
@@ -115,6 +116,7 @@
 //! Make sure to read the specific quadrature rule's documentation before using it.
 //!
 //! ## Passing functions to quadrature rules
+//!
 //! The `integrate` method expects functions of the form `Fn(f64) -> f64`, i.e. functions of
 //! one parameter.
 //!
