@@ -469,3 +469,30 @@ macro_rules! impl_node_rule_iterators {
         // endregion: QuadratureRuleIntoIter
     };
 }
+
+#[cfg(test)]
+mod tests {
+    use super::super::GaussLegendre;
+    use super::*;
+    #[test]
+    fn test_gauss_legendre_macro_implementation() {
+        let quad = GaussLegendre::new(5).unwrap();
+
+        // Test iterator implementations
+        assert_eq!(quad.nodes().count(), 5);
+        assert_eq!(quad.weights().count(), 5);
+        assert_eq!(quad.iter().count(), 5);
+        assert_eq!(quad.as_node_weight_pairs().len(), 5);
+
+        // Test IntoIterator implementation
+        let vec: Vec<(Node, Weight)> = quad.clone().into_iter().collect();
+        assert_eq!(vec.len(), 5);
+
+        // Test into_node_weight_pairs
+        let pairs = quad.clone().into_node_weight_pairs();
+        assert_eq!(pairs.len(), 5);
+
+        // Test degree
+        assert_eq!(quad.degree(), 5);
+    }
+}
