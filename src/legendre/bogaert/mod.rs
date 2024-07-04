@@ -183,20 +183,26 @@ impl ThetaWeightPair {
     }
 }
 
-#[test]
-fn check_bessel_j0_zero() {
-    // check bessel zeros with values from table in A Treatise on the Theory of Bessel Functions
-    approx::assert_abs_diff_eq!(bessel_j0_zero(1), 2.404_825_6, epsilon = 0.000_000_1);
-    approx::assert_abs_diff_eq!(bessel_j0_zero(2), 5.520_078_1, epsilon = 0.000_000_1);
-    approx::assert_abs_diff_eq!(bessel_j0_zero(20), 62.048_469_2, epsilon = 0.000_000_1);
-    approx::assert_abs_diff_eq!(bessel_j0_zero(30), 93.463_718_8, epsilon = 0.000_000_1);
-    approx::assert_abs_diff_eq!(bessel_j0_zero(40), 124.879_308_9, epsilon = 0.000_000_1);
-}
+#[cfg(test)]
+mod test {
+    use super::{bessel_j0_zero, bessel_j1_squared};
+    use approx::assert_abs_diff_eq;
 
-#[test]
-fn check_bessel_j1_squared() {
-    // check bessel j_1 squared values evaluated at zeros of j_0
-    // reference values calculated using implementation from scipy.special.j1
-    approx::assert_abs_diff_eq!(bessel_j1_squared(1), 0.269_514_1, epsilon = 0.000_000_1);
-    approx::assert_abs_diff_eq!(bessel_j1_squared(30), 0.006_811_5, epsilon = 0.000_000_1);
+    #[test]
+    fn check_bessel_j0_zero() {
+        // check bessel zeros with values from table in A Treatise on the Theory of Bessel Functions
+        assert_abs_diff_eq!(bessel_j0_zero(1), 2.404_825_6, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j0_zero(2), 5.520_078_1, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j0_zero(20), 62.048_469_2, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j0_zero(30), 93.463_718_8, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j0_zero(40), 124.879_308_9, epsilon = 0.000_000_1);
+    }
+
+    #[test]
+    fn check_bessel_j1_squared() {
+        // check bessel j_1 squared values evaluated at zeros of j_0
+        // reference values calculated using implementation from scipy.special.j1
+        assert_abs_diff_eq!(bessel_j1_squared(1), 0.269_514_1, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j1_squared(30), 0.006_811_5, epsilon = 0.000_000_1);
+    }
 }
