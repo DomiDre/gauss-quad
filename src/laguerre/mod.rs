@@ -2,7 +2,7 @@
 //!
 //! A Gauss-Laguerre rule of degree `n` has nodes and weights chosen such that it
 //! can integrate polynomials of degree 2`n`-1 exactly
-//! with the weighing function w(x, alpha) = x^`alpha` * e^(-x) over the domain `[0, ∞)`.
+//! with the weighing function w(x, `alpha`) = x^`alpha` * e^(-x) over the domain `[0, ∞)`.
 //!
 //! # Examples
 //! ```
