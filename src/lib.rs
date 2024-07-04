@@ -67,7 +67,7 @@
 //! let piecewise = gauss_laguerre.integrate(|x| if x > 0.0 && x < 2.0 { x } else { 0.0 });
 //!
 //! let gauss_hermite = GaussHermite::new(degree)?;
-//! // again, no explicit domain since integration is done over the domain (-∞, ∞).
+//! // again, no explicit domain since Gauss-Hermite integration is done over the domain (-∞, ∞).
 //! let golden_polynomial = gauss_hermite.integrate(|x| x * x - x - 1.0);
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
@@ -83,13 +83,17 @@
 //! This means no domain bounds are needed in the `integrate` call.
 //! ```
 //! # use gauss_quad::laguerre::{GaussLaguerre, GaussLaguerreError};
+//! # use approx::assert_relative_eq;
+//! # use core::f64::consts::PI;
 //! // initialize the quadrature rule
-//! let degree = 10;
+//! let degree = 2;
 //! let alpha = 0.5;
 //! let quad = GaussLaguerre::new(degree, alpha)?;
 //!
 //! // use the rule to integrate a function
 //! let integral = quad.integrate(|x| x * x);
+//! 
+//! assert_relative_eq!(integral, 15.0 * PI.sqrt() / 8.0, epsilon = 1e-14);
 //! # Ok::<(), GaussLaguerreError>(())
 //! ```
 //!
@@ -117,20 +121,24 @@
 //!
 //! ## Passing functions to quadrature rules
 //!
-//! The `integrate` method expects functions of the form `Fn(f64) -> f64`, i.e. functions of
-//! one parameter.
+//! The `integrate` method takes any integrand that implements the `Fn(f64) -> f64` trait, i.e. functions of
+//! one `f64` parameter.
 //!
 //! ```
 //! # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+//! # use approx::assert_relative_eq;
 //!
 //! // initialize the quadrature rule
-//! let degree = 10;
+//! let degree = 2;
 //! let quad = GaussLegendre::new(degree)?;
 //!
 //! // use the rule to integrate a function
 //! let left_bound = 0.0;
 //! let right_bound = 1.0;
+//!
 //! let integral = quad.integrate(left_bound, right_bound, |x| x * x);
+//!
+//! assert_relative_eq!(integral, 1.0 / 3.0);
 //! # Ok::<(), GaussLegendreError>(())
 //! ```
 //!
@@ -140,10 +148,12 @@
 //! ```
 //! # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 //! # use approx::assert_relative_eq;
-//! let rule = GaussLegendre::new(2)?;
-//! // integrate x^2*y over the unit square
-//! let double_int = rule.integrate(0.0, 1.0, |x| rule.integrate(0.0, 1.0, |y| x * x * y));
-//! assert_relative_eq!(double_int, 1.0 / 6.0);
+//! let rule = GaussLegendre::new(3)?;
+//!
+//! // integrate x^2*y over the triangle in the xy plane where x ϵ [0, 1] and y ϵ [0, x]:
+//! let double_int = rule.integrate(0.0, 1.0, |x| rule.integrate(0.0, x, |y| x * x * y));
+//!
+//! assert_relative_eq!(double_int, 0.1);
 //! # Ok::<(), GaussLegendreError>(())
 //! ```
 //! However, the time complexity of the integration then scales with the number of nodes to
