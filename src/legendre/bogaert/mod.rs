@@ -15,7 +15,9 @@ use core::{cmp::Ordering, f64::consts::PI};
 use data::{CL, EVEN_THETA_ZEROS, EVEN_WEIGHTS, J1, JZ, ODD_THETA_ZEROS, ODD_WEIGHTS};
 
 /// This function computes the `k`th zero of Bessel function j_0.
+/// 
 /// # Panic
+/// 
 /// Panics if `k == 0`.
 #[rustfmt::skip]
 // Inlined because the function is only used in a single location
@@ -34,7 +36,9 @@ fn bessel_j0_zero(k: usize) -> f64 {
 
 /// This function computes the square of Bessel function j_1
 /// evaluated at the `k`th zero of Bessel function j_0.
+/// 
 /// # Panic
+/// 
 /// Panics if `k == 0`.
 #[rustfmt::skip]
 // Inlined because the function is only used in a single location
@@ -92,7 +96,9 @@ struct ThetaWeightPair {
 
 impl ThetaWeightPair {
     /// Compute a new ThetaWeightPair.
+    ///
     /// # Panic
+    ///
     /// Panics if `k == 0` or `k > n`.
     #[must_use]
     fn new(n: usize, k: usize) -> Self {
@@ -109,7 +115,9 @@ impl ThetaWeightPair {
     }
 
     /// Compute a node-weight pair, with k limited to half the range
+    ///
     /// # Panic
+    ///
     /// Panics if `k == 0`.
     #[rustfmt::skip]
     #[must_use]
@@ -147,7 +155,9 @@ impl ThetaWeightPair {
     }
 
     /// Returns tabulated theta and weight values, valid for n <= 100
+    ///
     /// # Panic
+    ///
     /// Panics if `n > 100`.
     #[must_use]
     fn tabulated_pair(n: usize, k: usize) -> Self {
