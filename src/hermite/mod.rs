@@ -158,7 +158,13 @@ mod tests {
 
     #[test]
     fn check_hermite_error() {
-        assert!(GaussHermite::new(0).is_err());
+        let hermite_rule = GaussHermite::new(0);
+        assert!(hermite_rule.is_err());
+        assert_eq!(
+            format!("{}", hermite_rule.err().unwrap()),
+            "the degree of the Gauss-Hermite quadrature rule must be at least 2"
+        );
+
         assert!(GaussHermite::new(1).is_err());
     }
 

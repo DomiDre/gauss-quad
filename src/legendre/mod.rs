@@ -145,8 +145,9 @@ impl std::error::Error for GaussLegendreError {}
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use approx::assert_abs_diff_eq;
+
+    use super::*;
 
     #[test]
     fn check_degree_3() {
@@ -184,8 +185,19 @@ mod tests {
 
     #[test]
     fn check_legendre_error() {
-        assert!(GaussLegendre::new(0).is_err());
-        assert!(GaussLegendre::new(1).is_err());
+        let legendre_rule = GaussLegendre::new(0);
+        assert!(legendre_rule.is_err());
+        assert_eq!(
+            format!("{}", legendre_rule.err().unwrap()),
+            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
+        );
+
+        let legendre_rule = GaussLegendre::new(1);
+        assert!(legendre_rule.is_err());
+        assert_eq!(
+            format!("{}", legendre_rule.err().unwrap()),
+            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
+        );
     }
 
     #[test]

@@ -125,7 +125,6 @@ impl_node_rule_iterators! {SimpsonIter, SimpsonIntoIter}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fmt::Write;
 
     #[test]
     fn check_simpson_integration() {
@@ -138,13 +137,10 @@ mod tests {
     fn check_simpson_error() {
         let simpson_rule = Simpson::new(0);
         assert!(simpson_rule.is_err());
-
-        // test error display
-        let mut output = String::new();
-        write!(&mut output, "{}", simpson_rule.err().unwrap()).unwrap();
-
-        // Assert
-        assert_eq!(output, "the degree of the Simpson rule must be at least 1.");
+        assert_eq!(
+            format!("{}", simpson_rule.err().unwrap()),
+            "the degree of the Simpson rule must be at least 1."
+        );
     }
 
     #[test]

@@ -266,22 +266,41 @@ mod tests {
 
     #[test]
     fn check_laguerre_error() {
+        // test error kinds, and if print outputs are as expected
+        let laguerre_rule = GaussLaguerre::new(0, -0.25);
+        assert!(laguerre_rule
+            .as_ref()
+            .is_err_and(|x| x == &GaussLaguerreError::Degree));
         assert_eq!(
-            GaussLaguerre::new(0, -0.25),
-            Err(GaussLaguerreError::Degree)
+            format!("{}", laguerre_rule.err().unwrap()),
+            "degree must be at least 2"
         );
+
         assert_eq!(
             GaussLaguerre::new(1, -0.25),
             Err(GaussLaguerreError::Degree)
         );
 
-        assert_eq!(GaussLaguerre::new(5, -1.0), Err(GaussLaguerreError::Alpha));
+        let laguerre_rule = GaussLaguerre::new(5, -1.0);
+        assert!(laguerre_rule
+            .as_ref()
+            .is_err_and(|x| x == &GaussLaguerreError::Alpha));
+        assert_eq!(
+            format!("{}", laguerre_rule.err().unwrap()),
+            "alpha must be larger than -1.0"
+        );
+
         assert_eq!(GaussLaguerre::new(5, -2.0), Err(GaussLaguerreError::Alpha));
 
+        let laguerre_rule = GaussLaguerre::new(0, -1.0);
+        assert!(laguerre_rule
+            .as_ref()
+            .is_err_and(|x| x == &GaussLaguerreError::DegreeAlpha));
         assert_eq!(
-            GaussLaguerre::new(0, -1.0),
-            Err(GaussLaguerreError::DegreeAlpha)
+            format!("{}", laguerre_rule.err().unwrap()),
+            "degree must be at least 2, and alpha must be larger than -1.0"
         );
+
         assert_eq!(
             GaussLaguerre::new(0, -2.0),
             Err(GaussLaguerreError::DegreeAlpha)

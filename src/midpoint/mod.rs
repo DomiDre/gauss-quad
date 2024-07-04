@@ -128,7 +128,12 @@ mod tests {
 
     #[test]
     fn check_midpoint_error() {
-        assert!(Midpoint::new(0).is_err());
+        let midpoint_rule = Midpoint::new(0);
+        assert!(midpoint_rule.is_err());
+        assert_eq!(
+            format!("{}", midpoint_rule.err().unwrap()),
+            "the degree of the midpoint rule needs to be at least 1"
+        );
     }
 
     #[test]
