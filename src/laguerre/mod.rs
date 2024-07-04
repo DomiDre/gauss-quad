@@ -138,12 +138,15 @@ impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights,
 
 impl_node_weight_rule_iterators! {GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
-/// The error returned by [`GaussLaguerre::new`] if given a degree less than 2 and/or an alpha of -1 or less.
+/// The error returned by [`GaussLaguerre::new`] if given a degree, `deg`, less than 2 and/or an `alpha` of -1 or less.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussLaguerreError {
+    /// The given degree was less than 2.
     Degree,
+    /// The given `alpha` exponent was less than or equal to -1.
     Alpha,
+    /// The given degree was less than 2 and the given `alpha` exponent was less than or equal to -1.
     DegreeAlpha,
 }
 

@@ -9,7 +9,7 @@
 //!
 //!
 //! # Example
-//! 
+//!
 //! ```
 //! use gauss_quad::legendre::GaussLegendre;
 //! # use gauss_quad::legendre::GaussLegendreError;
