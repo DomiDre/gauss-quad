@@ -182,6 +182,7 @@ impl std::error::Error for GaussLaguerreError {}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::assert_abs_diff_eq;
 
     #[test]
     fn golub_welsch_2_alpha_5() {
@@ -189,10 +190,10 @@ mod tests {
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
         let w_should = [82.677_868_380_553_63, 37.322_131_619_446_37];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-12);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-12);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-12);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-12);
         }
     }
 
@@ -210,10 +211,10 @@ mod tests {
             0.010_389_256_501_586_135,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
@@ -231,10 +232,10 @@ mod tests {
             0.032_453_393_142_515_25,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
@@ -256,10 +257,10 @@ mod tests {
             1.162_358_758_613_074_8E-5,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
@@ -302,5 +303,32 @@ mod tests {
         assert_eq!(quad, quad_clone);
         let other_quad = GaussLaguerre::new(10, 2.0);
         assert_ne!(quad, other_quad);
+    }
+
+    #[test]
+    fn check_iterators() {
+        let rule = GaussLaguerre::new(3, 0.5).unwrap();
+
+        let ans = 15.0 / 8.0 * core::f64::consts::PI.sqrt();
+
+        assert_abs_diff_eq!(
+            rule.iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            ans,
+            epsilon = 1e-14
+        );
+
+        assert_abs_diff_eq!(
+            rule.nodes()
+                .zip(rule.weights())
+                .fold(0.0, |tot, (n, w)| tot + n * n * w),
+            ans,
+            epsilon = 1e-14
+        );
+
+        assert_abs_diff_eq!(
+            rule.into_iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            ans,
+            epsilon = 1e-14
+        );
     }
 }
