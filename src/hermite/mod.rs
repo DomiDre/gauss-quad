@@ -135,6 +135,8 @@ impl std::error::Error for GaussHermiteError {}
 
 #[cfg(test)]
 mod tests {
+    use approx::assert_abs_diff_eq;
+
     use super::*;
 
     #[test]
@@ -147,10 +149,10 @@ mod tests {
             0.295_408_975_150_919_35,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
         }
     }
 
@@ -167,5 +169,31 @@ mod tests {
         assert_eq!(quad, quad_clone);
         let other_quad = GaussHermite::new(3);
         assert_ne!(quad, other_quad);
+    }
+
+    #[test]
+    fn check_iterators() {
+        let rule = GaussHermite::new(3).unwrap();
+        let ans = core::f64::consts::PI.sqrt() / 2.0;
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            epsilon = 1e-14
+        );
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.nodes()
+                .zip(rule.weights())
+                .fold(0.0, |tot, (n, w)| tot + n * n * w),
+            epsilon = 1e-14
+        );
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.into_iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            epsilon = 1e-14
+        );
     }
 }
