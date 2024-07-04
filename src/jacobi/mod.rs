@@ -68,13 +68,27 @@ impl GaussJacobi {
             (beta.is_finite() && beta > -1.0),
         ) {
             (true, true, true) => (),
-            (false, true, true) => return Err(GaussJacobiError::Degree),
-            (true, false, true) => return Err(GaussJacobiError::Alpha),
-            (true, true, false) => return Err(GaussJacobiError::Beta),
-            (true, false, false) => return Err(GaussJacobiError::AlphaBeta),
-            (false, false, true) => return Err(GaussJacobiError::DegreeAlpha),
-            (false, true, false) => return Err(GaussJacobiError::DegreeBeta),
-            (false, false, false) => return Err(GaussJacobiError::DegreeAlphaBeta),
+            (false, true, true) => {
+                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree))
+            }
+            (true, false, true) => {
+                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Alpha))
+            }
+            (true, true, false) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Beta)),
+            (true, false, false) => {
+                return Err(GaussJacobiError::new(GaussJacobiErrorReason::AlphaBeta))
+            }
+            (false, false, true) => {
+                return Err(GaussJacobiError::new(GaussJacobiErrorReason::DegreeAlpha))
+            }
+            (false, true, false) => {
+                return Err(GaussJacobiError::new(GaussJacobiErrorReason::DegreeBeta))
+            }
+            (false, false, false) => {
+                return Err(GaussJacobiError::new(
+                    GaussJacobiErrorReason::DegreeAlphaBeta,
+                ))
+            }
         };
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
@@ -177,11 +191,49 @@ impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, Gauss
 
 impl_node_weight_rule_iterators! {GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
+use std::backtrace::Backtrace;
+
 /// The error returned by [`GaussJacobi::new`] if given a degree, `deg`, less than 2
 /// and/or an `alpha` and/or `beta` less than or equal to -1.
+#[derive(Debug)]
+pub struct GaussJacobiError {
+    reason: GaussJacobiErrorReason,
+    backtrace: Backtrace,
+}
+
+impl GaussJacobiError {
+    /// Captures a backtrace and creates a new GaussJacobiError with the given reason.
+    pub(crate) fn new(reason: GaussJacobiErrorReason) -> Self {
+        Self {
+            reason,
+            backtrace: Backtrace::capture(),
+        }
+    }
+
+    /// Returns the reason for the error.
+    pub fn reason(&self) -> GaussJacobiErrorReason {
+        self.reason
+    }
+
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// See [`Backtrace::capture`] for more information about how to make this display information when printed.
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.backtrace
+    }
+}
+
+impl fmt::Display for GaussJacobiError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.reason())
+    }
+}
+
+impl std::error::Error for GaussJacobiError {}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum GaussJacobiError {
+pub enum GaussJacobiErrorReason {
     /// The degree was less than 2.
     Degree,
     /// The `alpha` exponent was less than or equal to -1.
@@ -198,7 +250,7 @@ pub enum GaussJacobiError {
     DegreeAlphaBeta,
 }
 
-impl GaussJacobiError {
+impl GaussJacobiErrorReason {
     /// Returns true if the given degree, `deg`, was bad.
     #[inline]
     pub const fn was_bad_degree(&self) -> bool {
@@ -228,7 +280,7 @@ impl GaussJacobiError {
 }
 
 use core::fmt;
-impl fmt::Display for GaussJacobiError {
+impl fmt::Display for GaussJacobiErrorReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         const DEGREE_LIMIT: &str = "must be at least 2";
         const EXPONENT_LIMIT: &str = "must be finite and larger than -1.0";
@@ -245,8 +297,6 @@ impl fmt::Display for GaussJacobiError {
         }
     }
 }
-
-impl std::error::Error for GaussJacobiError {}
 
 #[cfg(test)]
 mod tests {
@@ -467,107 +517,125 @@ mod tests {
 
     #[test]
     fn check_derives() {
-        let quad = GaussJacobi::new(10, 0.0, 1.0);
+        let quad = GaussJacobi::new(10, 0.0, 1.0).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussJacobi::new(10, 1.0, 0.0);
+        let other_quad = GaussJacobi::new(10, 1.0, 0.0).unwrap();
         assert_ne!(quad, other_quad);
     }
 
     #[test]
     fn check_jacobi_error() {
-        assert_eq!(GaussJacobi::new(3, -2.0, 1.0), Err(GaussJacobiError::Alpha));
-        assert_eq!(GaussJacobi::new(3, -1.0, 1.0), Err(GaussJacobiError::Alpha));
-
-        assert_eq!(GaussJacobi::new(3, 1.0, -2.0), Err(GaussJacobiError::Beta));
-        assert_eq!(GaussJacobi::new(3, 1.0, -1.0), Err(GaussJacobiError::Beta));
-
         assert_eq!(
-            GaussJacobi::new(3, -2.0, -2.0),
-            Err(GaussJacobiError::AlphaBeta)
+            GaussJacobi::new(3, -2.0, 1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::Alpha)
         );
         assert_eq!(
-            GaussJacobi::new(3, -1.0, -2.0),
-            Err(GaussJacobiError::AlphaBeta)
+            GaussJacobi::new(3, -1.0, 1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::Alpha)
         );
 
         assert_eq!(
-            GaussJacobi::new(3, -2.0, -1.0),
-            Err(GaussJacobiError::AlphaBeta)
+            GaussJacobi::new(3, 1.0, -2.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::Beta)
         );
         assert_eq!(
-            GaussJacobi::new(3, -1.0, -1.0),
-            Err(GaussJacobiError::AlphaBeta)
-        );
-
-        assert_eq!(GaussJacobi::new(0, 0.5, 0.5), Err(GaussJacobiError::Degree));
-        assert_eq!(GaussJacobi::new(1, 0.5, 0.5), Err(GaussJacobiError::Degree));
-
-        assert_eq!(
-            GaussJacobi::new(0, -1.0, 0.5),
-            Err(GaussJacobiError::DegreeAlpha)
-        );
-        assert_eq!(
-            GaussJacobi::new(0, -2.0, 0.5),
-            Err(GaussJacobiError::DegreeAlpha)
-        );
-        assert_eq!(
-            GaussJacobi::new(1, -1.0, 0.5),
-            Err(GaussJacobiError::DegreeAlpha)
-        );
-        assert_eq!(
-            GaussJacobi::new(1, -2.0, 0.5),
-            Err(GaussJacobiError::DegreeAlpha)
+            GaussJacobi::new(3, 1.0, -1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::Beta)
         );
 
         assert_eq!(
-            GaussJacobi::new(0, 0.5, -1.0),
-            Err(GaussJacobiError::DegreeBeta)
+            GaussJacobi::new(3, -2.0, -2.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::AlphaBeta)
         );
         assert_eq!(
-            GaussJacobi::new(0, 0.5, -2.0),
-            Err(GaussJacobiError::DegreeBeta)
-        );
-        assert_eq!(
-            GaussJacobi::new(1, 0.5, -1.0),
-            Err(GaussJacobiError::DegreeBeta)
-        );
-        assert_eq!(
-            GaussJacobi::new(1, 0.5, -2.0),
-            Err(GaussJacobiError::DegreeBeta)
+            GaussJacobi::new(3, -1.0, -2.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::AlphaBeta)
         );
 
         assert_eq!(
-            GaussJacobi::new(0, -1.0, -1.0),
-            Err(GaussJacobiError::DegreeAlphaBeta)
+            GaussJacobi::new(3, -2.0, -1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::AlphaBeta)
         );
         assert_eq!(
-            GaussJacobi::new(0, -2.0, -2.0),
-            Err(GaussJacobiError::DegreeAlphaBeta)
+            GaussJacobi::new(3, -1.0, -1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::AlphaBeta)
+        );
+
+        assert_eq!(
+            GaussJacobi::new(0, 0.5, 0.5).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::Degree)
         );
         assert_eq!(
-            GaussJacobi::new(1, -1.0, -1.0),
-            Err(GaussJacobiError::DegreeAlphaBeta)
+            GaussJacobi::new(1, 0.5, 0.5).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::Degree)
+        );
+
+        assert_eq!(
+            GaussJacobi::new(0, -1.0, 0.5).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlpha)
         );
         assert_eq!(
-            GaussJacobi::new(1, -2.0, -2.0),
-            Err(GaussJacobiError::DegreeAlphaBeta)
+            GaussJacobi::new(0, -2.0, 0.5).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlpha)
         );
         assert_eq!(
-            GaussJacobi::new(0, -1.0, -2.0),
-            Err(GaussJacobiError::DegreeAlphaBeta)
+            GaussJacobi::new(1, -1.0, 0.5).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlpha)
         );
         assert_eq!(
-            GaussJacobi::new(0, -2.0, -1.0),
-            Err(GaussJacobiError::DegreeAlphaBeta)
+            GaussJacobi::new(1, -2.0, 0.5).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlpha)
+        );
+
+        assert_eq!(
+            GaussJacobi::new(0, 0.5, -1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeBeta)
         );
         assert_eq!(
-            GaussJacobi::new(1, -1.0, -2.0),
-            Err(GaussJacobiError::DegreeAlphaBeta)
+            GaussJacobi::new(0, 0.5, -2.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeBeta)
         );
         assert_eq!(
-            GaussJacobi::new(1, -2.0, -1.0),
-            Err(GaussJacobiError::DegreeAlphaBeta)
+            GaussJacobi::new(1, 0.5, -1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, 0.5, -2.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeBeta)
+        );
+
+        assert_eq!(
+            GaussJacobi::new(0, -1.0, -1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(0, -2.0, -2.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -1.0, -1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -2.0, -2.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(0, -1.0, -2.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(0, -2.0, -1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -1.0, -2.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+        );
+        assert_eq!(
+            GaussJacobi::new(1, -2.0, -1.0).map_err(|e| e.reason()),
+            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
         );
     }
 

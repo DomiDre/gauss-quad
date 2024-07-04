@@ -66,9 +66,11 @@ impl GaussLaguerre {
     pub fn new(deg: usize, alpha: f64) -> Result<Self, GaussLaguerreError> {
         match (deg >= 2, (alpha.is_finite() && alpha > -1.0)) {
             (true, true) => Ok(()),
-            (false, true) => Err(GaussLaguerreError::Degree),
-            (true, false) => Err(GaussLaguerreError::Alpha),
-            (false, false) => Err(GaussLaguerreError::DegreeAlpha),
+            (false, true) => Err(GaussLaguerreError::new(GaussLaguerreErrorReason::Degree)),
+            (true, false) => Err(GaussLaguerreError::new(GaussLaguerreErrorReason::Alpha)),
+            (false, false) => Err(GaussLaguerreError::new(
+                GaussLaguerreErrorReason::DegreeAlpha,
+            )),
         }?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
@@ -138,10 +140,48 @@ impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights,
 
 impl_node_weight_rule_iterators! {GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
+use std::backtrace::Backtrace;
+
 /// The error returned by [`GaussLaguerre::new`] if given a degree, `deg`, less than 2 and/or an `alpha` of -1 or less.
+#[derive(Debug)]
+pub struct GaussLaguerreError {
+    reason: GaussLaguerreErrorReason,
+    backtrace: Backtrace,
+}
+
+impl fmt::Display for GaussLaguerreError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.reason)
+    }
+}
+
+impl GaussLaguerreError {
+    /// Captures a backtrace and creates a new error with the given reason.
+    pub(crate) fn new(reason: GaussLaguerreErrorReason) -> Self {
+        Self {
+            reason,
+            backtrace: Backtrace::capture(),
+        }
+    }
+
+    /// Returns the reason for the error.
+    pub fn reason(&self) -> GaussLaguerreErrorReason {
+        self.reason
+    }
+
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// See [`Backtrace::capture`] for more information about how to make this display information when printed.
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.backtrace
+    }
+}
+
+impl std::error::Error for GaussLaguerreError {}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum GaussLaguerreError {
+pub enum GaussLaguerreErrorReason {
     /// The given degree was less than 2.
     Degree,
     /// The given `alpha` exponent was less than or equal to -1.
@@ -150,7 +190,7 @@ pub enum GaussLaguerreError {
     DegreeAlpha,
 }
 
-impl GaussLaguerreError {
+impl GaussLaguerreErrorReason {
     /// Returns true if the given degree, `deg`, was bad.
     #[inline]
     pub const fn was_bad_degree(&self) -> bool {
@@ -165,7 +205,7 @@ impl GaussLaguerreError {
 }
 
 use core::fmt;
-impl fmt::Display for GaussLaguerreError {
+impl fmt::Display for GaussLaguerreErrorReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         const DEGREE_LIMIT: &str = "degree must be at least 2";
         const ALPHA_LIMIT: &str = "alpha must be larger than -1.0";
@@ -176,8 +216,6 @@ impl fmt::Display for GaussLaguerreError {
         }
     }
 }
-
-impl std::error::Error for GaussLaguerreError {}
 
 #[cfg(test)]
 mod tests {
@@ -267,41 +305,47 @@ mod tests {
     #[test]
     fn check_laguerre_error() {
         assert_eq!(
-            GaussLaguerre::new(0, -0.25),
-            Err(GaussLaguerreError::Degree)
+            GaussLaguerre::new(0, -0.25).map_err(|e| e.reason()),
+            Err(GaussLaguerreErrorReason::Degree)
         );
         assert_eq!(
-            GaussLaguerre::new(1, -0.25),
-            Err(GaussLaguerreError::Degree)
+            GaussLaguerre::new(1, -0.25).map_err(|e| e.reason()),
+            Err(GaussLaguerreErrorReason::Degree)
         );
 
-        assert_eq!(GaussLaguerre::new(5, -1.0), Err(GaussLaguerreError::Alpha));
-        assert_eq!(GaussLaguerre::new(5, -2.0), Err(GaussLaguerreError::Alpha));
+        assert_eq!(
+            GaussLaguerre::new(5, -1.0).map_err(|e| e.reason()),
+            Err(GaussLaguerreErrorReason::Alpha)
+        );
+        assert_eq!(
+            GaussLaguerre::new(5, -2.0).map_err(|e| e.reason()),
+            Err(GaussLaguerreErrorReason::Alpha)
+        );
 
         assert_eq!(
-            GaussLaguerre::new(0, -1.0),
-            Err(GaussLaguerreError::DegreeAlpha)
+            GaussLaguerre::new(0, -1.0).map_err(|e| e.reason()),
+            Err(GaussLaguerreErrorReason::DegreeAlpha)
         );
         assert_eq!(
-            GaussLaguerre::new(0, -2.0),
-            Err(GaussLaguerreError::DegreeAlpha)
+            GaussLaguerre::new(0, -2.0).map_err(|e| e.reason()),
+            Err(GaussLaguerreErrorReason::DegreeAlpha)
         );
         assert_eq!(
-            GaussLaguerre::new(1, -1.0),
-            Err(GaussLaguerreError::DegreeAlpha)
+            GaussLaguerre::new(1, -1.0).map_err(|e| e.reason()),
+            Err(GaussLaguerreErrorReason::DegreeAlpha)
         );
         assert_eq!(
-            GaussLaguerre::new(1, -2.0),
-            Err(GaussLaguerreError::DegreeAlpha)
+            GaussLaguerre::new(1, -2.0).map_err(|e| e.reason()),
+            Err(GaussLaguerreErrorReason::DegreeAlpha)
         );
     }
 
     #[test]
     fn check_derives() {
-        let quad = GaussLaguerre::new(10, 1.0);
+        let quad = GaussLaguerre::new(10, 1.0).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussLaguerre::new(10, 2.0);
+        let other_quad = GaussLaguerre::new(10, 2.0).unwrap();
         assert_ne!(quad, other_quad);
     }
 

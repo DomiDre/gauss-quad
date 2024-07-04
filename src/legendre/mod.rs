@@ -77,7 +77,7 @@ impl GaussLegendre {
     /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussLegendreError> {
         if deg < 2 {
-            return Err(GaussLegendreError);
+            return Err(GaussLegendreError(Backtrace::capture()));
         }
 
         Ok(Self {
@@ -126,10 +126,11 @@ impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights,
 
 impl_node_weight_rule_iterators! {GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
 
+use std::backtrace::Backtrace;
+
 /// The error returned by [`GaussLegendre::new`] if it's given a degree of 0 or 1.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GaussLegendreError;
+#[derive(Debug)]
+pub struct GaussLegendreError(Backtrace);
 
 use core::fmt;
 impl fmt::Display for GaussLegendreError {
@@ -138,6 +139,15 @@ impl fmt::Display for GaussLegendreError {
             f,
             "the degree of the Gauss-Legendre quadrature rule must be at least 2"
         )
+    }
+}
+
+impl GaussLegendreError {
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// See [`Backtrace::capture`] for more information about how to make this display information when printed.
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
     }
 }
 
@@ -190,10 +200,10 @@ mod tests {
 
     #[test]
     fn check_derives() {
-        let quad = GaussLegendre::new(10);
+        let quad = GaussLegendre::new(10).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussLegendre::new(3);
+        let other_quad = GaussLegendre::new(3).unwrap();
         assert_ne!(quad, other_quad);
     }
 

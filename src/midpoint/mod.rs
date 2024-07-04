@@ -74,7 +74,7 @@ impl Midpoint {
                 nodes: (0..degree).map(|d| d as f64).collect(),
             })
         } else {
-            Err(MidpointError)
+            Err(MidpointError(Backtrace::capture()))
         }
     }
 
@@ -97,15 +97,25 @@ impl Midpoint {
 
 impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
 
+use std::backtrace::Backtrace;
+
 /// The error returned by [`Midpoint::new`] if given a degree of 0.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MidpointError;
+#[derive(Debug)]
+pub struct MidpointError(Backtrace);
 
 use core::fmt;
 impl fmt::Display for MidpointError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "the degree of the midpoint rule needs to be at least 1")
+    }
+}
+
+impl MidpointError {
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// See [`Backtrace::capture`] for more information about how to make this display information when printed.
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
     }
 }
 
@@ -133,10 +143,10 @@ mod tests {
 
     #[test]
     fn check_derives() {
-        let quad = Midpoint::new(10);
+        let quad = Midpoint::new(10).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Midpoint::new(3);
+        let other_quad = Midpoint::new(3).unwrap();
         assert_ne!(quad, other_quad);
     }
 

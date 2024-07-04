@@ -65,7 +65,7 @@ impl GaussHermite {
     /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussHermiteError> {
         if deg < 2 {
-            return Err(GaussHermiteError);
+            return Err(GaussHermiteError(Backtrace::capture()));
         }
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
         // Initialize symmetric companion matrix
@@ -116,10 +116,11 @@ impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, Ga
 
 impl_node_weight_rule_iterators! {GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
 
+use std::backtrace::Backtrace;
+
 /// The error returned by [`GaussHermite::new`] if it is given a degree of 0 or 1.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GaussHermiteError;
+#[derive(Debug)]
+pub struct GaussHermiteError(Backtrace);
 
 use core::fmt;
 impl fmt::Display for GaussHermiteError {
@@ -132,6 +133,15 @@ impl fmt::Display for GaussHermiteError {
 }
 
 impl std::error::Error for GaussHermiteError {}
+
+impl GaussHermiteError {
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// See [`Backtrace::capture`] for more information about how to make this display information when printed.
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -164,10 +174,10 @@ mod tests {
 
     #[test]
     fn check_derives() {
-        let quad = GaussHermite::new(10);
+        let quad = GaussHermite::new(10).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussHermite::new(3);
+        let other_quad = GaussHermite::new(3).unwrap();
         assert_ne!(quad, other_quad);
     }
 

@@ -65,7 +65,7 @@ impl Simpson {
                 nodes: (0..degree).map(|d| d as f64).collect(),
             })
         } else {
-            Err(SimpsonError)
+            Err(SimpsonError(Backtrace::capture()))
         }
     }
 
@@ -106,15 +106,25 @@ impl Simpson {
 
 impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
 
+use std::backtrace::Backtrace;
+
 /// The error returned by [`Simpson::new`] if given a degree of 0.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SimpsonError;
+#[derive(Debug)]
+pub struct SimpsonError(Backtrace);
 
 use core::fmt;
 impl fmt::Display for SimpsonError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "the degree of the Simpson rule must be at least 1.")
+    }
+}
+
+impl SimpsonError {
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// See [`Backtrace::capture`] for more information about how to make this display information when printed.
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
     }
 }
 
@@ -149,10 +159,10 @@ mod tests {
 
     #[test]
     fn check_derives() {
-        let quad = Simpson::new(10);
+        let quad = Simpson::new(10).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Simpson::new(3);
+        let other_quad = Simpson::new(3).unwrap();
         assert_ne!(quad, other_quad);
     }
 }
