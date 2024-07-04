@@ -250,6 +250,8 @@ impl std::error::Error for GaussJacobiError {}
 
 #[cfg(test)]
 mod tests {
+    use approx::assert_abs_diff_eq;
+
     use super::*;
 
     #[test]
@@ -566,6 +568,26 @@ mod tests {
         assert_eq!(
             GaussJacobi::new(1, -2.0, -1.0),
             Err(GaussJacobiError::DegreeAlphaBeta)
+        );
+    }
+
+    #[test]
+    fn check_iterators() {
+        let rule = GaussJacobi::new(2, -0.25, -0.5).unwrap();
+        let ans = 1.3298477657906902;
+
+        assert_abs_diff_eq!(ans, rule.iter().fold(0.0, |tot, (n, w)| tot + n * n * w));
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.nodes()
+                .zip(rule.weights())
+                .fold(0.0, |tot, (n, w)| tot + n * n * w)
+        );
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.into_iter().fold(0.0, |tot, (n, w)| tot + n * n * w)
         );
     }
 }
