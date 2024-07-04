@@ -475,6 +475,8 @@ macro_rules! impl_node_rule_iterators {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use core::fmt;
+    use std::backtrace::Backtrace;
 
     #[derive(Debug, Clone, PartialEq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -482,14 +484,27 @@ mod tests {
         node_weight_pairs: Vec<(Node, Weight)>,
     }
 
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-    pub struct MockQuadratureError;
+    #[derive(Debug)]
+    pub struct MockQuadratureError(Backtrace);
+
+    impl MockQuadratureError {
+        pub fn backtrace(&self) -> &Backtrace {
+            &self.0
+        }
+    }
+
+    impl fmt::Display for MockQuadratureError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "wrong! bad! T_T")
+        }
+    }
+
+    impl std::error::Error for MockQuadratureError {}
 
     impl MockQuadrature {
         pub fn new(deg: usize) -> Result<Self, MockQuadratureError> {
             if deg < 1 {
-                return Err(MockQuadratureError);
+                return Err(MockQuadratureError(Backtrace::capture()));
             }
 
             Ok(Self {
