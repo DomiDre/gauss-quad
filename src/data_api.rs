@@ -477,6 +477,7 @@ mod tests {
     use super::*;
 
     #[derive(Debug, Clone, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct MockQuadrature {
         node_weight_pairs: Vec<(Node, Weight)>,
     }
@@ -534,5 +535,42 @@ mod tests {
 
         // Test degree
         assert_eq!(quad.degree(), 5);
+
+        // test iter functions
+        let mut quad_iter = (&quad).into_iter();
+        assert_eq!(quad_iter.next().unwrap().0, 0.0);
+        assert_eq!(quad_iter.next().unwrap().0, 1.0);
+
+        let quad_iter = (&quad).into_iter();
+        assert_eq!(quad_iter.size_hint(), (5, Some(5)));
+
+        let mut quad_iter = (&quad).into_iter();
+        assert_eq!(quad_iter.nth(2).unwrap().0, 2.0);
+
+        let quad_iter = (&quad).into_iter();
+        assert_eq!(quad_iter.count(), 5);
+
+        let quad_iter = (&quad).into_iter();
+        assert_eq!(quad_iter.last().unwrap().0, 4.0);
+
+        let mut quad_iter = (&quad).into_iter();
+        assert_eq!(quad_iter.next_back().unwrap().0, 4.0);
+
+        let mut quad_iter = (&quad).into_iter();
+        assert_eq!(quad_iter.nth_back(1).unwrap().0, 3.0);
+
+        let quad_iter = (&quad).into_iter();
+        assert_eq!(quad_iter.len(), 5);
+
+        // test slice
+        let quad_slice = (&quad).into_iter().as_slice();
+        assert_eq!(quad_slice.len(), 5);
+        assert_eq!(quad_slice[2].0, 2.0);
+
+        // test as_ref
+        let quad_iter = (&quad).into_iter();
+        let quad_ref = quad_iter.as_ref();
+        assert_eq!(quad_ref.len(), 5);
+        assert_eq!(quad_ref[2].0, 2.0);
     }
 }
