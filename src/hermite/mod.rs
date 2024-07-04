@@ -5,6 +5,7 @@
 //! over the domain (-∞, ∞).
 //!
 //! # Example
+//!
 //! Integrate x^2 * e^(-x^2)
 //! ```
 //! use gauss_quad::hermite::GaussHermite;
@@ -12,7 +13,9 @@
 //! use approx::assert_abs_diff_eq;
 //!
 //! let quad = GaussHermite::new(10)?;
+//!
 //! let integral = quad.integrate(|x| x.powi(2));
+//!
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
 //! # Ok::<(), GaussHermiteError>(())
 //! ```
@@ -22,7 +25,9 @@ use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, 
 /// A Gauss-Hermite quadrature scheme.
 ///
 /// These rules can integrate integrands of the form e^(-x^2) * f(x) over the domain (-∞, ∞).
+///
 /// # Example
+///
 /// Integrate e^(-x^2) * cos(x)
 /// ```
 /// # use gauss_quad::hermite::{GaussHermite, GaussHermiteError};
@@ -93,7 +98,7 @@ impl GaussHermite {
         })
     }
 
-    /// Perform quadrature of e^(-x^2) * `integrand` over the domain (-∞, ∞).
+    /// Perform quadrature of e^(-x^2) * `integrand`(x) over the domain (-∞, ∞).
     pub fn integrate<F>(&self, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,

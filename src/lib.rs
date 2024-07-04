@@ -92,7 +92,7 @@
 //!
 //! // use the rule to integrate a function
 //! let integral = quad.integrate(|x| x * x);
-//! 
+//!
 //! assert_relative_eq!(integral, 15.0 * PI.sqrt() / 8.0, epsilon = 1e-14);
 //! # Ok::<(), GaussLaguerreError>(())
 //! ```
@@ -150,7 +150,7 @@
 //! # use approx::assert_relative_eq;
 //! let rule = GaussLegendre::new(3)?;
 //!
-//! // integrate x^2*y over the triangle in the xy plane where x ϵ [0, 1] and y ϵ [0, x]:
+//! // integrate x^2*y over the triangle in the xy-plane where x ϵ [0, 1] and y ϵ [0, x]:
 //! let double_int = rule.integrate(0.0, 1.0, |x| rule.integrate(0.0, x, |y| x * x * y));
 //!
 //! assert_relative_eq!(double_int, 0.1);
@@ -159,7 +159,7 @@
 //! However, the time complexity of the integration then scales with the number of nodes to
 //! the power of the depth of the integral, e.g. O(n^(3)) for triple integrals.
 //!
-//! ## Features
+//! ## Feature flags
 //!
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.

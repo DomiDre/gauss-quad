@@ -52,8 +52,8 @@ pub struct GaussJacobi {
 
 impl GaussJacobi {
     /// Initializes Gauss-Jacobi quadrature rule of the given degree by computing the nodes and weights
-    /// needed for the given parameters. `alpha` is the exponent of the `(1 - x)` factor and `beta` is the
-    /// exponent of the `(1 + x)` factor.
+    /// needed for the given parameters. `alpha` is the exponent of the (1 - x) factor and `beta` is the
+    /// exponent of the (1 + x) factor.
     ///
     /// Applies the Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights.
     /// See Gil, Segura, Temme - Numerical Methods for Special Functions
@@ -67,15 +67,15 @@ impl GaussJacobi {
             (alpha.is_finite() && alpha > -1.0),
             (beta.is_finite() && beta > -1.0),
         ) {
-            (true, true, true) => Ok(()),
-            (false, true, true) => Err(GaussJacobiError::Degree),
-            (true, false, true) => Err(GaussJacobiError::Alpha),
-            (true, true, false) => Err(GaussJacobiError::Beta),
-            (true, false, false) => Err(GaussJacobiError::AlphaBeta),
-            (false, false, true) => Err(GaussJacobiError::DegreeAlpha),
-            (false, true, false) => Err(GaussJacobiError::DegreeBeta),
-            (false, false, false) => Err(GaussJacobiError::DegreeAlphaBeta),
-        }?;
+            (true, true, true) => (),
+            (false, true, true) => return Err(GaussJacobiError::Degree),
+            (true, false, true) => return Err(GaussJacobiError::Alpha),
+            (true, true, false) => return Err(GaussJacobiError::Beta),
+            (true, false, false) => return Err(GaussJacobiError::AlphaBeta),
+            (false, false, true) => return Err(GaussJacobiError::DegreeAlpha),
+            (false, true, false) => return Err(GaussJacobiError::DegreeBeta),
+            (false, false, false) => return Err(GaussJacobiError::DegreeAlphaBeta),
+        };
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 
@@ -146,8 +146,8 @@ impl GaussJacobi {
     }
 
     /// Perform quadrature of integrand from `a` to `b`. This will integrate  
-    /// `(1 - x)^alpha * (1 + x)^beta * integrand(x)`  
-    /// where `alpha` and `beta` were given in the call to [`new`](Self::new), and f(x) is transformed from the domain [a, b] to the domain [-1, 1].
+    /// (1 - x)^`alpha` * (1 + x)^`beta` * `integrand`(x)  
+    /// where `alpha` and `beta` were given in the call to [`new`](Self::new), and the integrand is transformed from the domain [a, b] to the domain [-1, 1].
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
@@ -192,9 +192,9 @@ pub enum GaussJacobiError {
 }
 
 impl GaussJacobiError {
-    /// Returns true if the given `deg` was bad.
+    /// Returns true if the given degree, `deg`, was bad.
     #[inline]
-    pub const fn bad_degree(&self) -> bool {
+    pub const fn was_bad_degree(&self) -> bool {
         matches!(
             self,
             Self::Degree | Self::DegreeAlpha | Self::DegreeBeta | Self::DegreeAlphaBeta
@@ -203,7 +203,7 @@ impl GaussJacobiError {
 
     /// Returns true if the given `alpha` exponent was bad.
     #[inline]
-    pub const fn bad_alpha(&self) -> bool {
+    pub const fn was_bad_alpha(&self) -> bool {
         matches!(
             self,
             Self::Alpha | Self::DegreeAlpha | Self::AlphaBeta | Self::DegreeAlphaBeta
@@ -212,7 +212,7 @@ impl GaussJacobiError {
 
     /// Returns true if the given `beta` exponent was bad.
     #[inline]
-    pub const fn bad_beta(&self) -> bool {
+    pub const fn was_bad_beta(&self) -> bool {
         matches!(
             self,
             Self::Beta | Self::DegreeBeta | Self::AlphaBeta | Self::DegreeAlphaBeta

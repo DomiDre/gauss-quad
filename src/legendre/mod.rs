@@ -1,8 +1,7 @@
 //! Numerical integration using the Gauss-Legendre quadrature rule.
 //!
-//! In Gauss-Legendre quadrature rules the integrand is evaluated at
-//! the unique points such that a degree `n` rule can integrate
-//! degree `2n - 1` degree polynomials exactly.
+//! A Gauss-Legendre quadrature rule of degree `n` can integrate
+//! degree 2`n`-1 polynomials exactly.
 //!
 //! Evaluation point x_i of a degree n rule is the i:th root
 //! of Legendre polynomial P_n and its weight is  
@@ -34,12 +33,13 @@ use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight
 /// These rules can integrate functions on the domain [a, b].
 ///
 /// # Examples
+///
 /// Basic usage:
 /// ```
 /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 /// # use approx::assert_abs_diff_eq;
-/// // initialize a Gauss-Legendre rule with 3 nodes
-/// let quad = GaussLegendre::new(3)?;
+/// // initialize a Gauss-Legendre rule with 2 nodes
+/// let quad = GaussLegendre::new(2)?;
 ///
 /// // numerically integrate x^2 - 1/3 over the domain [0, 1]
 /// let integral = quad.integrate(0.0, 1.0, |x| x * x - 1.0 / 3.0);
@@ -47,13 +47,15 @@ use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight
 /// assert_abs_diff_eq!(integral, 0.0);
 /// # Ok::<(), GaussLegendreError>(())
 /// ```
-/// The nodes and weights are computed in `O(n)` time,
+/// The nodes and weights are computed in O(n) time,
 /// so large quadrature rules are feasible:
 /// ```
 /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 /// # use approx::assert_abs_diff_eq;
 /// let quad = GaussLegendre::new(1_000_000)?;
+///
 /// let integral = quad.integrate(-3.0, 3.0, |x| x.sin());
+///
 /// assert_abs_diff_eq!(integral, 0.0);
 /// # Ok::<(), GaussLegendreError>(())
 /// ```
@@ -93,13 +95,17 @@ impl GaussLegendre {
     }
 
     /// Perform quadrature integration of given integrand from `a` to `b`.
+    ///
     /// # Example
+    ///
     /// Basic usage
     /// ```
     /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
     /// # use approx::assert_abs_diff_eq;
     /// let glq_rule = GaussLegendre::new(3)?;
+    ///
     /// assert_abs_diff_eq!(glq_rule.integrate(-1.0, 1.0, |x| x.powi(5)), 0.0);
+    ///
     /// # Ok::<(), GaussLegendreError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64

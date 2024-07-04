@@ -1,14 +1,15 @@
 //! The macros in this module define the common API for accessing the data that underlies the quadrature rules.
-//! The [`impl_node_weight_rule!`] macro implements the API for a for a struct with both nodes and weights.
+//! The [`impl_node_weight_rule!`] macro implements the API for a struct with both nodes and weights.
 //! It should be called in the module that defines the quadrature rule struct.
-//! The [`impl_node_weight_rule_iterators!`] macro defines the iterators that somce of the functions return.
+//! The [`impl_node_weight_rule_iterators!`] macro defines the iterators that some of the functions return.
 //! It should be called somewhere it makes sense for the iterators to be defined, e.g. a sub-module.
 //! The [`impl_node_rule!`] and [`impl_node_rule_iterators!`] do the same thing as the previous
 //! macros but for a struct with only nodes and no weights.
 
 // The code in the macros uses fully qualified paths for every type, so it is quite verbose.
 // That is, instead of `usize` it uses `::core::primitive::usize` and so on. This makes it so that
-// the caller of the macro doesn't have to import anything into the module in order for the macro to compile.
+// the caller of the macro doesn't have to import anything into the module in order for the macro to compile,
+// and makes it compile even if the user has made custom types whose names shadow types used by the macro.
 
 /// A node in a quadrature rule.
 pub type Node = f64;
@@ -16,7 +17,7 @@ pub type Node = f64;
 pub type Weight = f64;
 
 /// This macro implements the data access API for the given quadrature rule struct that contains
-/// a field named `node_weight_pairs` of the type `Vec<Node, Weight>`.
+/// a field named `node_weight_pairs` of the type `Vec<(Node, Weight)>`.
 /// It takes in the name of the quadrature rule struct as well as the names if should give the iterators
 /// over its nodes, weights, and both, as well as the iterator returned by the [`IntoIterator`] trait.
 #[doc(hidden)]
@@ -110,7 +111,7 @@ macro_rules! impl_node_weight_rule {
     };
 }
 
-/// Implements the Iterator, DoubleEndedIterator, ExactSizeIterator and FusedIterator traits for a struct
+/// Implements the [`Iterator`], [`DoubleEndedIterator`], [`ExactSizeIterator`] and [`FusedIterator`](core::iter::FusedIterator) traits for a struct
 /// that wraps an iterator that has those traits. Takes in the name of the struct and optionally its lifetime
 /// as well as the type returned by the iterator.
 #[macro_export]
@@ -131,8 +132,8 @@ macro_rules! impl_slice_iterator_newtype_traits {
 
             // These methods by default call the `next` method a lot to access data.
             // This isn't needed in our case, since the data underlying the iterator is
-            // a slice, which has O(1) access to any element. As a result we reimplement them
-            // and just delegate to the inbuilt method.
+            // a slice, which has O(1) access to any element.
+            // As a result we reimplement them and just delegate to the builtin slice iterator methods.
 
             #[inline]
             fn nth(&mut self, index: ::core::primitive::usize) -> ::core::option::Option<Self::Item> {
@@ -246,7 +247,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         // region: QuadratureRuleIter
 
-        /// An iterator over the node-weight-pairs of the quadrature rule.
+        /// An iterator over the node-weight pairs of the quadrature rule.
         ///
         /// Created by the `iter` function on the quadrature rule struct.
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
@@ -287,7 +288,7 @@ macro_rules! impl_node_weight_rule_iterators {
 
         // region: QuadratureRuleIntoIter
 
-        /// An owning iterator over the node-weight-pairs of the quadrature rule.
+        /// An owning iterator over the node-weight pairs of the quadrature rule.
         ///
         /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
@@ -379,6 +380,7 @@ macro_rules! impl_node_rule {
             ///
             /// This function just returns the underlying data without any computation or cloning.
             #[inline]
+            #[must_use = "`self` will be dropped if the result is not used"]
             pub fn into_nodes(self) -> Vec<$crate::Node> {
                 self.nodes
             }

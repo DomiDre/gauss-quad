@@ -1,8 +1,8 @@
 //! Numerical integration using the generalized Gauss-Laguerre quadrature rule.
 //!
 //! A Gauss-Laguerre rule of degree `n` has nodes and weights chosen such that it
-//! can integrate polynomials of degree `2n - 1` exactly
-//! with the weighing function `w(x, alpha) = x^alpha * e^(-x)` over the domain `[0, ∞)`.
+//! can integrate polynomials of degree 2`n`-1 exactly
+//! with the weighing function w(x, alpha) = x^`alpha` * e^(-x) over the domain `[0, ∞)`.
 //!
 //! # Examples
 //! ```
@@ -11,7 +11,9 @@
 //! use approx::assert_abs_diff_eq;
 //!
 //! let quad = GaussLaguerre::new(10, 1.0)?;
+//!
 //! let integral = quad.integrate(|x| x.powi(2));
+//!
 //! assert_abs_diff_eq!(integral, 6.0, epsilon = 1e-14);
 //! # Ok::<(), GaussLaguerreError>(())
 //! ```
@@ -22,19 +24,21 @@ use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, 
 /// A Gauss-Laguerre quadrature scheme.
 ///
 /// These rules can perform integrals with integrands of the form x^alpha * e^(-x) * f(x) over the domain [0, ∞).
+///
 /// # Example
+///
 /// Compute the factorial of 5:
 /// ```
 /// # use gauss_quad::laguerre::{GaussLaguerre, GaussLaguerreError};
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Laguerre rule with 10 nodes
-/// let quad = GaussLaguerre::new(10, 0.0)?;
+/// let quad = GaussLaguerre::new(4, 0.0)?;
 ///
-/// // numerically evaluate this integral,
-/// // which is a definition of the gamma function
+/// // numerically evaluate the integral x^5*e^(-x),
+/// // which is a definition of the gamma function of six
 /// let fact_5 = quad.integrate(|x| x.powi(5));
 ///
-/// assert_abs_diff_eq!(fact_5, 1.0 * 2.0 * 3.0 * 4.0 * 5.0, epsilon = 1e-11);
+/// assert_abs_diff_eq!(fact_5, 1.0 * 2.0 * 3.0 * 4.0 * 5.0, epsilon = 1e-12);
 /// # Ok::<(), GaussLaguerreError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
@@ -109,7 +113,7 @@ impl GaussLaguerre {
     }
 
     /// Perform quadrature of  
-    /// x^`alpha` * e^(-x) * `integrand`  
+    /// x^`alpha` * e^(-x) * `integrand`(x)  
     /// over the domain `[0, ∞)`, where `alpha` was given in the call to [`new`](Self::new).
     pub fn integrate<F>(&self, integrand: F) -> f64
     where
@@ -134,7 +138,7 @@ impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights,
 
 impl_node_weight_rule_iterators! {GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
-/// The error returned by [`GaussLaguerre::new`] if given a `deg` less than 2 and/or an `alpha` of -1 or less.
+/// The error returned by [`GaussLaguerre::new`] if given a degree less than 2 and/or an alpha of -1 or less.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussLaguerreError {
@@ -144,15 +148,15 @@ pub enum GaussLaguerreError {
 }
 
 impl GaussLaguerreError {
-    /// Returns true if the given `deg` was bad.
+    /// Returns true if the given degree, `deg`, was bad.
     #[inline]
-    pub const fn bad_degree(&self) -> bool {
+    pub const fn was_bad_degree(&self) -> bool {
         matches!(self, Self::Degree | Self::DegreeAlpha)
     }
 
     /// Returns true if the given `alpha` was bad.
     #[inline]
-    pub const fn bad_alpha(&self) -> bool {
+    pub const fn was_bad_alpha(&self) -> bool {
         matches!(self, Self::Alpha | Self::DegreeAlpha)
     }
 }
