@@ -177,17 +177,24 @@ impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, Gauss
 
 impl_node_weight_rule_iterators! {GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
-/// The error returned by [`GaussJacobi::new`] if given a `deg` less than 2
+/// The error returned by [`GaussJacobi::new`] if given a degree, `deg`, less than 2
 /// and/or an `alpha` and/or `beta` less than or equal to -1.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussJacobiError {
+    /// The degree was less than 2.
     Degree,
+    /// The `alpha` exponent was less than or equal to -1.
     Alpha,
+    /// The `beta` exponent was less than or equal to -1.
     Beta,
+    /// Both the `alpha` and `beta` exponents were less than or equal to -1.
     AlphaBeta,
+    /// The degree was less than 2 and the `alpha` exponent was less than or equal to -1.
     DegreeAlpha,
+    /// The degree was less than 2 and the `beta` exponent was less than or equal to -1.
     DegreeBeta,
+    /// The degree was less than 2 and both the `alpha` and `beta` exponents were less than or equal to -1.
     DegreeAlphaBeta,
 }
 
