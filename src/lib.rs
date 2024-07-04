@@ -121,7 +121,7 @@
 //!
 //! ## Passing functions to quadrature rules
 //!
-//! The `integrate` method takes any integrand that implements the `Fn(f64) -> f64` trait, i.e. functions of
+//! The `integrate` method takes any integrand that implements the [`Fn(f64) -> f64`](Fn) trait, i.e. functions of
 //! one `f64` parameter.
 //!
 //! ```
