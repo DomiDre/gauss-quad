@@ -574,6 +574,7 @@ mod tests {
     #[test]
     fn check_iterators() {
         let rule = GaussJacobi::new(2, -0.25, -0.5).unwrap();
+        // Answer taken from wolfraom alpha <https://www.wolframalpha.com/input?i2d=true&i=Integrate%5BDivide%5BPower%5Bx%2C2%5D%2CPower%5B%5C%2840%291-x%5C%2841%29%2CDivide%5B1%2C4%5D%5DPower%5B%5C%2840%291%2Bx%5C%2841%29%2CDivide%5B1%2C2%5D%5D%5D%2C%7Bx%2C-1%2C1%7D%5D>
         let ans = 1.3298477657906902;
 
         assert_abs_diff_eq!(ans, rule.iter().fold(0.0, |tot, (n, w)| tot + n * n * w));
