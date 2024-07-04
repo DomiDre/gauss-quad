@@ -195,4 +195,28 @@ mod tests {
         let other_quad = GaussLegendre::new(3);
         assert_ne!(quad, other_quad);
     }
+
+    #[test]
+    fn check_iterators() {
+        // check int(x^2, -1, 1) with various iterators
+
+        let rule = GaussLegendre::new(3).unwrap();
+
+        assert_eq!(
+            2.0 / 3.0,
+            rule.iter().fold(0.0, |tot, (n, w)| tot + n * n * w)
+        );
+
+        assert_eq!(
+            2.0 / 3.0,
+            rule.nodes()
+                .zip(rule.weights())
+                .fold(0.0, |tot, (n, w)| tot + n * n * w)
+        );
+
+        assert_eq!(
+            2.0 / 3.0,
+            rule.into_iter().fold(0.0, |tot, (n, w)| tot + n * n * w)
+        );
+    }
 }
