@@ -157,6 +157,7 @@ impl fmt::Display for GaussLaguerreError {
 
 impl GaussLaguerreError {
     /// Captures a backtrace and creates a new error with the given reason.
+    #[inline]
     pub(crate) fn new(reason: GaussLaguerreErrorReason) -> Self {
         Self {
             reason,
@@ -165,6 +166,7 @@ impl GaussLaguerreError {
     }
 
     /// Returns the reason for the error.
+    #[inline]
     pub fn reason(&self) -> GaussLaguerreErrorReason {
         self.reason
     }
@@ -172,8 +174,27 @@ impl GaussLaguerreError {
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// See [`Backtrace::capture`] for more information about how to make this display information when printed.
+    #[inline]
     pub fn backtrace(&self) -> &Backtrace {
         &self.backtrace
+    }
+
+    /// Returns true if the given degree, `deg`, was bad.
+    #[inline]
+    pub fn was_bad_degree(&self) -> bool {
+        matches!(
+            self.reason(),
+            GaussLaguerreErrorReason::Degree | GaussLaguerreErrorReason::DegreeAlpha
+        )
+    }
+
+    /// Returns true if the given `alpha` was bad.
+    #[inline]
+    pub fn was_bad_alpha(&self) -> bool {
+        matches!(
+            self.reason(),
+            GaussLaguerreErrorReason::Alpha | GaussLaguerreErrorReason::DegreeAlpha
+        )
     }
 }
 
@@ -188,20 +209,6 @@ pub enum GaussLaguerreErrorReason {
     Alpha,
     /// The given degree was less than 2 and the given `alpha` exponent was less than or equal to -1.
     DegreeAlpha,
-}
-
-impl GaussLaguerreErrorReason {
-    /// Returns true if the given degree, `deg`, was bad.
-    #[inline]
-    pub const fn was_bad_degree(&self) -> bool {
-        matches!(self, Self::Degree | Self::DegreeAlpha)
-    }
-
-    /// Returns true if the given `alpha` was bad.
-    #[inline]
-    pub const fn was_bad_alpha(&self) -> bool {
-        matches!(self, Self::Alpha | Self::DegreeAlpha)
-    }
 }
 
 use core::fmt;
