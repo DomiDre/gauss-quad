@@ -277,10 +277,10 @@ mod tests {
             0.236_926_885_056_189_08,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
         }
     }
 
@@ -290,10 +290,10 @@ mod tests {
         let x_should = [-0.689_897_948_556_635_7, 0.289_897_948_556_635_64];
         let w_should = [1.272_165_526_975_908_7, 0.727_834_473_024_091_3];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
@@ -315,10 +315,10 @@ mod tests {
             0.062_991_658_086_769_1,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
@@ -340,10 +340,10 @@ mod tests {
             0.387_126_360_906_606_74,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
         }
     }
 
@@ -458,10 +458,10 @@ mod tests {
             6.645_776_758_516_211E-28,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-10);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-10);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-10);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-10);
         }
     }
 
