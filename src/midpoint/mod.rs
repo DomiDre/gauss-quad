@@ -115,13 +115,15 @@ impl_node_rule_iterators! {MidpointIter, MidpointIntoIter}
 
 #[cfg(test)]
 mod tests {
+    use approx::assert_abs_diff_eq;
+
     use super::*;
 
     #[test]
     fn check_midpoint_integration() {
         let quad = Midpoint::new(100).unwrap();
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
-        approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
+        assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
@@ -136,5 +138,32 @@ mod tests {
         assert_eq!(quad, quad_clone);
         let other_quad = Midpoint::new(3);
         assert_ne!(quad, other_quad);
+    }
+
+    #[test]
+    fn check_iterators() {
+        let rule = Midpoint::new(100).unwrap();
+        let a = 0.0;
+        let b = 1.0;
+        let ans = 1.0 / 3.0;
+        let rect_width = (b - a) / rule.degree() as f64;
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.iter().fold(0.0, |tot, n| {
+                let x = a + rect_width * (0.5 + n);
+                tot + x * x
+            }) * rect_width,
+            epsilon = 1e-4
+        );
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.into_iter().fold(0.0, |tot, n| {
+                let x = a + rect_width * (0.5 + n);
+                tot + x * x
+            }) * rect_width,
+            epsilon = 1e-4
+        );
     }
 }
