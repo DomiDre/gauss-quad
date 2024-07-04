@@ -57,3 +57,9 @@ If the integral is improper, as in the case of Gauss-Laguerre and Gauss-Hermite 
 ```rust
 let integral = quad.integrate(f(x));
 ```
+
+Rules can be nested into double and higher integrals:
+
+```rust
+let double_integral = quad.integrate(a, b, |x| quad.integrate(c(x), d(x), |y| f(x, y)));
+```
