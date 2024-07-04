@@ -7,7 +7,7 @@ This update is mostly about changing the API to adhere to the [Rust API guidelin
 ## Breaking changes
 
  - Changed the name of all constructors from `init` to `new`.  
- - All constructors now return a `Result` that describes the error instead of panicking.  
+ - All constructors now return a `Result` that contains an error when the input is invalid, instead of panicking. Simply `unwrap()` it to recover the old behaviour.  
  - The fields of the quadrature rule structs are now private to uphold the invariants needed for integration.  
  - A set of functions have been implemented that access the node and weight data of the quadrature rule structs in various ways.  
  - The `nodes_and_weights` functions have been removed. To achieve the same effect you can do `QuadratureRule::new(...)?.into_node_weight_pairs()` if you wish to have a `Vec<(f64, f64)>` of nodes and their corresponding weights, or you can do `QuadratureRule::new(...)?.into_iter().unzip()` if you wish to have the nodes and weights separate.
