@@ -474,11 +474,49 @@ macro_rules! impl_node_rule_iterators {
 
 #[cfg(test)]
 mod tests {
-    use super::super::GaussLegendre;
     use super::*;
+
+    #[derive(Debug, Clone, PartialEq)]
+    pub struct MockQuadrature {
+        node_weight_pairs: Vec<(Node, Weight)>,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+    pub struct MockQuadratureError;
+
+    impl MockQuadrature {
+        pub fn new(deg: usize) -> Result<Self, MockQuadratureError> {
+            if deg < 1 {
+                return Err(MockQuadratureError);
+            }
+
+            Ok(Self {
+                node_weight_pairs: (0..deg).map(|d| (d as f64, 1.0)).collect(),
+            })
+        }
+
+        pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+        where
+            F: Fn(f64) -> f64,
+        {
+            let rect_width = (b - a) / self.node_weight_pairs.len() as f64;
+            let result: f64 = self
+                .node_weight_pairs
+                .iter()
+                .map(|(x_val, w_val)| integrand(a + rect_width * (0.5 + x_val)) * w_val)
+                .sum();
+            result * rect_width
+        }
+    }
+
+    impl_node_weight_rule! {MockQuadrature, MockQuadratureNodes, MockQuadratureWeights, MockQuadratureIter, MockQuadratureIntoIter}
+    impl_node_weight_rule_iterators! {MockQuadratureNodes, MockQuadratureWeights, MockQuadratureIter, MockQuadratureIntoIter}
+
     #[test]
-    fn test_gauss_legendre_macro_implementation() {
-        let quad = GaussLegendre::new(5).unwrap();
+    fn test_macro_implementation() {
+        let quad = MockQuadrature::new(5).unwrap();
+        assert_eq!(quad.integrate(0.0, 1.0, |x| x), 0.5);
 
         // Test iterator implementations
         assert_eq!(quad.nodes().count(), 5);
