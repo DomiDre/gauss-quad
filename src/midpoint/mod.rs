@@ -43,6 +43,8 @@
 
 use crate::{impl_node_rule, impl_node_rule_iterators, Node};
 
+use std::backtrace::Backtrace;
+
 /// A midpoint rule quadrature scheme.
 /// ```
 /// # use gauss_quad::midpoint::{Midpoint, MidpointError};
@@ -96,8 +98,6 @@ impl Midpoint {
 }
 
 impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
-
-use std::backtrace::Backtrace;
 
 /// The error returned by [`Midpoint::new`] if given a degree of 0.
 #[derive(Debug)]

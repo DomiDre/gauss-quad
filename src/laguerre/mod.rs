@@ -21,6 +21,8 @@
 use crate::gamma::gamma;
 use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight};
 
+use std::backtrace::Backtrace;
+
 /// A Gauss-Laguerre quadrature scheme.
 ///
 /// These rules can perform integrals with integrands of the form x^alpha * e^(-x) * f(x) over the domain [0, ∞).
@@ -139,8 +141,6 @@ impl GaussLaguerre {
 impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
 impl_node_weight_rule_iterators! {GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
-
-use std::backtrace::Backtrace;
 
 /// The error returned by [`GaussLaguerre::new`] if given a degree, `deg`, less than 2 and/or an `alpha` of -1 or less.
 #[derive(Debug)]

@@ -36,6 +36,8 @@
 
 use crate::{impl_node_rule, impl_node_rule_iterators, Node};
 
+use std::backtrace::Backtrace;
+
 /// A Simpson rule quadrature scheme.
 /// ```
 /// # use gauss_quad::simpson::{Simpson, SimpsonError};
@@ -105,8 +107,6 @@ impl Simpson {
 }
 
 impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
-
-use std::backtrace::Backtrace;
 
 /// The error returned by [`Simpson::new`] if given a degree of 0.
 #[derive(Debug)]

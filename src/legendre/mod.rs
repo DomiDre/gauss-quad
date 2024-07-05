@@ -29,6 +29,8 @@ use bogaert::NodeWeightPair;
 
 use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight};
 
+use std::backtrace::Backtrace;
+
 /// A Gauss-Legendre quadrature scheme.
 ///
 /// These rules can integrate functions on the domain [a, b].
@@ -125,8 +127,6 @@ impl GaussLegendre {
 impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
 
 impl_node_weight_rule_iterators! {GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
-
-use std::backtrace::Backtrace;
 
 /// The error returned by [`GaussLegendre::new`] if it's given a degree of 0 or 1.
 #[derive(Debug)]

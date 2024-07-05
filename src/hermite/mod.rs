@@ -22,6 +22,8 @@
 
 use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight, PI};
 
+use std::backtrace::Backtrace;
+
 /// A Gauss-Hermite quadrature scheme.
 ///
 /// These rules can integrate integrands of the form e^(-x^2) * f(x) over the domain (-∞, ∞).
@@ -115,8 +117,6 @@ impl GaussHermite {
 impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
 
 impl_node_weight_rule_iterators! {GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
-
-use std::backtrace::Backtrace;
 
 /// The error returned by [`GaussHermite::new`] if it is given a degree of 0 or 1.
 #[derive(Debug)]

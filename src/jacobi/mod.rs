@@ -22,6 +22,8 @@
 use crate::gamma::gamma;
 use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight};
 
+use std::backtrace::Backtrace;
+
 /// A Gauss-Jacobi quadrature scheme.
 ///
 /// This rule can integrate expressions of the form (1 - x)^alpha * (1 + x)^beta * f(x),
@@ -190,8 +192,6 @@ impl GaussJacobi {
 impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
 impl_node_weight_rule_iterators! {GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
-
-use std::backtrace::Backtrace;
 
 /// The error returned by [`GaussJacobi::new`] if given a degree, `deg`, less than 2
 /// and/or an `alpha` and/or `beta` less than or equal to -1.
