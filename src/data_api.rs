@@ -88,16 +88,12 @@ macro_rules! impl_node_weight_rule {
             }
 
             /// Returns a slice of all the node-weight pairs of the quadrature rule.
-            ///
-            /// The first number is the node and the second is the weight.
             #[inline]
             pub fn as_node_weight_pairs(&self) -> &[($crate::Node, $crate::Weight)] {
                 &self.node_weight_pairs
             }
 
             /// Converts the quadrature rule into a vector of node-weight pairs.
-            ///
-            /// The first number is the node and the second is the weight.
             ///
             /// This function just returns the underlying vector without any computation or cloning.
             #[inline]
