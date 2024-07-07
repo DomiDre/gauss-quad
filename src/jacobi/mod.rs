@@ -124,7 +124,7 @@ impl GaussJacobi {
                 / (alpha + beta + 1.0);
 
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
-        let mut node_weight_pairs: Vec<(f64, f64)> = eigen
+        let mut node_weight_pairs: Vec<(Node, Weight)> = eigen
             .eigenvalues
             .iter()
             .copied()
@@ -135,6 +135,7 @@ impl GaussJacobi {
                     .iter()
                     .map(|x| x * x * scale_factor),
             )
+            .map(|(n, w)| (Node(n), Weight(w)))
             .collect();
 
         node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
@@ -143,7 +144,7 @@ impl GaussJacobi {
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
         // for now... manual correction seems to do the trick
         if deg % 2 == 1 {
-            node_weight_pairs[deg / 2].0 = 0.0;
+            node_weight_pairs[deg / 2].0 = Node(0.0);
         }
 
         Ok(Self {
@@ -171,7 +172,7 @@ impl GaussJacobi {
         let result: f64 = self
             .node_weight_pairs
             .iter()
-            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
+            .map(|(node, weight)| integrand(Self::argument_transformation(node.0, a, b)) * weight.0)
             .sum();
         Self::scale_factor(a, b) * result
     }
@@ -337,10 +338,10 @@ mod tests {
             0.236_926_885_056_189_08,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*x_val, x[i].0, epsilon = 1e-15);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*w_val, w[i].0, epsilon = 1e-15);
         }
     }
 
@@ -350,10 +351,10 @@ mod tests {
         let x_should = [-0.689_897_948_556_635_7, 0.289_897_948_556_635_64];
         let w_should = [1.272_165_526_975_908_7, 0.727_834_473_024_091_3];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*x_val, x[i].0, epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*w_val, w[i].0, epsilon = 1e-14);
         }
     }
 
@@ -375,10 +376,10 @@ mod tests {
             0.062_991_658_086_769_1,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*x_val, x[i].0, epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*w_val, w[i].0, epsilon = 1e-14);
         }
     }
 
@@ -400,10 +401,10 @@ mod tests {
             0.387_126_360_906_606_74,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*x_val, x[i].0, epsilon = 1e-14);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-14);
+            assert_abs_diff_eq!(*w_val, w[i].0, epsilon = 1e-14);
         }
     }
 
@@ -518,10 +519,10 @@ mod tests {
             6.645_776_758_516_211E-28,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-10);
+            assert_abs_diff_eq!(*x_val, x[i].0, epsilon = 1e-10);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-10);
+            assert_abs_diff_eq!(*w_val, w[i].0, epsilon = 1e-10);
         }
     }
 
@@ -731,7 +732,7 @@ mod tests {
 
         assert_abs_diff_eq!(
             ans,
-            rule.iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            rule.iter().fold(0.0, |tot, (n, w)| tot + n.0 * n.0 * w.0),
             epsilon = 1e-14
         );
 
@@ -739,13 +740,14 @@ mod tests {
             ans,
             rule.nodes()
                 .zip(rule.weights())
-                .fold(0.0, |tot, (n, w)| tot + n * n * w),
+                .fold(0.0, |tot, (n, w)| tot + n.0 * n.0 * w.0),
             epsilon = 1e-14
         );
 
         assert_abs_diff_eq!(
             ans,
-            rule.into_iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            rule.into_iter()
+                .fold(0.0, |tot, (n, w)| tot + n.0 * n.0 * w.0),
             epsilon = 1e-14
         );
     }

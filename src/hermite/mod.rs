@@ -96,6 +96,7 @@ impl GaussHermite {
                         .iter()
                         .copied(),
                 )
+                .map(|(n, w)| (Node(n), Weight(w)))
                 .collect(),
         })
     }
@@ -108,7 +109,7 @@ impl GaussHermite {
         let result: f64 = self
             .node_weight_pairs
             .iter()
-            .map(|(x_val, w_val)| integrand(*x_val) * w_val)
+            .map(|(x_val, w_val)| integrand(x_val.0) * w_val.0)
             .sum();
         result
     }
@@ -160,10 +161,10 @@ mod tests {
             0.295_408_975_150_919_35,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*x_val, x[i].0, epsilon = 1e-15);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*w_val, w[i].0, epsilon = 1e-15);
         }
     }
 
@@ -195,7 +196,7 @@ mod tests {
 
         assert_abs_diff_eq!(
             ans,
-            rule.iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            rule.iter().fold(0.0, |tot, (n, w)| tot + n.0 * n.0 * w.0),
             epsilon = 1e-14
         );
 
@@ -203,13 +204,14 @@ mod tests {
             ans,
             rule.nodes()
                 .zip(rule.weights())
-                .fold(0.0, |tot, (n, w)| tot + n * n * w),
+                .fold(0.0, |tot, (n, w)| tot + n.0 * n.0 * w.0),
             epsilon = 1e-14
         );
 
         assert_abs_diff_eq!(
             ans,
-            rule.into_iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            rule.into_iter()
+                .fold(0.0, |tot, (n, w)| tot + n.0 * n.0 * w.0),
             epsilon = 1e-14
         );
     }

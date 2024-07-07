@@ -14,6 +14,8 @@ mod data;
 use core::{cmp::Ordering, f64::consts::PI};
 use data::{CL, EVEN_THETA_ZEROS, EVEN_WEIGHTS, J1, JZ, ODD_THETA_ZEROS, ODD_WEIGHTS};
 
+use crate::{Node, Weight};
+
 /// This function computes the `k`th zero of Bessel function j_0.
 /// 
 /// # Panic
@@ -71,8 +73,8 @@ impl NodeWeightPair {
     /// The first number is the node, and the second is the weight.
     // Inlined because the function is trivial
     #[inline]
-    pub const fn into_tuple(self) -> (f64, f64) {
-        (self.node, self.weight)
+    pub const fn into_tuple(self) -> (Node, Weight) {
+        (Node(self.node), Weight(self.weight))
     }
 }
 

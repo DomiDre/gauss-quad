@@ -73,7 +73,7 @@ impl Midpoint {
     pub fn new(degree: usize) -> Result<Self, MidpointError> {
         if degree > 0 {
             Ok(Self {
-                nodes: (0..degree).map(|d| d as f64).collect(),
+                nodes: (0..degree).map(|d| Node(d as f64)).collect(),
             })
         } else {
             Err(MidpointError(Backtrace::capture()))
@@ -90,7 +90,7 @@ impl Midpoint {
         let sum: f64 = self
             .nodes
             .iter()
-            .map(|&node| integrand(a + rect_width * (0.5 + node)))
+            .map(|&node| integrand(a + rect_width * (0.5 + node.0)))
             .sum();
 
         sum * rect_width
@@ -167,7 +167,7 @@ mod tests {
         assert_abs_diff_eq!(
             ans,
             rule.iter().fold(0.0, |tot, n| {
-                let x = a + rect_width * (0.5 + n);
+                let x = a + rect_width * (0.5 + n.0);
                 tot + x * x
             }) * rect_width,
             epsilon = 1e-4
@@ -176,7 +176,7 @@ mod tests {
         assert_abs_diff_eq!(
             ans,
             rule.into_iter().fold(0.0, |tot, n| {
-                let x = a + rect_width * (0.5 + n);
+                let x = a + rect_width * (0.5 + n.0);
                 tot + x * x
             }) * rect_width,
             epsilon = 1e-4

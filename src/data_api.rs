@@ -10,11 +10,21 @@
 // That is, instead of `usize` it uses `::core::primitive::usize` and so on. This makes it so that
 // the caller of the macro doesn't have to import anything into the module in order for the macro to compile,
 // and makes it compile even if the user has made custom types whose names shadow types used by the macro.
-
 /// A node in a quadrature rule.
-pub type Node = f64;
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Node(
+    /// The value of the node.
+    pub f64,
+);
+
 /// A weight in a quadrature rule.
-pub type Weight = f64;
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Weight(
+    /// The value of the weight.
+    pub f64,
+);
 
 /// This macro implements the data access API for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Vec<(Node, Weight)>`.
@@ -508,7 +518,7 @@ mod tests {
             }
 
             Ok(Self {
-                node_weight_pairs: (0..deg).map(|d| (d as f64, 1.0)).collect(),
+                node_weight_pairs: (0..deg).map(|d| (Node(d as f64), Weight(1.0))).collect(),
             })
         }
 
@@ -520,7 +530,7 @@ mod tests {
             let result: f64 = self
                 .node_weight_pairs
                 .iter()
-                .map(|(x_val, w_val)| integrand(a + rect_width * (0.5 + x_val)) * w_val)
+                .map(|(node, weight)| integrand(a + rect_width * (0.5 + node.0)) * weight.0)
                 .sum();
             result * rect_width
         }
@@ -553,26 +563,26 @@ mod tests {
 
         // test iter functions
         let mut quad_iter = (&quad).into_iter();
-        assert_eq!(quad_iter.next().unwrap().0, 0.0);
-        assert_eq!(quad_iter.next().unwrap().0, 1.0);
+        assert_eq!(quad_iter.next().unwrap().0 .0, 0.0);
+        assert_eq!(quad_iter.next().unwrap().0 .0, 1.0);
 
         let quad_iter = (&quad).into_iter();
         assert_eq!(quad_iter.size_hint(), (5, Some(5)));
 
         let mut quad_iter = (&quad).into_iter();
-        assert_eq!(quad_iter.nth(2).unwrap().0, 2.0);
+        assert_eq!(quad_iter.nth(2).unwrap().0 .0, 2.0);
 
         let quad_iter = (&quad).into_iter();
         assert_eq!(quad_iter.count(), 5);
 
         let quad_iter = (&quad).into_iter();
-        assert_eq!(quad_iter.last().unwrap().0, 4.0);
+        assert_eq!(quad_iter.last().unwrap().0 .0, 4.0);
 
         let mut quad_iter = (&quad).into_iter();
-        assert_eq!(quad_iter.next_back().unwrap().0, 4.0);
+        assert_eq!(quad_iter.next_back().unwrap().0 .0, 4.0);
 
         let mut quad_iter = (&quad).into_iter();
-        assert_eq!(quad_iter.nth_back(1).unwrap().0, 3.0);
+        assert_eq!(quad_iter.nth_back(1).unwrap().0 .0, 3.0);
 
         let quad_iter = (&quad).into_iter();
         assert_eq!(quad_iter.len(), 5);
@@ -580,12 +590,12 @@ mod tests {
         // test slice
         let quad_slice = (&quad).into_iter().as_slice();
         assert_eq!(quad_slice.len(), 5);
-        assert_eq!(quad_slice[2].0, 2.0);
+        assert_eq!(quad_slice[2].0 .0, 2.0);
 
         // test as_ref
         let quad_iter = (&quad).into_iter();
         let quad_ref = quad_iter.as_ref();
         assert_eq!(quad_ref.len(), 5);
-        assert_eq!(quad_ref[2].0, 2.0);
+        assert_eq!(quad_ref[2].0 .0, 2.0);
     }
 }

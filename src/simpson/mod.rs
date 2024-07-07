@@ -64,7 +64,7 @@ impl Simpson {
     pub fn new(degree: usize) -> Result<Self, SimpsonError> {
         if degree >= 1 {
             Ok(Self {
-                nodes: (0..degree).map(|d| d as f64).collect(),
+                nodes: (0..degree).map(|d| Node(d as f64)).collect(),
             })
         } else {
             Err(SimpsonError(Backtrace::capture()))
@@ -85,7 +85,7 @@ impl Simpson {
             .nodes
             .iter()
             .skip(1)
-            .map(|&node| integrand(a + node * h))
+            .map(|&node| integrand(a + node.0 * h))
             .sum();
 
         // sum over the midpoints f( (x_{k-1} + x_k)/2 ), as node N is not included,
@@ -94,7 +94,7 @@ impl Simpson {
             .nodes
             .iter()
             .skip(1)
-            .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+            .map(|&node| integrand(a + (2.0 * node.0 - 1.0) * h / 2.0))
             .sum();
 
         h / 6.0
