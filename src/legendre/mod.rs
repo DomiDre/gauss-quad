@@ -243,4 +243,18 @@ mod tests {
             rule.into_iter().fold(0.0, |tot, (n, w)| tot + n * n * w)
         );
     }
+
+    #[test]
+    fn integrate_linear() {
+        let quad = GaussLegendre::new(5).unwrap();
+        let integral = quad.integrate(0.0, 1.0, |x| x);
+        assert_abs_diff_eq!(integral, 0.5, epsilon = 1e-15);
+    }
+
+    #[test]
+    fn integrate_parabola() {
+        let quad = GaussLegendre::new(5).unwrap();
+        let integral = quad.integrate(0.0, 3.0, |x| x.powi(2));
+        assert_abs_diff_eq!(integral, 9.0, epsilon = 1e-13);
+    }
 }

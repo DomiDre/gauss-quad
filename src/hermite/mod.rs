@@ -213,4 +213,11 @@ mod tests {
             epsilon = 1e-14
         );
     }
+
+    #[test]
+    fn integrate_one() {
+        let quad = GaussHermite::new(5).unwrap();
+        let integral = quad.integrate(|_x| 1.0);
+        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
+    }
 }

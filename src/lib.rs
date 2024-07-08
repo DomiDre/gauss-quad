@@ -171,8 +171,6 @@ use core::f64::consts::PI;
 
 mod data_api;
 mod gamma;
-#[cfg(test)]
-mod gaussian_quadrature;
 pub mod hermite;
 pub mod jacobi;
 pub mod laguerre;
