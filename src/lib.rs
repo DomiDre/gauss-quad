@@ -167,7 +167,6 @@
 use nalgebra::{Dyn, Matrix, VecStorage};
 
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
-use core::f64::consts::PI;
 
 mod data_api;
 mod gamma;

@@ -20,7 +20,9 @@
 //! # Ok::<(), GaussHermiteError>(())
 //! ```
 
-use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight, PI};
+use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight};
+
+use core::f64::consts::PI;
 
 use std::backtrace::Backtrace;
 
