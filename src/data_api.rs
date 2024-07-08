@@ -312,11 +312,6 @@ macro_rules! __impl_slice_iterator_newtype_traits {
     };
 }
 
-/// This macro defines the iterators used by the functions defined in the [`impl_node_weight_rule!`] macro.
-/// It takes in the names of the same structs as that macro,
-/// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
-/// These iterators can only be created in the module where the macro is called.
-
 /// This macro implements the data access API for rules that have only nodes and no weights.
 /// It takes in the name of the a rule struct that contans a field with the name `nodes`
 /// of the type `Vec<Node>`. As well as the names it should give the iterator over its
