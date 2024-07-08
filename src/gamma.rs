@@ -3,6 +3,8 @@
 //!
 //! The reason for this is the reduction of dependencies.
 
+use core::f64::consts::{E, PI};
+
 /// Constant value for `2 * sqrt(e / pi)`
 const TWO_SQRT_E_OVER_PI: f64 = 1.860_382_734_205_265_7;
 
@@ -10,7 +12,7 @@ const TWO_SQRT_E_OVER_PI: f64 = 1.860_382_734_205_265_7;
 const GAMMA_R: f64 = 10.900511;
 
 /// Polynomial coefficients for approximating the `gamma_ln` function
-const GAMMA_DK: &[f64] = &[
+static GAMMA_DK: &[f64] = &[
     2.485_740_891_387_535_5e-5,
     1.051_423_785_817_219_7,
     -3.456_870_972_220_162_5,
@@ -36,11 +38,7 @@ pub(crate) fn gamma(x: f64) -> f64 {
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
-        core::f64::consts::PI
-            / ((core::f64::consts::PI * x).sin()
-                * s
-                * TWO_SQRT_E_OVER_PI
-                * ((0.5 - x + GAMMA_R) / core::f64::consts::E).powf(0.5 - x))
+        PI / ((PI * x).sin() * s * TWO_SQRT_E_OVER_PI * ((0.5 - x + GAMMA_R) / E).powf(0.5 - x))
     } else {
         let s = GAMMA_DK
             .iter()
@@ -48,7 +46,7 @@ pub(crate) fn gamma(x: f64) -> f64 {
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
-        s * TWO_SQRT_E_OVER_PI * ((x - 0.5 + GAMMA_R) / core::f64::consts::E).powf(x - 0.5)
+        s * TWO_SQRT_E_OVER_PI * ((x - 0.5 + GAMMA_R) / E).powf(x - 0.5)
     }
 }
 
