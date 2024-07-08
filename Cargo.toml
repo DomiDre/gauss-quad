@@ -1,10 +1,10 @@
 [package]
 name = "gauss-quad"
-version = "0.1.9"
+version = "0.2.0"
 authors = ["DomiDre <dominiquedresen@gmail.com>", "Johanna Sörngård <jsorngard@gmail.com>"]
 keywords = ["gaussian", "quadrature", "numerics", "integration"]
 categories = ["mathematics"]
-edition = "2018"
+edition = "2021"
 description = "Library for applying Gaussian quadrature to integrate a function"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/domidre/gauss-quad"
