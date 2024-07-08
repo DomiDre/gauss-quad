@@ -249,6 +249,7 @@ impl fmt::Display for GaussJacobiError {
 
 impl std::error::Error for GaussJacobiError {}
 
+/// The reason for the `GaussJacobiError`, returned by the [`GaussJacobiError::reason`] function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussJacobiErrorReason {
