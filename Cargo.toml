@@ -23,6 +23,7 @@ approx = "0.5.1"
 criterion = {version = "0.5", features = ["html_reports"]}
 
 [features]
+# Implements the `Serialize` and `Deserialize` traits from the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 serde = ["dep:serde"]
 
 [package.metadata.docs.rs]
