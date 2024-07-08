@@ -52,84 +52,61 @@ pub(crate) fn gamma(x: f64) -> f64 {
 
 #[cfg(test)]
 mod tests {
+    use super::gamma;
     use approx::assert_abs_diff_eq;
     use core::f64::{self, consts};
 
     #[test]
     fn test_gamma() {
-        assert!(super::gamma(f64::NAN).is_nan());
+        assert!(gamma(f64::NAN).is_nan());
+        assert_abs_diff_eq!(gamma(1.000001e-35), 9.999_990_000_01e34, epsilon = 1e20);
+        assert_abs_diff_eq!(gamma(1.000001e-10), 9.999_989_999_432_785e9, epsilon = 1e-5);
+        assert_abs_diff_eq!(gamma(1.000001e-5), 99_999.322_794_325_58, epsilon = 1e-10);
+        assert_abs_diff_eq!(gamma(1.000001e-2), 99.432_485_128_962_57, epsilon = 1e-13);
+        assert_abs_diff_eq!(gamma(-4.8), -0.062_423_361_354_759_55, epsilon = 1e-13);
+        assert_abs_diff_eq!(gamma(-1.5), 2.363_271_801_207_355, epsilon = 1e-13);
+        assert_abs_diff_eq!(gamma(-0.5), -3.544_907_701_811_032, epsilon = 1e-13);
         assert_abs_diff_eq!(
-            super::gamma(1.000001e-35),
-            9.999_990_000_01e34,
-            epsilon = 1e20
-        );
-        assert_abs_diff_eq!(
-            super::gamma(1.000001e-10),
-            9.999_989_999_432_785e9,
-            epsilon = 1e-5
-        );
-        assert_abs_diff_eq!(
-            super::gamma(1.000001e-5),
-            99_999.322_794_325_58,
-            epsilon = 1e-10
-        );
-        assert_abs_diff_eq!(
-            super::gamma(1.000001e-2),
-            99.432_485_128_962_57,
-            epsilon = 1e-13
-        );
-        assert_abs_diff_eq!(
-            super::gamma(-4.8),
-            -0.062_423_361_354_759_55,
-            epsilon = 1e-13
-        );
-        assert_abs_diff_eq!(super::gamma(-1.5), 2.363_271_801_207_355, epsilon = 1e-13);
-        assert_abs_diff_eq!(super::gamma(-0.5), -3.544_907_701_811_032, epsilon = 1e-13);
-        assert_abs_diff_eq!(
-            super::gamma(1.0e-5 + 1.0e-16),
+            gamma(1.0e-5 + 1.0e-16),
             99_999.422_793_225_57,
             epsilon = 1e-9
         );
-        assert_abs_diff_eq!(super::gamma(0.1), 9.513_507_698_668_732, epsilon = 1e-14);
-        assert_eq!(super::gamma(1.0 - 1.0e-14), 1.000_000_000_000_005_8);
-        assert_abs_diff_eq!(super::gamma(1.0), 1.0, epsilon = 1e-15);
+        assert_abs_diff_eq!(gamma(0.1), 9.513_507_698_668_732, epsilon = 1e-14);
+        assert_eq!(gamma(1.0 - 1.0e-14), 1.000_000_000_000_005_8);
+        assert_abs_diff_eq!(gamma(1.0), 1.0, epsilon = 1e-15);
         assert_abs_diff_eq!(
-            super::gamma(1.0 + 1.0e-14),
+            gamma(1.0 + 1.0e-14),
             0.999_999_999_999_994_2,
             epsilon = 1e-15
         );
-        assert_abs_diff_eq!(super::gamma(1.5), 0.886_226_925_452_758, epsilon = 1e-14);
+        assert_abs_diff_eq!(gamma(1.5), 0.886_226_925_452_758, epsilon = 1e-14);
         assert_abs_diff_eq!(
-            super::gamma(consts::PI / 2.0),
+            gamma(consts::PI / 2.0),
             0.890_560_890_381_539_3,
             epsilon = 1e-15
         );
-        assert_abs_diff_eq!(super::gamma(2.0), 1.0);
-        assert_abs_diff_eq!(super::gamma(2.5), 1.329_340_388_179_137, epsilon = 1e-13);
-        assert_abs_diff_eq!(super::gamma(3.0), 2.0, epsilon = 1e-14);
+        assert_abs_diff_eq!(gamma(2.0), 1.0);
+        assert_abs_diff_eq!(gamma(2.5), 1.329_340_388_179_137, epsilon = 1e-13);
+        assert_abs_diff_eq!(gamma(3.0), 2.0, epsilon = 1e-14);
+        assert_abs_diff_eq!(gamma(consts::PI), 2.288_037_795_340_032_6, epsilon = 1e-13);
+        assert_abs_diff_eq!(gamma(3.5), 3.323_350_970_447_842_6, epsilon = 1e-14);
+        assert_abs_diff_eq!(gamma(4.0), 6.0, epsilon = 1e-13);
+        assert_abs_diff_eq!(gamma(4.5), 11.631_728_396_567_448, epsilon = 1e-12);
         assert_abs_diff_eq!(
-            super::gamma(consts::PI),
-            2.288_037_795_340_032_6,
-            epsilon = 1e-13
-        );
-        assert_abs_diff_eq!(super::gamma(3.5), 3.323_350_970_447_842_6, epsilon = 1e-14);
-        assert_abs_diff_eq!(super::gamma(4.0), 6.0, epsilon = 1e-13);
-        assert_abs_diff_eq!(super::gamma(4.5), 11.631_728_396_567_448, epsilon = 1e-12);
-        assert_abs_diff_eq!(
-            super::gamma(5.0 - 1.0e-14),
+            gamma(5.0 - 1.0e-14),
             23.999_999_999_999_638,
             epsilon = 1e-13
         );
-        assert_abs_diff_eq!(super::gamma(5.0), 24.0, epsilon = 1e-12);
+        assert_abs_diff_eq!(gamma(5.0), 24.0, epsilon = 1e-12);
         assert_abs_diff_eq!(
-            super::gamma(5.0 + 1.0e-14),
+            gamma(5.0 + 1.0e-14),
             24.000_000_000_000_362,
             epsilon = 1e-12
         );
-        assert_abs_diff_eq!(super::gamma(5.5), 52.342_777_784_553_52, epsilon = 1e-12);
-        assert_abs_diff_eq!(super::gamma(10.1), 454_760.751_441_585_95, epsilon = 1e-7);
+        assert_abs_diff_eq!(gamma(5.5), 52.342_777_784_553_52, epsilon = 1e-12);
+        assert_abs_diff_eq!(gamma(10.1), 454_760.751_441_585_95, epsilon = 1e-7);
         assert_abs_diff_eq!(
-            super::gamma(150.0 + 1.0e-12),
+            gamma(150.0 + 1.0e-12),
             3.808_922_637_649_642e260,
             epsilon = 1e248
         );
