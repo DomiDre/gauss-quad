@@ -18,11 +18,11 @@ pub type Weight = f64;
 
 /// This macro implements the data access API for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Vec<(Node, Weight)>`.
-/// It takes in the name of the quadrature rule struct as well as the names if should give the iterators
+/// It takes in the name of the quadrature rule struct as well as the names it should give the iterators
 /// over its nodes, weights, and both, as well as the iterator returned by the [`IntoIterator`] trait.
 #[doc(hidden)]
 #[macro_export]
-macro_rules! impl_node_weight_rule {
+macro_rules! __impl_node_weight_rule {
     (
         // The name of the quadrature rule struct, e.g. GaussLegendre.
         $quadrature_rule:ident,
@@ -108,6 +108,145 @@ macro_rules! impl_node_weight_rule {
                 self.node_weight_pairs.len()
             }
         }
+
+        // region: QuadratureRuleNodes
+
+        /// An iterator over the nodes of the quadrature rule.
+        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
+        #[must_use = "iterators are lazy and do nothing unless consumed"]
+        pub struct $quadrature_rule_nodes<'a>(
+            // This horrible type is just the fully qualified path of the type returned
+            // by `slice.iter().map(|(x, _)| x)`.
+            ::std::iter::Map<
+                ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+                fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
+            >,
+        );
+
+        impl<'a> $quadrature_rule_nodes<'a> {
+            #[inline]
+            const fn new(
+                iter_map: ::std::iter::Map<
+                    ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+                    fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
+                >,
+            ) -> Self {
+                Self(iter_map)
+            }
+        }
+
+        $crate::__impl_slice_iterator_newtype_traits!{$quadrature_rule_nodes<'a>, &'a $crate::Node}
+
+        // endregion: QuadratureRuleNodes
+
+        // region: QuadratureRuleWeights
+
+        /// An iterator over the weights of the quadrature rule.
+        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
+        #[must_use = "iterators are lazy and do nothing unless consumed"]
+        pub struct $quadrature_rule_weights<'a>(
+            // Same as the previous horrible type, but maps out the weight instead of the node.
+            ::std::iter::Map<
+                ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+                fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
+            >,
+        );
+
+        impl<'a> $quadrature_rule_weights<'a> {
+            #[inline]
+            const fn new(
+                iter_map: ::std::iter::Map<
+                    ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+                    fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
+                >,
+            ) -> Self {
+                Self(iter_map)
+            }
+        }
+
+        $crate::__impl_slice_iterator_newtype_traits!{$quadrature_rule_weights<'a>, &'a $crate::Weight}
+
+        // endregion: QuadratureRuleWeights
+
+        // region: QuadratureRuleIter
+
+        /// An iterator over the node-weight pairs of the quadrature rule.
+        ///
+        /// Created by the `iter` function on the quadrature rule struct.
+        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
+        #[must_use = "iterators are lazy and do nothing unless consumed"]
+        pub struct $quadrature_rule_iter<'a>(
+            ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+        );
+
+        impl<'a> $quadrature_rule_iter<'a> {
+            #[inline]
+            const fn new(
+                node_weight_pairs: ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
+            ) -> Self {
+                Self(node_weight_pairs)
+            }
+
+            /// Views the underlying data as a subslice of the original data.
+            ///
+            /// See [`core::slice::Iter::as_slice`] for more information.
+            #[inline]
+            pub fn as_slice(&self) -> &'a [($crate::Node, $crate::Weight)] {
+                self.0.as_slice()
+            }
+        }
+
+        impl<'a> ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
+            for $quadrature_rule_iter<'a>
+        {
+            #[inline]
+            fn as_ref(&self) -> &[($crate::Node, $crate::Weight)] {
+                self.0.as_ref()
+            }
+        }
+
+        $crate::__impl_slice_iterator_newtype_traits!{$quadrature_rule_iter<'a>, &'a ($crate::Node, $crate::Weight)}
+
+        // endregion: QuadratureRuleIter
+
+        // region: QuadratureRuleIntoIter
+
+        /// An owning iterator over the node-weight pairs of the quadrature rule.
+        ///
+        /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
+        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
+        #[must_use = "iterators are lazy and do nothing unless consumed"]
+        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<($crate::Node, $crate::Weight)>);
+
+        impl $quadrature_rule_into_iter {
+            #[inline]
+            const fn new(
+                node_weight_pairs: ::std::vec::IntoIter<($crate::Node, $crate::Weight)>,
+            ) -> Self {
+                Self(node_weight_pairs)
+            }
+
+            /// Views the underlying data as a subslice of the original data.
+            ///
+            /// See [`std::vec::IntoIter::as_slice`] for more information.
+            #[inline]
+            pub fn as_slice(&self) -> &[($crate::Node, $crate::Weight)] {
+                self.0.as_slice()
+            }
+        }
+
+        impl ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
+            for $quadrature_rule_into_iter
+        {
+            #[inline]
+            fn as_ref(&self) -> &[($crate::Node, $crate::Weight)] {
+                self.0.as_ref()
+            }
+        }
+
+        $crate::__impl_slice_iterator_newtype_traits!{$quadrature_rule_into_iter, ($crate::Node, $crate::Weight)}
+
+        // endregion: QuadratureRuleIntoIter
     };
 }
 
@@ -116,7 +255,7 @@ macro_rules! impl_node_weight_rule {
 /// as well as the type returned by the iterator.
 #[macro_export]
 #[doc(hidden)]
-macro_rules! impl_slice_iterator_newtype_traits {
+macro_rules! __impl_slice_iterator_newtype_traits {
     ($iterator:ident$(<$a:lifetime>)?, $item:ty) => {
         impl$(<$a>)? ::core::iter::Iterator for $iterator<$($a)?> {
             type Item = $item;
@@ -177,155 +316,6 @@ macro_rules! impl_slice_iterator_newtype_traits {
 /// It takes in the names of the same structs as that macro,
 /// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
 /// These iterators can only be created in the module where the macro is called.
-#[doc(hidden)]
-#[macro_export]
-macro_rules! impl_node_weight_rule_iterators {
-    (
-        $quadrature_rule_nodes:ident,
-        $quadrature_rule_weights:ident,
-        $quadrature_rule_iter:ident,
-        $quadrature_rule_into_iter:ident
-    ) => {
-        // region: QuadratureRuleNodes
-
-        /// An iterator over the nodes of the quadrature rule.
-        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
-        #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_nodes<'a>(
-            // This horrible type is just the fully qualified path of the type returned
-            // by `slice.iter().map(|(x, _)| x)`.
-            ::std::iter::Map<
-                ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
-                fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
-            >,
-        );
-
-        impl<'a> $quadrature_rule_nodes<'a> {
-            #[inline]
-            const fn new(
-                iter_map: ::std::iter::Map<
-                    ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
-                    fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
-                >,
-            ) -> Self {
-                Self(iter_map)
-            }
-        }
-
-        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_nodes<'a>, &'a $crate::Node}
-
-        // endregion: QuadratureRuleNodes
-
-        // region: QuadratureRuleWeights
-
-        /// An iterator over the weights of the quadrature rule.
-        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
-        #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_weights<'a>(
-            // Same as the previous horrible type, but maps out the weight instead of the node.
-            ::std::iter::Map<
-                ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
-                fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
-            >,
-        );
-
-        impl<'a> $quadrature_rule_weights<'a> {
-            #[inline]
-            const fn new(
-                iter_map: ::std::iter::Map<
-                    ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
-                    fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
-                >,
-            ) -> Self {
-                Self(iter_map)
-            }
-        }
-
-        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_weights<'a>, &'a $crate::Weight}
-
-        // endregion: QuadratureRuleWeights
-
-        // region: QuadratureRuleIter
-
-        /// An iterator over the node-weight pairs of the quadrature rule.
-        ///
-        /// Created by the `iter` function on the quadrature rule struct.
-        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
-        #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_iter<'a>(
-            ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
-        );
-
-        impl<'a> $quadrature_rule_iter<'a> {
-            #[inline]
-            const fn new(
-                node_weight_pairs: ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
-            ) -> Self {
-                Self(node_weight_pairs)
-            }
-
-            /// Views the underlying data as a subslice of the original data.
-            ///
-            /// See [`core::slice::Iter::as_slice`] for more information.
-            #[inline]
-            pub fn as_slice(&self) -> &'a [($crate::Node, $crate::Weight)] {
-                self.0.as_slice()
-            }
-        }
-
-        impl<'a> ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
-            for $quadrature_rule_iter<'a>
-        {
-            #[inline]
-            fn as_ref(&self) -> &[($crate::Node, $crate::Weight)] {
-                self.0.as_ref()
-            }
-        }
-
-        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_iter<'a>, &'a ($crate::Node, $crate::Weight)}
-
-        // endregion: QuadratureRuleIter
-
-        // region: QuadratureRuleIntoIter
-
-        /// An owning iterator over the node-weight pairs of the quadrature rule.
-        ///
-        /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
-        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
-        #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<($crate::Node, $crate::Weight)>);
-
-        impl $quadrature_rule_into_iter {
-            #[inline]
-            const fn new(
-                node_weight_pairs: ::std::vec::IntoIter<($crate::Node, $crate::Weight)>,
-            ) -> Self {
-                Self(node_weight_pairs)
-            }
-
-            /// Views the underlying data as a subslice of the original data.
-            ///
-            /// See [`std::vec::IntoIter::as_slice`] for more information.
-            #[inline]
-            pub fn as_slice(&self) -> &[($crate::Node, $crate::Weight)] {
-                self.0.as_slice()
-            }
-        }
-
-        impl ::core::convert::AsRef<[($crate::Node, $crate::Weight)]>
-            for $quadrature_rule_into_iter
-        {
-            #[inline]
-            fn as_ref(&self) -> &[($crate::Node, $crate::Weight)] {
-                self.0.as_ref()
-            }
-        }
-
-        $crate::impl_slice_iterator_newtype_traits!{$quadrature_rule_into_iter, ($crate::Node, $crate::Weight)}
-
-        // endregion: QuadratureRuleIntoIter
-    };
-}
 
 /// This macro implements the data access API for rules that have only nodes and no weights.
 /// It takes in the name of the a rule struct that contans a field with the name `nodes`
@@ -333,7 +323,7 @@ macro_rules! impl_node_weight_rule_iterators {
 /// nodes and the iterator returned by the [`IntoIterator`] trait.
 #[macro_export]
 #[doc(hidden)]
-macro_rules! impl_node_rule {
+macro_rules! __impl_node_rule {
     ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
         // Lets the user do
         // for node in QuadratureRule::new(...) {
@@ -391,17 +381,7 @@ macro_rules! impl_node_rule {
                 self.nodes.len()
             }
         }
-    };
-}
 
-/// This macro defines the iterators used by the functions defined by the [`impl_node_rule`] macro.
-/// It takes in the names of the same structs as that macro,
-/// plus the name it should give the iterator that is returned by the [`IntoIterator`] implementation.
-/// These iterators can only be created in the module where the macro is called.
-#[macro_export]
-#[doc(hidden)]
-macro_rules! impl_node_rule_iterators {
-    ($quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
         // region: QuadratureRuleIter
 
         /// An iterator of the nodes of the rule.
@@ -431,7 +411,7 @@ macro_rules! impl_node_rule_iterators {
             }
         }
 
-        $crate::impl_slice_iterator_newtype_traits! {$quadrature_rule_iter<'a>, &'a $crate::Node}
+        $crate::__impl_slice_iterator_newtype_traits! {$quadrature_rule_iter<'a>, &'a $crate::Node}
 
         // endregion: QuadratureRuleIter
 
@@ -466,7 +446,7 @@ macro_rules! impl_node_rule_iterators {
             }
         }
 
-        $crate::impl_slice_iterator_newtype_traits! {$quadrature_rule_into_iter, $crate::Node}
+        $crate::__impl_slice_iterator_newtype_traits! {$quadrature_rule_into_iter, $crate::Node}
 
         // endregion: QuadratureRuleIntoIter
     };
@@ -526,8 +506,7 @@ mod tests {
         }
     }
 
-    impl_node_weight_rule! {MockQuadrature, MockQuadratureNodes, MockQuadratureWeights, MockQuadratureIter, MockQuadratureIntoIter}
-    impl_node_weight_rule_iterators! {MockQuadratureNodes, MockQuadratureWeights, MockQuadratureIter, MockQuadratureIntoIter}
+    __impl_node_weight_rule! {MockQuadrature, MockQuadratureNodes, MockQuadratureWeights, MockQuadratureIter, MockQuadratureIntoIter}
 
     #[test]
     fn test_macro_implementation() {

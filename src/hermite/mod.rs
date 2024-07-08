@@ -20,7 +20,7 @@
 //! # Ok::<(), GaussHermiteError>(())
 //! ```
 
-use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight};
+use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
 use core::f64::consts::PI;
 
@@ -116,9 +116,7 @@ impl GaussHermite {
     }
 }
 
-impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
-
-impl_node_weight_rule_iterators! {GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
+__impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
 
 /// The error returned by [`GaussHermite::new`] if it is given a degree of 0 or 1.
 #[derive(Debug)]

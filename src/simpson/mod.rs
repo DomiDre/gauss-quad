@@ -34,7 +34,7 @@
 //! # Ok::<(), SimpsonError>(())
 //! ```
 
-use crate::{impl_node_rule, impl_node_rule_iterators, Node};
+use crate::{Node, __impl_node_rule};
 
 use std::backtrace::Backtrace;
 
@@ -106,7 +106,7 @@ impl Simpson {
     }
 }
 
-impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
+__impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
 
 /// The error returned by [`Simpson::new`] if given a degree of 0.
 #[derive(Debug)]
@@ -130,8 +130,6 @@ impl SimpsonError {
 }
 
 impl std::error::Error for SimpsonError {}
-
-impl_node_rule_iterators! {SimpsonIter, SimpsonIntoIter}
 
 #[cfg(test)]
 mod tests {

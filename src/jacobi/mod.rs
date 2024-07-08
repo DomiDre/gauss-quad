@@ -20,7 +20,7 @@
 //! ```
 
 use crate::gamma::gamma;
-use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight};
+use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
 use std::backtrace::Backtrace;
 
@@ -189,9 +189,7 @@ impl GaussJacobi {
     }
 }
 
-impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
-
-impl_node_weight_rule_iterators! {GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
+__impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
 /// The error returned by [`GaussJacobi::new`] if given a degree, `deg`, less than 2
 /// and/or an `alpha` and/or `beta` less than or equal to -1.

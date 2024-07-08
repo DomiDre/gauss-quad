@@ -41,7 +41,7 @@
 //! # Ok::<(), MidpointError>(())
 //! ```
 
-use crate::{impl_node_rule, impl_node_rule_iterators, Node};
+use crate::{Node, __impl_node_rule};
 
 use std::backtrace::Backtrace;
 
@@ -97,7 +97,7 @@ impl Midpoint {
     }
 }
 
-impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
+__impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
 
 /// The error returned by [`Midpoint::new`] if given a degree of 0.
 #[derive(Debug)]
@@ -121,8 +121,6 @@ impl MidpointError {
 }
 
 impl std::error::Error for MidpointError {}
-
-impl_node_rule_iterators! {MidpointIter, MidpointIntoIter}
 
 #[cfg(test)]
 mod tests {

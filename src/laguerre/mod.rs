@@ -19,7 +19,7 @@
 //! ```
 
 use crate::gamma::gamma;
-use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight};
+use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
 use std::backtrace::Backtrace;
 
@@ -138,9 +138,7 @@ impl GaussLaguerre {
     }
 }
 
-impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
-
-impl_node_weight_rule_iterators! {GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
+__impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
 /// The error returned by [`GaussLaguerre::new`] if given a degree, `deg`, less than 2 and/or an `alpha` of -1 or less.
 #[derive(Debug)]
