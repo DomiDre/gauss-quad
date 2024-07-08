@@ -176,24 +176,6 @@ impl GaussLaguerreError {
     pub fn backtrace(&self) -> &Backtrace {
         &self.backtrace
     }
-
-    /// Returns true if the given degree, `deg`, was bad.
-    #[inline]
-    pub fn was_bad_degree(&self) -> bool {
-        matches!(
-            self.reason(),
-            GaussLaguerreErrorReason::Degree | GaussLaguerreErrorReason::DegreeAlpha
-        )
-    }
-
-    /// Returns true if the given `alpha` was bad.
-    #[inline]
-    pub fn was_bad_alpha(&self) -> bool {
-        matches!(
-            self.reason(),
-            GaussLaguerreErrorReason::Alpha | GaussLaguerreErrorReason::DegreeAlpha
-        )
-    }
 }
 
 impl std::error::Error for GaussLaguerreError {}
@@ -207,6 +189,20 @@ pub enum GaussLaguerreErrorReason {
     Alpha,
     /// The given degree was less than 2 and the given `alpha` exponent was less than or equal to -1.
     DegreeAlpha,
+}
+
+impl GaussLaguerreErrorReason {
+    /// Returns true if the given degree, `deg`, was bad.
+    #[inline]
+    pub fn was_bad_degree(&self) -> bool {
+        matches!(self, Self::Degree | Self::DegreeAlpha)
+    }
+
+    /// Returns true if the given `alpha` was bad.
+    #[inline]
+    pub fn was_bad_alpha(&self) -> bool {
+        matches!(self, Self::Alpha | Self::DegreeAlpha)
+    }
 }
 
 use core::fmt;

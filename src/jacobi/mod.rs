@@ -222,42 +222,6 @@ impl GaussJacobiError {
     pub fn backtrace(&self) -> &Backtrace {
         &self.backtrace
     }
-
-    /// Returns true if the given degree, `deg`, was bad.
-    #[inline]
-    pub fn was_bad_degree(&self) -> bool {
-        matches!(
-            self.reason(),
-            GaussJacobiErrorReason::Degree
-                | GaussJacobiErrorReason::DegreeAlpha
-                | GaussJacobiErrorReason::DegreeBeta
-                | GaussJacobiErrorReason::DegreeAlphaBeta
-        )
-    }
-
-    /// Returns true if the given `alpha` exponent was bad.
-    #[inline]
-    pub fn was_bad_alpha(&self) -> bool {
-        matches!(
-            self.reason(),
-            GaussJacobiErrorReason::Alpha
-                | GaussJacobiErrorReason::DegreeAlpha
-                | GaussJacobiErrorReason::AlphaBeta
-                | GaussJacobiErrorReason::DegreeAlphaBeta
-        )
-    }
-
-    /// Returns true if the given `beta` exponent was bad.
-    #[inline]
-    pub fn was_bad_beta(&self) -> bool {
-        matches!(
-            self.reason(),
-            GaussJacobiErrorReason::Beta
-                | GaussJacobiErrorReason::DegreeBeta
-                | GaussJacobiErrorReason::AlphaBeta
-                | GaussJacobiErrorReason::DegreeAlphaBeta
-        )
-    }
 }
 
 impl fmt::Display for GaussJacobiError {
@@ -285,6 +249,35 @@ pub enum GaussJacobiErrorReason {
     DegreeBeta,
     /// The degree was less than 2 and both the `alpha` and `beta` exponents were less than or equal to -1.
     DegreeAlphaBeta,
+}
+
+impl GaussJacobiErrorReason {
+    /// Returns true if the given degree, `deg`, was bad.
+    #[inline]
+    pub fn was_bad_degree(&self) -> bool {
+        matches!(
+            self,
+            Self::Degree | Self::DegreeAlpha | Self::DegreeBeta | Self::DegreeAlphaBeta
+        )
+    }
+
+    /// Returns true if the given `alpha` exponent was bad.
+    #[inline]
+    pub fn was_bad_alpha(&self) -> bool {
+        matches!(
+            self,
+            Self::Alpha | Self::DegreeAlpha | Self::AlphaBeta | Self::DegreeAlphaBeta
+        )
+    }
+
+    /// Returns true if the given `beta` exponent was bad.
+    #[inline]
+    pub fn was_bad_beta(&self) -> bool {
+        matches!(
+            self,
+            Self::Beta | Self::DegreeBeta | Self::AlphaBeta | Self::DegreeAlphaBeta
+        )
+    }
 }
 
 use core::fmt;
