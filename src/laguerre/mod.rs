@@ -405,4 +405,15 @@ mod tests {
             epsilon = 1e-14
         );
     }
+
+    #[test]
+    fn check_some_integrals() {
+        let rule = GaussLaguerre::new(2, -0.5).unwrap();
+
+        assert_abs_diff_eq!(
+            rule.integrate(|x| x * x),
+            3.0 * core::f64::consts::PI.sqrt() / 4.0,
+            epsilon = 1e-14
+        );
+    }
 }
