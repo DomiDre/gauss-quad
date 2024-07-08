@@ -147,9 +147,16 @@ pub struct GaussLaguerreError {
     backtrace: Backtrace,
 }
 
+use core::fmt;
 impl fmt::Display for GaussLaguerreError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.reason)
+        const DEGREE_LIMIT: &str = "degree must be at least 2";
+        const ALPHA_LIMIT: &str = "alpha must be larger than -1.0";
+        match self.reason() {
+            GaussLaguerreErrorReason::Degree => write!(f, "{DEGREE_LIMIT}"),
+            GaussLaguerreErrorReason::Alpha => write!(f, "{ALPHA_LIMIT}"),
+            GaussLaguerreErrorReason::DegreeAlpha => write!(f, "{DEGREE_LIMIT}, and {ALPHA_LIMIT}"),
+        }
     }
 }
 
@@ -202,19 +209,6 @@ impl GaussLaguerreErrorReason {
     #[inline]
     pub fn was_bad_alpha(&self) -> bool {
         matches!(self, Self::Alpha | Self::DegreeAlpha)
-    }
-}
-
-use core::fmt;
-impl fmt::Display for GaussLaguerreErrorReason {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        const DEGREE_LIMIT: &str = "degree must be at least 2";
-        const ALPHA_LIMIT: &str = "alpha must be larger than -1.0";
-        match self {
-            Self::Degree => write!(f, "{DEGREE_LIMIT}"),
-            Self::Alpha => write!(f, "{ALPHA_LIMIT}"),
-            Self::DegreeAlpha => write!(f, "{DEGREE_LIMIT}, and {ALPHA_LIMIT}"),
-        }
     }
 }
 

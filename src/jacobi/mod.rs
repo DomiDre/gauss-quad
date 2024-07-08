@@ -224,9 +224,26 @@ impl GaussJacobiError {
     }
 }
 
+use core::fmt;
 impl fmt::Display for GaussJacobiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.reason())
+        const DEGREE_LIMIT: &str = "must be at least 2";
+        const EXPONENT_LIMIT: &str = "must be finite and larger than -1.0";
+        match self.reason() {
+            GaussJacobiErrorReason::Degree => write!(f, "degree {DEGREE_LIMIT}"),
+            GaussJacobiErrorReason::Alpha => write!(f, "alpha {EXPONENT_LIMIT}"),
+            GaussJacobiErrorReason::Beta => write!(f, "beta {EXPONENT_LIMIT}"),
+            GaussJacobiErrorReason::AlphaBeta => write!(f, "alpha and beta {EXPONENT_LIMIT}"),
+            GaussJacobiErrorReason::DegreeAlpha => {
+                write!(f, "degree {DEGREE_LIMIT} and alpha {EXPONENT_LIMIT}")
+            }
+            GaussJacobiErrorReason::DegreeBeta => {
+                write!(f, "degree {DEGREE_LIMIT} and beta {EXPONENT_LIMIT}")
+            }
+            GaussJacobiErrorReason::DegreeAlphaBeta => {
+                write!(f, "degree {DEGREE_LIMIT}, alpha and beta {EXPONENT_LIMIT}")
+            }
+        }
     }
 }
 
@@ -277,25 +294,6 @@ impl GaussJacobiErrorReason {
             self,
             Self::Beta | Self::DegreeBeta | Self::AlphaBeta | Self::DegreeAlphaBeta
         )
-    }
-}
-
-use core::fmt;
-impl fmt::Display for GaussJacobiErrorReason {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        const DEGREE_LIMIT: &str = "must be at least 2";
-        const EXPONENT_LIMIT: &str = "must be finite and larger than -1.0";
-        match self {
-            Self::Degree => write!(f, "degree {DEGREE_LIMIT}"),
-            Self::Alpha => write!(f, "alpha {EXPONENT_LIMIT}"),
-            Self::Beta => write!(f, "beta {EXPONENT_LIMIT}"),
-            Self::AlphaBeta => write!(f, "alpha and beta {EXPONENT_LIMIT}"),
-            Self::DegreeAlpha => write!(f, "degree {DEGREE_LIMIT} and alpha {EXPONENT_LIMIT}"),
-            Self::DegreeBeta => write!(f, "degree {DEGREE_LIMIT} and beta {EXPONENT_LIMIT}"),
-            Self::DegreeAlphaBeta => {
-                write!(f, "degree {DEGREE_LIMIT}, alpha and beta {EXPONENT_LIMIT}")
-            }
-        }
     }
 }
 
