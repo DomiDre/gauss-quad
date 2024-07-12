@@ -217,7 +217,7 @@ impl GaussJacobiError {
 
     /// Returns a [`Backtrace`] to where the error was created.
     ///
-    /// See [`Backtrace::capture`] for more information about how to make this display information when printed.
+    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
     #[inline]
     pub fn backtrace(&self) -> &Backtrace {
         &self.backtrace
