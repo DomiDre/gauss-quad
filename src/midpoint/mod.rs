@@ -5,7 +5,7 @@
 //! 1. Divide the domain into equally sized sections.
 //! 2. Find the function value at the midpoint of each section.
 //! 3. The section's integral is approximated as a rectangle as wide as the section and as tall as the function
-//!  value at the midpoint.
+//!    value at the midpoint.
 //!
 //! ```
 //! use gauss_quad::midpoint::{Midpoint, MidpointError};
