@@ -15,6 +15,7 @@
 //!
 //! ```
 //! use gauss_quad::simpson::Simpson;
+//! # use gauss_quad::simpson::SimpsonError;
 //! use approx::assert_abs_diff_eq;
 //!
 //! use core::f64::consts::PI;
@@ -22,7 +23,7 @@
 //! let eps = 0.001;
 //!
 //! let n = 10;
-//! let quad = Simpson::init(n);
+//! let quad = Simpson::new(n)?;
 //!
 //! // integrate some functions
 //! let integrate_euler = quad.integrate(0.0, 1.0, |x| x.exp());
@@ -30,41 +31,44 @@
 //!
 //! let integrate_sin = quad.integrate(-PI, PI, |x| x.sin());
 //! assert_abs_diff_eq!(integrate_sin, 0.0, epsilon = eps);
-//!
+//! # Ok::<(), SimpsonError>(())
 //! ```
+
+use crate::{Node, __impl_node_rule};
+
+use std::backtrace::Backtrace;
 
 /// A Simpson rule quadrature scheme.
 /// ```
-/// # use gauss_quad::Simpson;
+/// # use gauss_quad::simpson::{Simpson, SimpsonError};
 /// // initialize a Simpson rule with 100 subintervals
-/// let quad: Simpson = Simpson::init(100);
+/// let quad: Simpson = Simpson::new(100)?;
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the Simpson rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
+/// # Ok::<(), SimpsonError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Simpson {
-    /// The dimensionless Simpsons
-    nodes: Vec<f64>,
+    /// The dimensionless Simpsons nodes.
+    nodes: Vec<Node>,
 }
 
 impl Simpson {
-    /// Initialize a new Simpson rule with `degree` being the number of intervals
-    pub fn init(degree: usize) -> Self {
-        assert!(degree >= 1, "Degree of Simpson rule needs to be >= 1");
-        Self {
-            nodes: Self::nodes(degree),
+    /// Initialize a new Simpson rule with `degree` being the number of intervals.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if given a degree of zero.
+    pub fn new(degree: usize) -> Result<Self, SimpsonError> {
+        if degree >= 1 {
+            Ok(Self {
+                nodes: (0..degree).map(|d| d as f64).collect(),
+            })
+        } else {
+            Err(SimpsonError(Backtrace::capture()))
         }
-    }
-
-    /// Generate vector of indices for the subintervals
-    fn nodes(degree: usize) -> Vec<f64> {
-        let mut nodes = Vec::with_capacity(degree);
-        for idx in 0..degree {
-            nodes.push(idx as f64);
-        }
-
-        nodes
     }
 
     /// Integrate over the domain [a, b].
@@ -102,23 +106,58 @@ impl Simpson {
     }
 }
 
+__impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
+
+/// The error returned by [`Simpson::new`] if given a degree of 0.
+#[derive(Debug)]
+pub struct SimpsonError(Backtrace);
+
+use core::fmt;
+impl fmt::Display for SimpsonError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "the degree of the Simpson rule must be at least 1.")
+    }
+}
+
+impl SimpsonError {
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
+    #[inline]
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
+    }
+}
+
+impl std::error::Error for SimpsonError {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn check_simpson_integration() {
-        let quad = Simpson::init(2);
+        let quad = Simpson::new(2).unwrap();
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
+    fn check_simpson_error() {
+        let simpson_rule = Simpson::new(0);
+        assert!(simpson_rule.is_err());
+        assert_eq!(
+            format!("{}", simpson_rule.err().unwrap()),
+            "the degree of the Simpson rule must be at least 1."
+        );
+    }
+
+    #[test]
     fn check_derives() {
-        let quad = Simpson::init(10);
+        let quad = Simpson::new(10).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Simpson::init(3);
+        let other_quad = Simpson::new(3).unwrap();
         assert_ne!(quad, other_quad);
     }
 }
