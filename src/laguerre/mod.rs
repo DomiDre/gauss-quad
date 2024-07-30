@@ -33,7 +33,7 @@ use std::backtrace::Backtrace;
 /// ```
 /// # use gauss_quad::laguerre::{GaussLaguerre, GaussLaguerreError};
 /// # use approx::assert_abs_diff_eq;
-/// // initialize a Gauss-Laguerre rule with 10 nodes
+/// // initialize a Gauss-Laguerre rule with 4 nodes
 /// let quad = GaussLaguerre::new(4, 0.0)?;
 ///
 /// // numerically evaluate the integral x^5*e^(-x),
