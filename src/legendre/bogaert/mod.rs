@@ -15,7 +15,9 @@ use core::{cmp::Ordering, f64::consts::PI};
 use data::{CL, EVEN_THETA_ZEROS, EVEN_WEIGHTS, J1, JZ, ODD_THETA_ZEROS, ODD_WEIGHTS};
 
 /// This function computes the `k`th zero of Bessel function j_0.
+/// 
 /// # Panic
+/// 
 /// Panics if `k == 0`.
 #[rustfmt::skip]
 // Inlined because the function is only used in a single location
@@ -34,7 +36,9 @@ fn bessel_j0_zero(k: usize) -> f64 {
 
 /// This function computes the square of Bessel function j_1
 /// evaluated at the `k`th zero of Bessel function j_0.
+/// 
 /// # Panic
+/// 
 /// Panics if `k == 0`.
 #[rustfmt::skip]
 // Inlined because the function is only used in a single location
@@ -92,7 +96,9 @@ struct ThetaWeightPair {
 
 impl ThetaWeightPair {
     /// Compute a new ThetaWeightPair.
+    ///
     /// # Panic
+    ///
     /// Panics if `k == 0` or `k > n`.
     #[must_use]
     fn new(n: usize, k: usize) -> Self {
@@ -109,7 +115,9 @@ impl ThetaWeightPair {
     }
 
     /// Compute a node-weight pair, with k limited to half the range
+    ///
     /// # Panic
+    ///
     /// Panics if `k == 0`.
     #[rustfmt::skip]
     #[must_use]
@@ -147,7 +155,9 @@ impl ThetaWeightPair {
     }
 
     /// Returns tabulated theta and weight values, valid for n <= 100
+    ///
     /// # Panic
+    ///
     /// Panics if `n > 100`.
     #[must_use]
     fn tabulated_pair(n: usize, k: usize) -> Self {
@@ -180,5 +190,29 @@ impl ThetaWeightPair {
             }
         };
         Self { theta, weight }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{bessel_j0_zero, bessel_j1_squared};
+    use approx::assert_abs_diff_eq;
+
+    #[test]
+    fn check_bessel_j0_zero() {
+        // check bessel zeros with values from table in A Treatise on the Theory of Bessel Functions
+        assert_abs_diff_eq!(bessel_j0_zero(1), 2.404_825_6, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j0_zero(2), 5.520_078_1, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j0_zero(20), 62.048_469_2, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j0_zero(30), 93.463_718_8, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j0_zero(40), 124.879_308_9, epsilon = 0.000_000_1);
+    }
+
+    #[test]
+    fn check_bessel_j1_squared() {
+        // check bessel j_1 squared values evaluated at zeros of j_0
+        // reference values calculated using implementation from scipy.special.j1
+        assert_abs_diff_eq!(bessel_j1_squared(1), 0.269_514_1, epsilon = 0.000_000_1);
+        assert_abs_diff_eq!(bessel_j1_squared(30), 0.006_811_5, epsilon = 0.000_000_1);
     }
 }

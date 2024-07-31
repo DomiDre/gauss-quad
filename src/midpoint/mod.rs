@@ -5,7 +5,7 @@
 //! 1. Divide the domain into equally sized sections.
 //! 2. Find the function value at the midpoint of each section.
 //! 3. The section's integral is approximated as a rectangle as wide as the section and as tall as the function
-//!  value at the midpoint.
+//!    value at the midpoint.
 //!
 //! ```
 //! use gauss_quad::midpoint::{Midpoint, MidpointError};
@@ -44,7 +44,9 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{impl_node_rule, impl_node_rule_iterators, Node};
+use crate::{Node, __impl_node_rule};
+
+use std::backtrace::Backtrace;
 
 /// A midpoint rule quadrature scheme.
 /// ```
@@ -77,7 +79,7 @@ impl Midpoint {
                 nodes: (0..degree).map(|d| d as f64).collect(),
             })
         } else {
-            Err(MidpointError)
+            Err(MidpointError(Backtrace::capture()))
         }
     }
 
@@ -115,12 +117,11 @@ impl Midpoint {
     }
 }
 
-impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
+__impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
 
 /// The error returned by [`Midpoint::new`] if given a degree of 0.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MidpointError;
+#[derive(Debug)]
+pub struct MidpointError(Backtrace);
 
 use core::fmt;
 impl fmt::Display for MidpointError {
@@ -129,32 +130,74 @@ impl fmt::Display for MidpointError {
     }
 }
 
-impl std::error::Error for MidpointError {}
+impl MidpointError {
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
+    #[inline]
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
+    }
+}
 
-impl_node_rule_iterators! {MidpointIter, MidpointIntoIter}
+impl std::error::Error for MidpointError {}
 
 #[cfg(test)]
 mod tests {
+    use approx::assert_abs_diff_eq;
+
     use super::*;
 
     #[test]
     fn check_midpoint_integration() {
         let quad = Midpoint::new(100).unwrap();
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
-        approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
+        assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
     fn check_midpoint_error() {
-        assert!(Midpoint::new(0).is_err());
+        let midpoint_rule = Midpoint::new(0);
+        assert!(midpoint_rule.is_err());
+        assert_eq!(
+            format!("{}", midpoint_rule.err().unwrap()),
+            "the degree of the midpoint rule needs to be at least 1"
+        );
     }
 
     #[test]
     fn check_derives() {
-        let quad = Midpoint::new(10);
+        let quad = Midpoint::new(10).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Midpoint::new(3);
+        let other_quad = Midpoint::new(3).unwrap();
         assert_ne!(quad, other_quad);
+    }
+
+    #[test]
+    fn check_iterators() {
+        let rule = Midpoint::new(100).unwrap();
+        let a = 0.0;
+        let b = 1.0;
+        let ans = 1.0 / 3.0;
+        let rect_width = (b - a) / rule.degree() as f64;
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.iter().fold(0.0, |tot, n| {
+                let x = a + rect_width * (0.5 + n);
+                tot + x * x
+            }) * rect_width,
+            epsilon = 1e-4
+        );
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.into_iter().fold(0.0, |tot, n| {
+                let x = a + rect_width * (0.5 + n);
+                tot + x * x
+            }) * rect_width,
+            epsilon = 1e-4
+        );
     }
 }

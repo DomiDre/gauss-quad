@@ -37,7 +37,9 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
-use crate::{impl_node_rule, impl_node_rule_iterators, Node};
+use crate::{Node, __impl_node_rule};
+
+use std::backtrace::Backtrace;
 
 /// A Simpson rule quadrature scheme.
 /// ```
@@ -68,7 +70,7 @@ impl Simpson {
                 nodes: (0..degree).map(|d| d as f64).collect(),
             })
         } else {
-            Err(SimpsonError)
+            Err(SimpsonError(Backtrace::capture()))
         }
     }
 
@@ -139,12 +141,11 @@ impl Simpson {
     }
 }
 
-impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
+__impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
 
 /// The error returned by [`Simpson::new`] if given a degree of 0.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SimpsonError;
+#[derive(Debug)]
+pub struct SimpsonError(Backtrace);
 
 use core::fmt;
 impl fmt::Display for SimpsonError {
@@ -153,9 +154,17 @@ impl fmt::Display for SimpsonError {
     }
 }
 
-impl std::error::Error for SimpsonError {}
+impl SimpsonError {
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
+    #[inline]
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
+    }
+}
 
-impl_node_rule_iterators! {SimpsonIter, SimpsonIntoIter}
+impl std::error::Error for SimpsonError {}
 
 #[cfg(test)]
 mod tests {
@@ -170,15 +179,20 @@ mod tests {
 
     #[test]
     fn check_simpson_error() {
-        assert!(Simpson::new(0).is_err());
+        let simpson_rule = Simpson::new(0);
+        assert!(simpson_rule.is_err());
+        assert_eq!(
+            format!("{}", simpson_rule.err().unwrap()),
+            "the degree of the Simpson rule must be at least 1."
+        );
     }
 
     #[test]
     fn check_derives() {
-        let quad = Simpson::new(10);
+        let quad = Simpson::new(10).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Simpson::new(3);
+        let other_quad = Simpson::new(3).unwrap();
         assert_ne!(quad, other_quad);
     }
 }

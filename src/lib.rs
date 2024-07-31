@@ -3,6 +3,7 @@
 //! **gauss-quad** is a Gaussian quadrature library for numerical integration.
 //!
 //! ## Quadrature rules
+//!
 //! **gauss-quad** implements the following quadrature rules:
 //! * Gauss-Legendre
 //! * Gauss-Jacobi
@@ -12,6 +13,7 @@
 //! * Simpson
 //!
 //! ## Using **gauss-quad**
+//!
 //! To use any of the quadrature rules in your project, first initialize the rule with
 //! a specified degree and then you can use it for integration, e.g.:
 //! ```
@@ -35,6 +37,7 @@
 //! ```
 //!
 //! ## Setting up a quadrature rule
+//!
 //! Using a quadrature rule takes two steps:
 //! 1. Initialization
 //! 2. Integration
@@ -64,12 +67,13 @@
 //! let piecewise = gauss_laguerre.integrate(|x| if x > 0.0 && x < 2.0 { x } else { 0.0 });
 //!
 //! let gauss_hermite = GaussHermite::new(degree)?;
-//! // again, no explicit domain since integration is done over the domain (-∞, ∞).
-//! let constant = gauss_hermite.integrate(|x| if x > -1.0 && x < 1.0 { 2.0 } else { 1.0 });
+//! // again, no explicit domain since Gauss-Hermite integration is done over the domain (-∞, ∞).
+//! let golden_polynomial = gauss_hermite.integrate(|x| x * x - x - 1.0);
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 //!
 //! ## Specific quadrature rules
+//!
 //! Different rules may take different parameters.
 //!
 //! For example, the `GaussLaguerre` rule requires both a `degree` and an `alpha`
@@ -79,17 +83,22 @@
 //! This means no domain bounds are needed in the `integrate` call.
 //! ```
 //! # use gauss_quad::laguerre::{GaussLaguerre, GaussLaguerreError};
+//! # use approx::assert_abs_diff_eq;
+//! # use core::f64::consts::PI;
 //! // initialize the quadrature rule
-//! let degree = 10;
+//! let degree = 2;
 //! let alpha = 0.5;
 //! let quad = GaussLaguerre::new(degree, alpha)?;
 //!
 //! // use the rule to integrate a function
 //! let integral = quad.integrate(|x| x * x);
+//!
+//! assert_abs_diff_eq!(integral, 15.0 * PI.sqrt() / 8.0, epsilon = 1e-14);
 //! # Ok::<(), GaussLaguerreError>(())
 //! ```
 //!
 //! ## Errors
+//!
 //! Quadrature rules are only defined for a certain set of input values.
 //! For example, every rule is only defined for degrees where `degree > 1`.
 //! ```
@@ -110,24 +119,26 @@
 //! ```
 //! Make sure to read the specific quadrature rule's documentation before using it.
 //!
-//! Error handling is very simple: bad input values will cause the program to panic
-//! and abort with a short error message.
-//!
 //! ## Passing functions to quadrature rules
-//! The `integrate` method expects functions of the form `Fn(f64) -> f64`, i.e. functions of
-//! one parameter.
+//!
+//! The `integrate` method takes any integrand that implements the [`Fn(f64) -> f64`](Fn) trait, i.e. functions of
+//! one `f64` parameter.
 //!
 //! ```
 //! # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+//! # use approx::assert_abs_diff_eq;
 //!
 //! // initialize the quadrature rule
-//! let degree = 10;
+//! let degree = 2;
 //! let quad = GaussLegendre::new(degree)?;
 //!
 //! // use the rule to integrate a function
 //! let left_bound = 0.0;
 //! let right_bound = 1.0;
+//!
 //! let integral = quad.integrate(left_bound, right_bound, |x| x * x);
+//!
+//! assert_abs_diff_eq!(integral, 1.0 / 3.0);
 //! # Ok::<(), GaussLegendreError>(())
 //! ```
 //!
@@ -136,18 +147,23 @@
 //! It is possible to use this crate to do double and higher integrals:
 //! ```
 //! # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
-//! # use approx::assert_relative_eq;
-//! let rule = GaussLegendre::new(2)?;
-//! let double_int = rule.integrate(0.0, 1.0, |x| rule.integrate(0.0, 1.0, |y| x * x * y));
-//! assert_relative_eq!(double_int, 1.0 / 6.0);
+//! # use approx::assert_abs_diff_eq;
+//! let rule = GaussLegendre::new(3)?;
+//!
+//! // integrate x^2*y over the triangle in the xy-plane where x ϵ [0, 1] and y ϵ [0, x]:
+//! let double_int = rule.integrate(0.0, 1.0, |x| rule.integrate(0.0, x, |y| x * x * y));
+//!
+//! assert_abs_diff_eq!(double_int, 0.1);
 //! # Ok::<(), GaussLegendreError>(())
 //! ```
 //! However, the time complexity of the integration then scales with the number of nodes to
 //! the power of the depth of the integral, e.g. O(n^(3)) for triple integrals.
 //!
-//! # Features
+//! ## Feature flags
+//!
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
-//! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.  
+//! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
+//!
 //! `rayon`: enables parallel versions of the `integrate` functions on the quadrature rule structs.
 
 // Only enable the nighlty `doc_auto_cfg` feature when
@@ -158,13 +174,11 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 use nalgebra::{Dyn, Matrix, VecStorage};
+
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
-use core::f64::consts::PI;
 
 mod data_api;
 mod gamma;
-#[cfg(test)]
-mod gaussian_quadrature;
 pub mod hermite;
 pub mod jacobi;
 pub mod laguerre;
