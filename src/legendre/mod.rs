@@ -100,7 +100,7 @@ impl GaussLegendre {
     /// Returns an error if `deg` is smaller than 2.
     pub fn par_new(deg: usize) -> Result<Self, GaussLegendreError> {
         if deg < 2 {
-            return Err(GaussLegendreError);
+            return Err(GaussLegendreError(Backtrace::capture()));
         }
 
         Ok(Self {
