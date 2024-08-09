@@ -237,4 +237,12 @@ mod tests {
         let integral = quad.integrate(|_x| 1.0);
         assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
     }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_integrate_one() {
+        let quad = GaussHermite::new(5).unwrap();
+        let integral = quad.integrate(|_x| 1.0);
+        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
+    }
 }

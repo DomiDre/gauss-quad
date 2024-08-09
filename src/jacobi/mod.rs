@@ -773,4 +773,22 @@ mod tests {
             epsilon = 1e-5
         );
     }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_check_some_integrals() {
+        let rule = GaussJacobi::new(10, -0.5, -0.25).unwrap();
+
+        assert_abs_diff_eq!(
+            rule.par_integrate(-1.0, 1.0, |x| x * x),
+            1.3298477657906902,
+            epsilon = 1e-14
+        );
+
+        assert_abs_diff_eq!(
+            rule.par_integrate(-1.0, 1.0, |x| x.cos()),
+            2.2239,
+            epsilon = 1e-5
+        );
+    }
 }

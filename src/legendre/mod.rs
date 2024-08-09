@@ -304,4 +304,20 @@ mod tests {
         let integral = quad.integrate(0.0, 3.0, |x| x.powi(2));
         assert_abs_diff_eq!(integral, 9.0, epsilon = 1e-13);
     }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_integrate_linear() {
+        let quad = GaussLegendre::par_new(5).unwrap();
+        let integral = quad.par_integrate(0.0, 1.0, |x| x);
+        assert_abs_diff_eq!(integral, 0.5, epsilon = 1e-15);
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_integrate_parabola() {
+        let quad = GaussLegendre::par_new(5).unwrap();
+        let integral = quad.par_integrate(0.0, 3.0, |x| x.powi(2));
+        assert_abs_diff_eq!(integral, 9.0, epsilon = 1e-13);
+    }
 }

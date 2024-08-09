@@ -177,6 +177,14 @@ mod tests {
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_check_simpson_integration() {
+        let quad = Simpson::new(2).unwrap();
+        let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
+        approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
+    }
+
     #[test]
     fn check_simpson_error() {
         let simpson_rule = Simpson::new(0);

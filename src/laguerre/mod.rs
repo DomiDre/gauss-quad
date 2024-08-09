@@ -435,4 +435,22 @@ mod tests {
             epsilon = 1e-7,
         );
     }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_check_some_integrals() {
+        let rule = GaussLaguerre::new(10, -0.5).unwrap();
+
+        assert_abs_diff_eq!(
+            rule.par_integrate(|x| x * x),
+            3.0 * PI.sqrt() / 4.0,
+            epsilon = 1e-14
+        );
+
+        assert_abs_diff_eq!(
+            rule.par_integrate(|x| x.sin()),
+            (PI.sqrt() * (PI / 8.0).sin()) / (2.0_f64.powf(0.25)),
+            epsilon = 1e-7,
+        );
+    }
 }

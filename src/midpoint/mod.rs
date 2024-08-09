@@ -155,6 +155,14 @@ mod tests {
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_check_midpoint_integration() {
+        let quad = Midpoint::new(100).unwrap();
+        let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
+        assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
+    }
+
     #[test]
     fn check_midpoint_error() {
         let midpoint_rule = Midpoint::new(0);
