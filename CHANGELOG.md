@@ -1,5 +1,9 @@
 This document contains all changes to the crate since version 0.1.8.
 
+# 0.2.1
+
+Add par_integrate to every method which can be used with the rayon feature to use parallel iterator during integration.
+
 # 0.2.0
 
 This update is mostly about changing the API to adhere to the [Rust API guidelines](https://rust-lang.github.io/api-guidelines/about.html).
