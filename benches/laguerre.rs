@@ -16,16 +16,23 @@ fn benches(c: &mut Criterion) {
             b.iter(|| black_box(rule.integrate(|x| x.sin().cos().asin().acos().sin().cos())))
         });
         #[cfg(feature = "rayon")]
-        group.bench_function(
-            &format!("cheap integrand, degree {deg}, parallelized"),
-            |b| b.iter(|| black_box(rule.par_integrate(|x| x * x - x - 1.0))),
-        );
+        group.bench_function(&format!("double integral, degree {deg}, serial"), |b| {
+            b.iter(|| {
+                black_box(
+                    rule.integrate(|_y| {
+                        rule.integrate(|x| (x.sin().powi(2) + 2.0).ln().cos().acos())
+                    }),
+                )
+            })
+        });
         #[cfg(feature = "rayon")]
         group.bench_function(
-            &format!("expensive integrand, degree {deg}, parallelized"),
+            &format!("double integral, degree {deg}, parallelized"),
             |b| {
                 b.iter(|| {
-                    black_box(rule.par_integrate(|x| x.sin().cos().asin().acos().sin().cos()))
+                    black_box(rule.par_integrate(|_y| {
+                        rule.integrate(|x| (x.sin().powi(2) + 2.0).ln().cos().acos())
+                    }))
                 })
             },
         );
