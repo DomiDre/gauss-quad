@@ -2,7 +2,7 @@ This document contains all changes to the crate since version 0.1.8.
 
 # 0.2.1
 
-Add par_integrate to every method which can be used with the rayon feature to use parallel iterator during integration.
+- Add par_integrate to every method which can be used with the rayon feature to use parallel iterator during integration.
 
 # 0.2.0
 
