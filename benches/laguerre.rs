@@ -15,6 +15,20 @@ fn benches(c: &mut Criterion) {
         group.bench_function(&format!("expensive integrand, degree {deg}"), |b| {
             b.iter(|| black_box(rule.integrate(|x| x.sin().cos().asin().acos().sin().cos())))
         });
+        #[cfg(feature = "rayon")]
+        group.bench_function(
+            &format!("cheap integrand, degree {deg}, parallelized"),
+            |b| b.iter(|| black_box(rule.par_integrate(|x| x * x - x - 1.0))),
+        );
+        #[cfg(feature = "rayon")]
+        group.bench_function(
+            &format!("expensive integrand, degree {deg}, parallelized"),
+            |b| {
+                b.iter(|| {
+                    black_box(rule.par_integrate(|x| x.sin().cos().asin().acos().sin().cos()))
+                })
+            },
+        );
     }
 }
 

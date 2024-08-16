@@ -19,6 +19,24 @@ fn benches(c: &mut Criterion) {
                 )
             })
         });
+        #[cfg(feature = "rayon")]
+        group.bench_function(
+            &format!("cheap integrand, degree {deg}, parallelized"),
+            |b| b.iter(|| black_box(rule.par_integrate(-1.0, 1.0, |x| x * x - x - 1.0))),
+        );
+        #[cfg(feature = "rayon")]
+        group.bench_function(
+            &format!("expensive integrand, degree {deg}, parallelized"),
+            |b| {
+                b.iter(|| {
+                    black_box(
+                        rule.par_integrate(0.0, 2.0 * PI, |x| {
+                            x.sin().cos().asin().acos().sin().cos()
+                        }),
+                    )
+                })
+            },
+        );
     }
 }
 
