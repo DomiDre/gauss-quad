@@ -157,7 +157,7 @@
 //! # Ok::<(), GaussLegendreError>(())
 //! ```
 //! However, the time complexity of the integration then scales with the number of nodes to
-//! the power of the depth of the integral, e.g. O(n^(3)) for triple integrals.
+//! the power of the depth of the integral, e.g. O(n³) for triple integrals.
 //!
 //! ## Feature flags
 //!
