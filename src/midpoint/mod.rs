@@ -41,6 +41,9 @@
 //! # Ok::<(), MidpointError>(())
 //! ```
 
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+
 use crate::{Node, __impl_node_rule};
 
 use std::backtrace::Backtrace;
@@ -95,6 +98,23 @@ impl Midpoint {
 
         sum * rect_width
     }
+
+    #[cfg(feature = "rayon")]
+    /// Same as [`integrate`](Midpoint::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let rect_width = (b - a) / self.nodes.len() as f64;
+
+        let sum: f64 = self
+            .nodes
+            .par_iter()
+            .map(|&node| integrand(a + rect_width * (0.5 + node)))
+            .sum();
+
+        sum * rect_width
+    }
 }
 
 __impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
@@ -132,6 +152,14 @@ mod tests {
     fn check_midpoint_integration() {
         let quad = Midpoint::new(100).unwrap();
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
+        assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_check_midpoint_integration() {
+        let quad = Midpoint::new(100).unwrap();
+        let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 

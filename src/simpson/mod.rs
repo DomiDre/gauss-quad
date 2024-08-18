@@ -34,6 +34,9 @@
 //! # Ok::<(), SimpsonError>(())
 //! ```
 
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
+
 use crate::{Node, __impl_node_rule};
 
 use std::backtrace::Backtrace;
@@ -104,6 +107,38 @@ impl Simpson {
                 + integrand(a)
                 + integrand(b))
     }
+
+    #[cfg(feature = "rayon")]
+    /// Same as [`integrate`](Simpson::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let n = self.nodes.len() as f64;
+
+        let h = (b - a) / n;
+
+        let sum_over_interval_edges: f64 = self
+            .nodes
+            .par_iter()
+            .skip(1)
+            .map(|&node| integrand(a + node * h))
+            .sum();
+
+        let sum_over_midpoints: f64 = self
+            .nodes
+            .par_iter()
+            .skip(1)
+            .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+            .sum();
+
+        h / 6.0
+            * (2.0 * sum_over_interval_edges
+                + 4.0 * sum_over_midpoints
+                + 4.0 * integrand(a + (2.0 * n - 1.0) * h / 2.0)
+                + integrand(a)
+                + integrand(b))
+    }
 }
 
 __impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
@@ -139,6 +174,14 @@ mod tests {
     fn check_simpson_integration() {
         let quad = Simpson::new(2).unwrap();
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
+        approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_check_simpson_integration() {
+        let quad = Simpson::new(2).unwrap();
+        let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 

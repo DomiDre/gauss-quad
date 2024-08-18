@@ -30,7 +30,7 @@ where QUADRATURE_RULE can currently be set to calculate either:
 | Simpson         | $$\int_a^b f(x) \mathrm{d}x$$                              |
 | GaussLegendre   | $$\int_a^b f(x) \mathrm{d}x$$                              |
 | GaussJacobi     | $$\int_a^b f(x)(1-x)^\alpha (1&plus;x)^\beta \mathrm{d}x$$ |
-| GaussLaguerre   | $$\int_{0}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$  |
+| GaussLaguerre   | $$\int_{0}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$        |
 | GaussHermite    | $$\int_{-\infty}^\infty f(x) e^{-x^2} \mathrm{d}x$$        |
 
 For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
@@ -62,4 +62,10 @@ Rules can be nested into double and higher integrals:
 
 ```rust
 let double_integral = quad.integrate(a, b, |x| quad.integrate(c(x), d(x), |y| f(x, y)));
+```
+
+If the computation time for the evaluation of the integrand is large (>> 100µs), the rayon feature can be used to parallelize the computation on multiple cores (for low computation any gain is overshadowed by the overhead from parallelization)
+
+```rust
+let slow_integral = quad.par_integrate(a, b, |x| f(x));
 ```

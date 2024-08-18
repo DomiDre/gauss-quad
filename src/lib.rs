@@ -162,7 +162,16 @@
 //! ## Feature flags
 //!
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
-//! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
+//! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
+//!
+//! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
+
+// Only enable the nighlty `doc_auto_cfg` feature when
+// the `docsrs` configuration attribute is defined.
+// The config in Cargo.toml means that this is defined when we are on docs.rs (which uses the nightly compiler)
+// or if the environment variable RUSTDOCFLAGS is set as `RUSTDOCFLAGS="--cfg docsrs"`.
+// This lets us get a tag on docs.rs that says "Available on crate feature ... only".
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 

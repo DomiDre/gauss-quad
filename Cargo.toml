@@ -1,6 +1,6 @@
 [package]
 name = "gauss-quad"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["DomiDre <dominiquedresen@gmail.com>", "Johanna Sörngård <jsorngard@gmail.com>"]
 keywords = ["gaussian", "quadrature", "numerics", "integration"]
 categories = ["mathematics"]
@@ -17,6 +17,7 @@ crate-type = ["lib", "cdylib"]
 [dependencies]
 nalgebra = {version = "0.33", default-features = false, features = ["std"]}
 serde = {version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true}
+rayon = {version = "1.10", optional = true}
 
 [dev-dependencies]
 approx = "0.5.1"
@@ -25,10 +26,12 @@ criterion = {version = "0.5", features = ["html_reports"]}
 [features]
 # Implements the `Serialize` and `Deserialize` traits from the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 serde = ["dep:serde"]
+# Enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
+rayon = ["dep:rayon"]
 
 [package.metadata.docs.rs]
+# Document all features
 all-features = true
-
 
 [[bench]]
 name = "legendre"

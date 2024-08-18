@@ -20,6 +20,9 @@
 //! # Ok::<(), GaussHermiteError>(())
 //! ```
 
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+
 use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
 use core::f64::consts::PI;
@@ -110,6 +113,20 @@ impl GaussHermite {
         let result: f64 = self
             .node_weight_pairs
             .iter()
+            .map(|(x_val, w_val)| integrand(*x_val) * w_val)
+            .sum();
+        result
+    }
+
+    #[cfg(feature = "rayon")]
+    /// Same as [`integrate`](GaussHermite::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let result: f64 = self
+            .node_weight_pairs
+            .par_iter()
             .map(|(x_val, w_val)| integrand(*x_val) * w_val)
             .sum();
         result
@@ -218,6 +235,14 @@ mod tests {
     fn integrate_one() {
         let quad = GaussHermite::new(5).unwrap();
         let integral = quad.integrate(|_x| 1.0);
+        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_integrate_one() {
+        let quad = GaussHermite::new(5).unwrap();
+        let integral = quad.par_integrate(|_x| 1.0);
         assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
     }
 }

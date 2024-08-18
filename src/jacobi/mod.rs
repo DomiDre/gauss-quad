@@ -19,6 +19,9 @@
 //! # Ok::<(), GaussJacobiError>(())
 //! ```
 
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+
 use crate::gamma::gamma;
 use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
@@ -171,6 +174,20 @@ impl GaussJacobi {
         let result: f64 = self
             .node_weight_pairs
             .iter()
+            .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
+            .sum();
+        Self::scale_factor(a, b) * result
+    }
+
+    #[cfg(feature = "rayon")]
+    /// Same as [`integrate`](GaussJacobi::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let result: f64 = self
+            .node_weight_pairs
+            .par_iter()
             .map(|(x_val, w_val)| integrand(Self::argument_transformation(*x_val, a, b)) * w_val)
             .sum();
         Self::scale_factor(a, b) * result
@@ -752,6 +769,24 @@ mod tests {
 
         assert_abs_diff_eq!(
             rule.integrate(-1.0, 1.0, |x| x.cos()),
+            2.2239,
+            epsilon = 1e-5
+        );
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_check_some_integrals() {
+        let rule = GaussJacobi::new(10, -0.5, -0.25).unwrap();
+
+        assert_abs_diff_eq!(
+            rule.par_integrate(-1.0, 1.0, |x| x * x),
+            1.3298477657906902,
+            epsilon = 1e-14
+        );
+
+        assert_abs_diff_eq!(
+            rule.par_integrate(-1.0, 1.0, |x| x.cos()),
             2.2239,
             epsilon = 1e-5
         );
