@@ -2,7 +2,7 @@ This document contains all changes to the crate since version 0.1.8.
 
 # 0.2.1
 
-- Add the function `par_integrate` to every quadrature rule struct which can be used when the `rayon` feature is active to perform the integration in parallel.
+- Add the function `par_integrate` to every quadrature rule struct which can be used when the `rayon` feature is enabled to perform the integration in parallel.
 
 # 0.2.0
 
