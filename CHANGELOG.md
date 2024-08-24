@@ -2,6 +2,7 @@ This document contains all changes to the crate since version 0.1.8.
 
 # 0.2.1
 
+- Add the `rayon` feature that enables certain calculations to be done in parallel. 
 - Add the function `par_integrate` to every quadrature rule struct which can be used when the `rayon` feature is enabled to perform the integration in parallel.
 - Add the function `par_new` to `GaussLegendre` to initialize it in parallel. This function is also behind the `rayon` feature.
 
