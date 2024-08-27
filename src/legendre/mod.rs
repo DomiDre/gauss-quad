@@ -73,7 +73,7 @@ pub struct GaussLegendre {
 
 impl GaussLegendre {
     /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights.  
-    /// 
+    ///
     /// A rule of degree `n` can integrate polynomials of degree 2`n`-1 exactly.
     ///
     /// Uses the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969), which has linear time
