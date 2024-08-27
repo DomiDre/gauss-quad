@@ -327,4 +327,11 @@ mod tests {
         let integral = quad.par_integrate(0.0, 3.0, |x| x.powi(2));
         assert_abs_diff_eq!(integral, 9.0, epsilon = 1e-13);
     }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn check_legendre_error_rayon() {
+        assert!(GaussLegendre::par_new(0).is_err());
+        assert!(GaussLegendre::par_new(1).is_err());
+    }
 }
