@@ -77,7 +77,7 @@ impl GaussLaguerre {
             (true, false) => Err(GaussLaguerreErrorReason::Alpha),
             (false, false) => Err(GaussLaguerreErrorReason::DegreeAlpha),
         }
-        .map_err(|reason| GaussLaguerreError::new(reason))?;
+        .map_err(GaussLaguerreError::new)?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 

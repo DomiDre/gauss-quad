@@ -83,7 +83,7 @@ impl GaussJacobi {
             (false, true, false) => Err(GaussJacobiErrorReason::DegreeBeta),
             (false, false, false) => Err(GaussJacobiErrorReason::DegreeAlphaBeta),
         }
-        .map_err(|reason| GaussJacobiError::new(reason))?;
+        .map_err(GaussJacobiError::new)?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 
