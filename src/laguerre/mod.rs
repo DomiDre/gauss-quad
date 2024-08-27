@@ -57,6 +57,8 @@ impl GaussLaguerre {
     /// Initializes Gauss-Laguerre quadrature rule of the given degree by computing the nodes and weights
     /// needed for the given `alpha` parameter.
     ///
+    /// A rule of degree `n` can integrate polynomials of degree 2`n`-1 exactly.
+    ///
     /// Applies the Golub-Welsch algorithm to determine Gauss-Laguerre nodes & weights.
     /// Constructs the companion matrix A for the Laguerre Polynomial using the relation:
     /// -n L_{n-1} + (2n+1) L_{n} -(n+1) L_{n+1} = x L_n
