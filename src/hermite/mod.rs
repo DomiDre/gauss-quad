@@ -74,7 +74,7 @@ impl GaussHermite {
     /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussHermiteError> {
         if deg < 2 {
-            return Err(GaussHermiteError(Backtrace::capture()));
+            return Err(GaussHermiteError::new());
         }
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
         // Initialize symmetric companion matrix
@@ -154,6 +154,11 @@ impl fmt::Display for GaussHermiteError {
 impl std::error::Error for GaussHermiteError {}
 
 impl GaussHermiteError {
+    /// Calls [`Backtrace::capture`] and wraps the result in a `GaussHermiteError` struct.
+    fn new() -> Self {
+        Self(Backtrace::capture())
+    }
+
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.

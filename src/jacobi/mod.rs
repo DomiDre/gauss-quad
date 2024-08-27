@@ -74,29 +74,16 @@ impl GaussJacobi {
             (alpha.is_finite() && alpha > -1.0),
             (beta.is_finite() && beta > -1.0),
         ) {
-            (true, true, true) => (),
-            (false, true, true) => {
-                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree))
-            }
-            (true, false, true) => {
-                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Alpha))
-            }
-            (true, true, false) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Beta)),
-            (true, false, false) => {
-                return Err(GaussJacobiError::new(GaussJacobiErrorReason::AlphaBeta))
-            }
-            (false, false, true) => {
-                return Err(GaussJacobiError::new(GaussJacobiErrorReason::DegreeAlpha))
-            }
-            (false, true, false) => {
-                return Err(GaussJacobiError::new(GaussJacobiErrorReason::DegreeBeta))
-            }
-            (false, false, false) => {
-                return Err(GaussJacobiError::new(
-                    GaussJacobiErrorReason::DegreeAlphaBeta,
-                ))
-            }
-        };
+            (true, true, true) => Ok(()),
+            (false, true, true) => Err(GaussJacobiErrorReason::Degree),
+            (true, false, true) => Err(GaussJacobiErrorReason::Alpha),
+            (true, true, false) => Err(GaussJacobiErrorReason::Beta),
+            (true, false, false) => Err(GaussJacobiErrorReason::AlphaBeta),
+            (false, false, true) => Err(GaussJacobiErrorReason::DegreeAlpha),
+            (false, true, false) => Err(GaussJacobiErrorReason::DegreeBeta),
+            (false, false, false) => Err(GaussJacobiErrorReason::DegreeAlphaBeta),
+        }
+        .map_err(GaussJacobiError::new)?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 

@@ -84,7 +84,7 @@ impl GaussLegendre {
     /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussLegendreError> {
         if deg < 2 {
-            return Err(GaussLegendreError(Backtrace::capture()));
+            return Err(GaussLegendreError::new());
         }
 
         Ok(Self {
@@ -102,7 +102,7 @@ impl GaussLegendre {
     /// Returns an error if `deg` is smaller than 2.
     pub fn par_new(deg: usize) -> Result<Self, GaussLegendreError> {
         if deg < 2 {
-            return Err(GaussLegendreError(Backtrace::capture()));
+            return Err(GaussLegendreError::new());
         }
 
         Ok(Self {
@@ -190,6 +190,11 @@ impl fmt::Display for GaussLegendreError {
 }
 
 impl GaussLegendreError {
+    /// Calls [`Backtrace::capture`] and wraps the result in a `GaussLegendreError` struct.
+    fn new() -> Self {
+        Self(Backtrace::capture())
+    }
+
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
@@ -321,5 +326,12 @@ mod tests {
         let quad = GaussLegendre::par_new(5).unwrap();
         let integral = quad.par_integrate(0.0, 3.0, |x| x.powi(2));
         assert_abs_diff_eq!(integral, 9.0, epsilon = 1e-13);
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn check_legendre_error_rayon() {
+        assert!(GaussLegendre::par_new(0).is_err());
+        assert!(GaussLegendre::par_new(1).is_err());
     }
 }

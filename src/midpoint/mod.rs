@@ -79,7 +79,7 @@ impl Midpoint {
                 nodes: (0..degree).map(|d| d as f64).collect(),
             })
         } else {
-            Err(MidpointError(Backtrace::capture()))
+            Err(MidpointError::new())
         }
     }
 
@@ -131,6 +131,11 @@ impl fmt::Display for MidpointError {
 }
 
 impl MidpointError {
+    /// Calls [`Backtrace::capture`] and wraps the result in a `MidpointError` struct.
+    fn new() -> Self {
+        Self(Backtrace::capture())
+    }
+
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
