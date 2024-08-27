@@ -70,7 +70,7 @@ impl Simpson {
                 nodes: (0..degree).map(|d| d as f64).collect(),
             })
         } else {
-            Err(SimpsonError(Backtrace::capture()))
+            Err(SimpsonError::new())
         }
     }
 
@@ -155,6 +155,11 @@ impl fmt::Display for SimpsonError {
 }
 
 impl SimpsonError {
+    /// Calls [`Backtrace::capture`] and wraps the result in a `SimpsonError` struct.
+    fn new() -> Self {
+        Self(Backtrace::capture())
+    }
+
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.

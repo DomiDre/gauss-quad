@@ -73,12 +73,11 @@ impl GaussLaguerre {
     pub fn new(deg: usize, alpha: f64) -> Result<Self, GaussLaguerreError> {
         match (deg >= 2, (alpha.is_finite() && alpha > -1.0)) {
             (true, true) => Ok(()),
-            (false, true) => Err(GaussLaguerreError::new(GaussLaguerreErrorReason::Degree)),
-            (true, false) => Err(GaussLaguerreError::new(GaussLaguerreErrorReason::Alpha)),
-            (false, false) => Err(GaussLaguerreError::new(
-                GaussLaguerreErrorReason::DegreeAlpha,
-            )),
-        }?;
+            (false, true) => Err(GaussLaguerreErrorReason::Degree),
+            (true, false) => Err(GaussLaguerreErrorReason::Alpha),
+            (false, false) => Err(GaussLaguerreErrorReason::DegreeAlpha),
+        }
+        .map_err(|reason| GaussLaguerreError::new(reason))?;
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 
