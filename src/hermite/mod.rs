@@ -58,6 +58,8 @@ pub struct GaussHermite {
 impl GaussHermite {
     /// Initializes Gauss-Hermite quadrature rule of the given degree by computing the needed nodes and weights.
     ///
+    /// A rule of degree `n` can integrate polynomials of degree 2`n`-1 exactly.
+    ///
     /// Applies the Golub-Welsch algorithm to determine Gauss-Hermite nodes & weights.
     /// Constructs the companion matrix A for the Hermite Polynomial using the relation:
     /// 1/2 H_{n+1} + n H_{n-1} = x H_n
