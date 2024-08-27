@@ -33,6 +33,8 @@ where QUADRATURE_RULE can currently be set to calculate either:
 | GaussLaguerre   | $$\int_{0}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$        |
 | GaussHermite    | $$\int_{-\infty}^\infty f(x) e^{-x^2} \mathrm{d}x$$        |
 
+A Gaussian quadrature rule of degree `n` can integrate a polynomial of degree 2`n`-1 exactly.
+
 For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
 
 ```rust
