@@ -16,6 +16,8 @@ pub type Node = f64;
 /// A weight in a quadrature rule.
 pub type Weight = f64;
 
+// These types are used in the macro to guarantee that we point to the right `Vec` and `IntoIter`
+// regardless of whether we have the standard library.
 #[cfg(feature = "std")]
 pub(crate) type PortableVec<T> = ::std::vec::Vec<T>;
 #[cfg(not(feature = "std"))]
