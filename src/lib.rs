@@ -168,6 +168,7 @@
 //! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
 //!
 //! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
+//! Note that [`rayon`] depends on the standard library.
 
 // Only enable the nighlty `doc_auto_cfg` feature when
 // the `docsrs` configuration attribute is defined.
