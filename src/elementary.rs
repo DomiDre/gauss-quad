@@ -1,3 +1,6 @@
+/// This module contains elementary math functions that delegate to the standard library
+/// if the `std` feature is enabled, and the [`libm`] crate if it is not.
+
 pub(crate) fn sin(x: f64) -> f64 {
     #[cfg(feature = "std")]
     {
