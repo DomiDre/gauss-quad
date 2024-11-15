@@ -18,6 +18,8 @@
 //! # Ok::<(), GaussLaguerreError>(())
 //! ```
 
+use crate::elementary::sqrt;
+
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
@@ -89,7 +91,7 @@ impl GaussLaguerre {
         // Initialize symmetric companion matrix
         for idx in 0..deg - 1 {
             let idx_f64 = 1.0 + idx as f64;
-            let off_diag = (idx_f64 * (idx_f64 + alpha)).sqrt();
+            let off_diag = sqrt(idx_f64 * (idx_f64 + alpha));
             unsafe {
                 *companion_matrix.get_unchecked_mut((idx, idx)) = diag;
                 *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;

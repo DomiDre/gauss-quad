@@ -193,6 +193,7 @@ version = "0.2.1"
 dependencies = [
  "approx",
  "criterion",
+ "libm",
  "nalgebra",
  "rayon",
  "serde",

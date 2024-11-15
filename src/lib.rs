@@ -186,6 +186,7 @@ use nalgebra::{Dyn, Matrix, VecStorage};
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 
 mod data_api;
+mod elementary;
 mod gamma;
 pub mod hermite;
 pub mod jacobi;

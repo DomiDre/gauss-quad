@@ -52,7 +52,7 @@ macro_rules! __impl_node_weight_rule {
         // in a way the adheres to the API guidelines: <https://rust-lang.github.io/api-guidelines/naming.html>.
         // The functions in these impl blocks all have an #[inline] directive because they are trivial.
 
-        use crate::data_api::{PortableVec, PortableVecIntoIter};
+        use $crate::data_api::{PortableVec, PortableVecIntoIter};
 
         // Lets the user do
         // for (node, weight) in QuadratuleRule::new(...) {
@@ -334,7 +334,7 @@ macro_rules! __impl_slice_iterator_newtype_traits {
 #[doc(hidden)]
 macro_rules! __impl_node_rule {
     ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
-        use crate::data_api::PortableVecIntoIter;
+        use $crate::data_api::PortableVecIntoIter;
 
         // Lets the user do
         // for node in QuadratureRule::new(...) {

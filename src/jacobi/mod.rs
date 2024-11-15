@@ -22,6 +22,7 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
+use crate::elementary::{pow, sqrt};
 use crate::gamma::gamma;
 use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
@@ -98,9 +99,10 @@ impl GaussJacobi {
             let idx_p1 = idx_f64 + 1.0;
             let denom_sum = 2.0 * idx_p1 + alpha + beta;
             let off_diag = 2.0 / denom_sum
-                * (idx_p1 * (idx_p1 + alpha) * (idx_p1 + beta) * (idx_p1 + alpha + beta)
-                    / ((denom_sum + 1.0) * (denom_sum - 1.0)))
-                    .sqrt();
+                * sqrt(
+                    idx_p1 * (idx_p1 + alpha) * (idx_p1 + beta) * (idx_p1 + alpha + beta)
+                        / ((denom_sum + 1.0) * (denom_sum - 1.0)),
+                );
             unsafe {
                 *companion_matrix.get_unchecked_mut((idx, idx)) = diag;
                 *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;
@@ -114,10 +116,9 @@ impl GaussJacobi {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        let scale_factor =
-            (2.0f64).powf(alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
-                / gamma(alpha + beta + 1.0)
-                / (alpha + beta + 1.0);
+        let scale_factor = pow(2.0, alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
+            / gamma(alpha + beta + 1.0)
+            / (alpha + beta + 1.0);
 
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
         let mut node_weight_pairs: Vec<(f64, f64)> = eigen

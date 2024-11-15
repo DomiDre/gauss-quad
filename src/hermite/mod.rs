@@ -23,7 +23,7 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
+use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule, elementary::sqrt};
 
 use core::f64::consts::PI;
 
@@ -84,7 +84,7 @@ impl GaussHermite {
         // Initialize symmetric companion matrix
         for idx in 0..deg - 1 {
             let idx_f64 = 1.0 + idx as f64;
-            let element = (idx_f64 * 0.5).sqrt();
+            let element = sqrt(idx_f64 * 0.5);
             unsafe {
                 *companion_matrix.get_unchecked_mut((idx, idx + 1)) = element;
                 *companion_matrix.get_unchecked_mut((idx + 1, idx)) = element;
@@ -103,7 +103,7 @@ impl GaussHermite {
                     eigen
                         .eigenvectors
                         .row(0)
-                        .map(|x| x * x * PI.sqrt())
+                        .map(|x| x * x * sqrt(PI))
                         .iter()
                         .copied(),
                 )
@@ -229,7 +229,7 @@ mod tests {
     #[test]
     fn check_iterators() {
         let rule = GaussHermite::new(3).unwrap();
-        let ans = core::f64::consts::PI.sqrt() / 2.0;
+        let ans = sqrt(core::f64::consts::PI) / 2.0;
 
         assert_abs_diff_eq!(
             ans,
