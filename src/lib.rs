@@ -161,7 +161,7 @@
 //!
 //! ## Feature flags
 //!
-//! `std`: enables the error types like e.g. [`GaussLegendreError`](legendre::GaussLegendreError), to capture a [`Backtrace`](std::backtrace::Backtrace).
+//! `std`: enables the error types like e.g. [`GaussLegendreError`](legendre::GaussLegendreError) to capture a [`Backtrace`](std::backtrace::Backtrace).
 //! If this feature is disabled the crate is `no_std` compatible.
 //!
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
