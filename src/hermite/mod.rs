@@ -27,7 +27,11 @@ use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
 use core::f64::consts::PI;
 
+#[cfg(feature = "std")]
 use std::backtrace::Backtrace;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 /// A Gauss-Hermite quadrature scheme.
 ///
@@ -139,7 +143,10 @@ __impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, 
 
 /// The error returned by [`GaussHermite::new`] if it is given a degree of 0 or 1.
 #[derive(Debug)]
-pub struct GaussHermiteError(Backtrace);
+pub struct GaussHermiteError {
+    #[cfg(feature = "std")]
+    backtrace: Backtrace,
+}
 
 use core::fmt;
 impl fmt::Display for GaussHermiteError {
@@ -151,20 +158,24 @@ impl fmt::Display for GaussHermiteError {
     }
 }
 
-impl std::error::Error for GaussHermiteError {}
+impl core::error::Error for GaussHermiteError {}
 
 impl GaussHermiteError {
     /// Calls [`Backtrace::capture`] and wraps the result in a `GaussHermiteError` struct.
     fn new() -> Self {
-        Self(Backtrace::capture())
+        Self {
+            #[cfg(feature = "std")]
+            backtrace: Backtrace::capture(),
+        }
     }
 
+    #[cfg(feature = "std")]
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
     #[inline]
     pub fn backtrace(&self) -> &Backtrace {
-        &self.0
+        &self.backtrace
     }
 }
 
@@ -173,6 +184,9 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use super::*;
+
+    #[cfg(not(feature = "std"))]
+    use alloc::format;
 
     #[test]
     fn golub_welsch_3() {

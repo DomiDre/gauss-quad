@@ -25,7 +25,11 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 use crate::gamma::gamma;
 use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
+#[cfg(feature = "std")]
 use std::backtrace::Backtrace;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -202,6 +206,7 @@ __impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, Gau
 #[derive(Debug)]
 pub struct GaussJacobiError {
     reason: GaussJacobiErrorReason,
+    #[cfg(feature = "std")]
     backtrace: Backtrace,
 }
 
@@ -211,6 +216,7 @@ impl GaussJacobiError {
     pub(crate) fn new(reason: GaussJacobiErrorReason) -> Self {
         Self {
             reason,
+            #[cfg(feature = "std")]
             backtrace: Backtrace::capture(),
         }
     }
@@ -221,6 +227,7 @@ impl GaussJacobiError {
         self.reason
     }
 
+    #[cfg(feature = "std")]
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
@@ -253,7 +260,7 @@ impl fmt::Display for GaussJacobiError {
     }
 }
 
-impl std::error::Error for GaussJacobiError {}
+impl core::error::Error for GaussJacobiError {}
 
 /// The reason for the `GaussJacobiError`, returned by the [`GaussJacobiError::reason`] function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -309,6 +316,9 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use super::*;
+
+    #[cfg(not(feature = "std"))]
+    use alloc::format;
 
     #[test]
     fn check_alpha_beta_bounds() {

@@ -161,6 +161,9 @@
 //!
 //! ## Feature flags
 //!
+//! `std`: enables the error types like e.g. [`GaussLegendreError`](legendre::GaussLegendreError), to capture a [`Backtrace`](std::backtrace::Backtrace).
+//! If this feature is disabled the crate is `no_std` compatible.
+//!
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quatrature rule structs.
 //!
@@ -172,6 +175,10 @@
 // or if the environment variable RUSTDOCFLAGS is set as `RUSTDOCFLAGS="--cfg docsrs"`.
 // This lets us get a tag on docs.rs that says "Available on crate feature ... only".
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 

@@ -39,7 +39,11 @@ use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelI
 
 use crate::{Node, __impl_node_rule};
 
+#[cfg(feature = "std")]
 use std::backtrace::Backtrace;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 /// A Simpson rule quadrature scheme.
 /// ```
@@ -145,7 +149,10 @@ __impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
 
 /// The error returned by [`Simpson::new`] if given a degree of 0.
 #[derive(Debug)]
-pub struct SimpsonError(Backtrace);
+pub struct SimpsonError {
+    #[cfg(feature = "std")]
+    backtrace: Backtrace,
+}
 
 use core::fmt;
 impl fmt::Display for SimpsonError {
@@ -157,9 +164,13 @@ impl fmt::Display for SimpsonError {
 impl SimpsonError {
     /// Calls [`Backtrace::capture`] and wraps the result in a `SimpsonError` struct.
     fn new() -> Self {
-        Self(Backtrace::capture())
+        Self {
+            #[cfg(feature = "std")]
+            backtrace: Backtrace::capture(),
+        }
     }
 
+    #[cfg(feature = "std")]
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
@@ -169,11 +180,14 @@ impl SimpsonError {
     }
 }
 
-impl std::error::Error for SimpsonError {}
+impl core::error::Error for SimpsonError {}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(not(feature = "std"))]
+    use alloc::format;
 
     #[test]
     fn check_simpson_integration() {
