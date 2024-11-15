@@ -223,6 +223,7 @@ mod tests {
 
     use super::*;
 
+    #[cfg(not(feature = "std"))]
     use alloc::format;
 
     #[test]

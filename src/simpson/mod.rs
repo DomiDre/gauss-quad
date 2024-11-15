@@ -176,7 +176,7 @@ impl SimpsonError {
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
     #[inline]
     pub fn backtrace(&self) -> &Backtrace {
-        &self.0
+        &self.backtrace
     }
 }
 

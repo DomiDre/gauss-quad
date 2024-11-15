@@ -15,9 +15,9 @@ repository = "https://github.com/domidre/gauss-quad"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
-nalgebra = {version = "0.33", default-features = false, features = ["std"]}
-serde = {version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true}
-rayon = {version = "1.10", optional = true}
+nalgebra = { version = "0.33", default-features = false, features = ["alloc", "libm"] }
+serde = { version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true }
+rayon = { version = "1.10", optional = true }
 
 [dev-dependencies]
 approx = "0.5.1"
@@ -29,7 +29,7 @@ serde = ["dep:serde"]
 # Enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
 rayon = ["dep:rayon"]
 # Enables the errors to capture a `Backtrace`. If this feature is disabled the crate is `no_std` compatible.
-std = []
+std = ["nalgebra/std"]
 
 [package.metadata.docs.rs]
 # Document all features
