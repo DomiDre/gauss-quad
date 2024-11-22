@@ -1,6 +1,6 @@
 # gauss-quad
 
-[![Latest Version](https://img.shields.io/crates/v/gauss-quad.svg)](https://crates.io/crates/gauss-quad)
+[![Crates.io Version](https://img.shields.io/crates/v/gauss-quad?logo=Rust)](https://crates.io/crates/gauss-quad)
 [![docs.rs](https://img.shields.io/docsrs/gauss-quad?logo=docs.rs)](https://docs.rs/gauss-quad/latest/gauss_quad/)
 [![Build Status](https://github.com/domidre/gauss-quad/actions/workflows/rust.yml/badge.svg)](https://github.com/domidre/gauss-quad/actions/workflows/rust.yml)
 [![codecov](https://codecov.io/gh/DomiDre/gauss-quad/graph/badge.svg?token=YUP5Y77ER2)](https://codecov.io/gh/DomiDre/gauss-quad)
