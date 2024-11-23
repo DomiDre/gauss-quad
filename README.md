@@ -9,7 +9,9 @@ The `gauss-quad` crate is a small library to calculate integrals of the type
 
 $$\int_a^b f(x) w(x) \mathrm{d}x$$
 
-using Gaussian quadrature. Here $f(x)$ is a user supplied function
+using Gaussian quadrature. 
+
+Here $f(x)$ is a user supplied function
 and $w(x)$ is a weight function that depends on which rule is used.
 Gaussian quadrature is interesting because a rule of degree n can exactly integrate
 all polynomials of degree 2n-1.
