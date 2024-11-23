@@ -27,10 +27,11 @@ criterion = { version = "0.5", features = ["html_reports"] }
 [features]
 # Implements the `Serialize` and `Deserialize` traits from the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 serde = ["dep:serde"]
-# Enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
+# Enables a parallel version of the `integrate` function on all the quadrature rule structs as well as the `new` function on some of the structs. 
+# Can speed up integration if evaluating the integrand is expensive.
 # Note that `rayon` depends on the standard library.
 rayon = ["dep:rayon"]
-# Enables the errors to capture a `Backtrace`. If this feature is disabled the crate is `no_std` compatible.
+# Enables the errors to capture a `Backtrace`. If this feature is disabled the crate is `no_std` compatible if the `rayon` feature is also disabled.
 std = ["nalgebra/std", "serde?/std"]
 
 [package.metadata.docs.rs]
