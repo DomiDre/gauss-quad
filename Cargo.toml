@@ -31,7 +31,7 @@ serde = ["dep:serde"]
 # Note that `rayon` depends on the standard library.
 rayon = ["dep:rayon"]
 # Enables the errors to capture a `Backtrace`. If this feature is disabled the crate is `no_std` compatible.
-std = ["nalgebra/std", "serde/std"]
+std = ["nalgebra/std", "serde?/std"]
 
 [package.metadata.docs.rs]
 # Document all features
