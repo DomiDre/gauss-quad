@@ -1,9 +1,9 @@
 //! The macros in this module define the common API for accessing the data that underlies the quadrature rules.
-//! The [`impl_node_weight_rule!`] macro implements the API for a struct with both nodes and weights.
+//! The [`__impl_node_weight_rule!`] macro implements the API for a struct with both nodes and weights.
 //! It should be called in the module that defines the quadrature rule struct.
-//! The [`impl_node_weight_rule_iterators!`] macro defines the iterators that some of the functions return.
+//! The [`__impl_node_weight_rule_iterators!`] macro defines the iterators that some of the functions return.
 //! It should be called somewhere it makes sense for the iterators to be defined, e.g. a sub-module.
-//! The [`impl_node_rule!`] and [`impl_node_rule_iterators!`] do the same thing as the previous
+//! The [`__impl_node_rule!`] and [`__impl_node_rule_iterators!`] do the same thing as the previous
 //! macros but for a struct with only nodes and no weights.
 
 // The code in the macros uses fully qualified paths for every type, so it is quite verbose.
