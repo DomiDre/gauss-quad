@@ -9,7 +9,12 @@ The `gauss-quad` crate is a small library to calculate integrals of the type
 
 $$\int_a^b f(x) w(x) \mathrm{d}x$$
 
-using Gaussian quadrature.
+using Gaussian quadrature. 
+
+Here $f(x)$ is a user supplied function
+and $w(x)$ is a weight function that depends on which rule is used.
+Gaussian quadrature is interesting because a rule of degree n can exactly integrate
+all polynomials of degree 2n-1.
 
 To use the crate, the desired quadrature rule has to be included in the program, e.g. for a Gauss-Legendre rule
 
@@ -33,8 +38,6 @@ where QUADRATURE_RULE can currently be set to calculate either:
 | GaussJacobi     | $$\int_a^b f(x)(1-x)^\alpha (1&plus;x)^\beta \mathrm{d}x$$ |
 | GaussLaguerre   | $$\int_{0}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$        |
 | GaussHermite    | $$\int_{-\infty}^\infty f(x) e^{-x^2} \mathrm{d}x$$        |
-
-A Gaussian quadrature rule of degree n can integrate a polynomial of degree 2n-1 exactly.
 
 For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
 
