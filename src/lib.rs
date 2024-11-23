@@ -161,10 +161,14 @@
 //!
 //! ## Feature flags
 //!
+//! `std`: enables the error types like e.g. [`GaussLegendreError`](legendre::GaussLegendreError) to capture a [`Backtrace`](std::backtrace::Backtrace).
+//! If this feature is disabled the crate is `no_std` compatible.
+//!
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 //!
 //! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
+//! Note that [`rayon`] depends on the standard library.
 
 // Only enable the nighlty `doc_auto_cfg` feature when
 // the `docsrs` configuration attribute is defined.
@@ -172,12 +176,17 @@
 // or if the environment variable RUSTDOCFLAGS is set as `RUSTDOCFLAGS="--cfg docsrs"`.
 // This lets us get a tag on docs.rs that says "Available on crate feature ... only".
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 
 mod data_api;
+mod elementary;
 mod gamma;
 pub mod hermite;
 pub mod jacobi;

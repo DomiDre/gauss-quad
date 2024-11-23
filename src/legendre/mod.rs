@@ -32,7 +32,11 @@ use bogaert::NodeWeightPair;
 
 use crate::{Node, Weight, __impl_node_weight_rule};
 
+#[cfg(feature = "std")]
 use std::backtrace::Backtrace;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -177,7 +181,10 @@ __impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeight
 
 /// The error returned by [`GaussLegendre::new`] if it's given a degree of 0 or 1.
 #[derive(Debug)]
-pub struct GaussLegendreError(Backtrace);
+pub struct GaussLegendreError {
+    #[cfg(feature = "std")]
+    backtrace: Backtrace,
+}
 
 use core::fmt;
 impl fmt::Display for GaussLegendreError {
@@ -192,25 +199,32 @@ impl fmt::Display for GaussLegendreError {
 impl GaussLegendreError {
     /// Calls [`Backtrace::capture`] and wraps the result in a `GaussLegendreError` struct.
     fn new() -> Self {
-        Self(Backtrace::capture())
+        Self {
+            #[cfg(feature = "std")]
+            backtrace: Backtrace::capture(),
+        }
     }
 
+    #[cfg(feature = "std")]
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
     #[inline]
     pub fn backtrace(&self) -> &Backtrace {
-        &self.0
+        &self.backtrace
     }
 }
 
-impl std::error::Error for GaussLegendreError {}
+impl core::error::Error for GaussLegendreError {}
 
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
 
     use super::*;
+
+    #[cfg(not(feature = "std"))]
+    use alloc::format;
 
     #[test]
     fn check_degree_3() {

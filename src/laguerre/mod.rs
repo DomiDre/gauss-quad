@@ -18,13 +18,19 @@
 //! # Ok::<(), GaussLaguerreError>(())
 //! ```
 
+use crate::elementary::sqrt;
+
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::gamma::gamma;
 use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
+#[cfg(feature = "std")]
 use std::backtrace::Backtrace;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 /// A Gauss-Laguerre quadrature scheme.
 ///
@@ -85,7 +91,7 @@ impl GaussLaguerre {
         // Initialize symmetric companion matrix
         for idx in 0..deg - 1 {
             let idx_f64 = 1.0 + idx as f64;
-            let off_diag = (idx_f64 * (idx_f64 + alpha)).sqrt();
+            let off_diag = sqrt(idx_f64 * (idx_f64 + alpha));
             unsafe {
                 *companion_matrix.get_unchecked_mut((idx, idx)) = diag;
                 *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;
@@ -162,6 +168,7 @@ __impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeight
 #[derive(Debug)]
 pub struct GaussLaguerreError {
     reason: GaussLaguerreErrorReason,
+    #[cfg(feature = "std")]
     backtrace: Backtrace,
 }
 
@@ -184,6 +191,7 @@ impl GaussLaguerreError {
     pub(crate) fn new(reason: GaussLaguerreErrorReason) -> Self {
         Self {
             reason,
+            #[cfg(feature = "std")]
             backtrace: Backtrace::capture(),
         }
     }
@@ -194,6 +202,7 @@ impl GaussLaguerreError {
         self.reason
     }
 
+    #[cfg(feature = "std")]
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
@@ -203,7 +212,7 @@ impl GaussLaguerreError {
     }
 }
 
-impl std::error::Error for GaussLaguerreError {}
+impl core::error::Error for GaussLaguerreError {}
 
 /// The reason for the `GaussLaguerreError`, returned by the [`GaussLaguerreError::reason`] function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -236,6 +245,9 @@ mod tests {
     use super::*;
     use approx::assert_abs_diff_eq;
     use core::f64::consts::PI;
+
+    #[cfg(not(feature = "std"))]
+    use alloc::format;
 
     #[test]
     fn golub_welsch_2_alpha_5() {

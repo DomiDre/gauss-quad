@@ -46,7 +46,11 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{Node, __impl_node_rule};
 
+#[cfg(feature = "std")]
 use std::backtrace::Backtrace;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 /// A midpoint rule quadrature scheme.
 /// ```
@@ -121,7 +125,10 @@ __impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
 
 /// The error returned by [`Midpoint::new`] if given a degree of 0.
 #[derive(Debug)]
-pub struct MidpointError(Backtrace);
+pub struct MidpointError {
+    #[cfg(feature = "std")]
+    backtrace: Backtrace,
+}
 
 use core::fmt;
 impl fmt::Display for MidpointError {
@@ -133,25 +140,32 @@ impl fmt::Display for MidpointError {
 impl MidpointError {
     /// Calls [`Backtrace::capture`] and wraps the result in a `MidpointError` struct.
     fn new() -> Self {
-        Self(Backtrace::capture())
+        Self {
+            #[cfg(feature = "std")]
+            backtrace: Backtrace::capture(),
+        }
     }
 
+    #[cfg(feature = "std")]
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
     #[inline]
     pub fn backtrace(&self) -> &Backtrace {
-        &self.0
+        &self.backtrace
     }
 }
 
-impl std::error::Error for MidpointError {}
+impl core::error::Error for MidpointError {}
 
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
 
     use super::*;
+
+    #[cfg(not(feature = "std"))]
+    use alloc::format;
 
     #[test]
     fn check_midpoint_integration() {

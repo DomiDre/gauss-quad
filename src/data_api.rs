@@ -14,6 +14,18 @@ pub type Node = f64;
 /// A weight in a quadrature rule.
 pub type Weight = f64;
 
+// These types are used in the macro to guarantee that we point to the right `Vec` and `IntoIter`
+// regardless of whether we have the standard library.
+#[cfg(feature = "std")]
+pub(crate) type PortableVec<T> = ::std::vec::Vec<T>;
+#[cfg(not(feature = "std"))]
+pub(crate) type PortableVec<T> = ::alloc::vec::Vec<T>;
+
+#[cfg(feature = "std")]
+pub(crate) type PortableVecIntoIter<T> = ::std::vec::IntoIter<T>;
+#[cfg(not(feature = "std"))]
+pub(crate) type PortableVecIntoIter<T> = ::alloc::vec::IntoIter<T>;
+
 /// This macro implements the data access API for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Vec<(Node, Weight)>`.
 /// It takes in the name of the quadrature rule struct as well as the names it should give the iterators
@@ -37,6 +49,8 @@ macro_rules! __impl_node_weight_rule {
         // Implements functions for accessing the underlying data of the quadrature rule struct
         // in a way the adheres to the API guidelines: <https://rust-lang.github.io/api-guidelines/naming.html>.
         // The functions in these impl blocks all have an #[inline] directive because they are trivial.
+
+        use $crate::data_api::{PortableVec, PortableVecIntoIter};
 
         // Lets the user do
         // for (node, weight) in QuadratuleRule::new(...) {
@@ -96,7 +110,7 @@ macro_rules! __impl_node_weight_rule {
             /// This function just returns the underlying vector without any computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> ::std::vec::Vec<($crate::Node, $crate::Weight)> {
+            pub fn into_node_weight_pairs(self) -> PortableVec<($crate::Node, $crate::Weight)> {
                 self.node_weight_pairs
             }
 
@@ -115,7 +129,7 @@ macro_rules! __impl_node_weight_rule {
         pub struct $quadrature_rule_nodes<'a>(
             // This horrible type is just the fully qualified path of the type returned
             // by `slice.iter().map(|(x, _)| x)`.
-            ::std::iter::Map<
+            ::core::iter::Map<
                 ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                 fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
             >,
@@ -124,7 +138,7 @@ macro_rules! __impl_node_weight_rule {
         impl<'a> $quadrature_rule_nodes<'a> {
             #[inline]
             const fn new(
-                iter_map: ::std::iter::Map<
+                iter_map: ::core::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                     fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
                 >,
@@ -144,7 +158,7 @@ macro_rules! __impl_node_weight_rule {
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_weights<'a>(
             // Same as the previous horrible type, but maps out the weight instead of the node.
-            ::std::iter::Map<
+            ::core::iter::Map<
                 ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                 fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
             >,
@@ -153,7 +167,7 @@ macro_rules! __impl_node_weight_rule {
         impl<'a> $quadrature_rule_weights<'a> {
             #[inline]
             const fn new(
-                iter_map: ::std::iter::Map<
+                iter_map: ::core::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                     fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
                 >,
@@ -214,12 +228,12 @@ macro_rules! __impl_node_weight_rule {
         /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<($crate::Node, $crate::Weight)>);
+        pub struct $quadrature_rule_into_iter(PortableVecIntoIter<($crate::Node, $crate::Weight)>);
 
         impl $quadrature_rule_into_iter {
             #[inline]
             const fn new(
-                node_weight_pairs: ::std::vec::IntoIter<($crate::Node, $crate::Weight)>,
+                node_weight_pairs: PortableVecIntoIter<($crate::Node, $crate::Weight)>,
             ) -> Self {
                 Self(node_weight_pairs)
             }
@@ -318,6 +332,8 @@ macro_rules! __impl_slice_iterator_newtype_traits {
 #[doc(hidden)]
 macro_rules! __impl_node_rule {
     ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
+        use $crate::data_api::PortableVecIntoIter;
+
         // Lets the user do
         // for node in QuadratureRule::new(...) {
         //    ...
@@ -415,11 +431,11 @@ macro_rules! __impl_node_rule {
         /// Created by the [`IntoIterator`] trait implementation of the rule struct.
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<$crate::Node>);
+        pub struct $quadrature_rule_into_iter(PortableVecIntoIter<$crate::Node>);
 
         impl $quadrature_rule_into_iter {
             #[inline]
-            const fn new(iter: ::std::vec::IntoIter<$crate::Node>) -> Self {
+            const fn new(iter: PortableVecIntoIter<$crate::Node>) -> Self {
                 Self(iter)
             }
 
@@ -448,7 +464,10 @@ macro_rules! __impl_node_rule {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(not(feature = "std"))]
+    use alloc::vec::Vec;
     use core::fmt;
+    #[cfg(feature = "std")]
     use std::backtrace::Backtrace;
 
     #[derive(Debug, Clone, PartialEq)]
@@ -458,11 +477,15 @@ mod tests {
     }
 
     #[derive(Debug)]
-    pub struct MockQuadratureError(Backtrace);
+    pub struct MockQuadratureError {
+        #[cfg(feature = "std")]
+        backtrace: Backtrace,
+    }
 
+    #[cfg(feature = "std")]
     impl MockQuadratureError {
         pub fn backtrace(&self) -> &Backtrace {
-            &self.0
+            &self.backtrace
         }
     }
 
@@ -472,12 +495,15 @@ mod tests {
         }
     }
 
-    impl std::error::Error for MockQuadratureError {}
+    impl core::error::Error for MockQuadratureError {}
 
     impl MockQuadrature {
         pub fn new(deg: usize) -> Result<Self, MockQuadratureError> {
             if deg < 1 {
-                return Err(MockQuadratureError(Backtrace::capture()));
+                return Err(MockQuadratureError {
+                    #[cfg(feature = "std")]
+                    backtrace: Backtrace::capture(),
+                });
             }
 
             Ok(Self {
