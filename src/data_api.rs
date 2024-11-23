@@ -1,8 +1,8 @@
 //! The macros in this module define the common API for accessing the data that underlies the quadrature rules.
 //! The [`__impl_node_weight_rule!`] macro implements the API for a struct with both nodes and weights.
 //! It should be called in the module that defines the quadrature rule struct.
-//! [`__impl_node_rule!`] do the same thing as the previous
-//! macros but for a struct with only nodes and no weights.
+//! [`__impl_node_rule!`] does the same thing as the previous macros
+//! but for a struct with only nodes and no weights.
 
 // The code in the macros uses fully qualified paths for every type, so it is quite verbose.
 // That is, instead of `usize` it uses `::core::primitive::usize` and so on. This makes it so that
