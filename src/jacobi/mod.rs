@@ -122,7 +122,7 @@ impl GaussJacobi {
                 * (idx_p1 * (idx_p1 + alpha) * (idx_p1 + beta) * (idx_p1 + alpha + beta)
                     / ((denom_sum + 1.0) * (denom_sum - 1.0)))
                     .sqrt();
-            println!("idx: {idx}, denom_sum = {denom_sum} --> off_diag = {off_diag}");
+
             unsafe {
                 *companion_matrix.get_unchecked_mut((idx, idx)) = diag;
                 *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;
@@ -134,8 +134,6 @@ impl GaussJacobi {
             *companion_matrix.get_unchecked_mut((deg - 1, deg - 1)) = diag;
         }
 
-        println!("{companion_matrix:?}");
-
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
@@ -143,8 +141,6 @@ impl GaussJacobi {
             (2.0f64).powf(alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
                 / gamma(alpha + beta + 1.0)
                 / (alpha + beta + 1.0);
-
-        println!("scale factor = {scale_factor}");
 
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
         let mut node_weight_pairs: Vec<(f64, f64)> = eigen
