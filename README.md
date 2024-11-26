@@ -32,12 +32,12 @@ where QUADRATURE_RULE can currently be set to calculate either:
 
 | QUADRATURE_RULE | Integral                                                            |
 | --------------- | ------------------------------------------------------------------- |
-| Midpoint        | $$\int_a^b f(x) \mathrm{d}x$$                                       |
-| Simpson         | $$\int_a^b f(x) \mathrm{d}x$$                                       |
-| GaussLegendre   | $$\int_a^b f(x) \mathrm{d}x$$                                       |
-| GaussJacobi     | $$\int_a^b f(x)(1-x)^\alpha (1+x)^\beta \mathrm{d}x$$               |
-| GaussLaguerre   | $$\int_{0}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$                 |
-| GaussHermite    | $$\int_{-\infty}^\infty f(x) e^{-x^2} \mathrm{d}x$$                 |
+| Midpoint        | $$\int_a^b\!f(x)\;\mathrm{d}x$$                                     |
+| Simpson         | $$\int_a^b\!f(x)\;\mathrm{d}x$$                                     |
+| GaussLegendre   | $$\int_a^b\!f(x)\;\mathrm{d}x$$                                     |
+| GaussJacobi     | $$\int_a^b\!f(x)(1-x)^\alpha (1+x)^\beta\;\mathrm{d}x$$             |
+| GaussLaguerre   | $$\int_{0}^\infty\!f(x)x^\alpha e^{-x}\;\mathrm{d}x$$               |
+| GaussHermite    | $$\int_{-\infty}^\infty\!f(x) e^{-x^2}\;\mathrm{d}x$$               |
 | GaussChebyshev  | $$\int_a^b\!f(x)(1-x^2)^a\;\mathrm{d}x,\qquad a=\pm\frac{1}{2}$$    |
 
 For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
