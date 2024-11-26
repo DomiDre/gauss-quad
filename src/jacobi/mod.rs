@@ -286,6 +286,7 @@ impl fmt::Display for GaussJacobiError {
 
 impl std::error::Error for GaussJacobiError {}
 
+/// Gauss-Legendre quadrature is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.
 impl From<GaussLegendre> for GaussJacobi {
     fn from(value: GaussLegendre) -> Self {
         let mut node_weight_pairs = value.into_node_weight_pairs();
@@ -301,6 +302,7 @@ impl From<GaussLegendre> for GaussJacobi {
     }
 }
 
+/// Gauss-Chebyshev quadrature of the first kind is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = -0.5.
 impl From<GaussChebyshevFirstKind> for GaussJacobi {
     fn from(value: GaussChebyshevFirstKind) -> Self {
         Self {
@@ -311,6 +313,7 @@ impl From<GaussChebyshevFirstKind> for GaussJacobi {
     }
 }
 
+/// Gauss-Chebyshev quadrature of the second kind is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.5.
 impl From<GaussChebyshevSecondKind> for GaussJacobi {
     fn from(value: GaussChebyshevSecondKind) -> Self {
         Self {
