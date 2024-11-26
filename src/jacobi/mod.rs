@@ -91,36 +91,40 @@ impl GaussJacobi {
         // Delegate the computation of nodes and weights when they have special values
         // that are equivalent to other rules that have faster implementations.
         if alpha == 0.0 && beta == 0.0 {
-            return match GaussLegendre::new(deg) {
+            match GaussLegendre::new(deg) {
                 Ok(legendre_rule) => {
                     let mut node_weight_pairs = legendre_rule.into_node_weight_pairs();
                     // Gauss-Legendre nodes are generated in reverse sorted order. This corrects that.
                     node_weight_pairs.reverse();
-                    Ok(Self {
+                    return Ok(Self {
                         node_weight_pairs,
+                        alpha,
+                        beta,
+                    });
+                }
+                Err(_) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
+            };
+        } else if alpha == -0.5 && beta == -0.5 {
+            match GaussChebyshevFirstKind::new(deg) {
+                Ok(chebyshev_rule) => {
+                    return Ok(Self {
+                        node_weight_pairs: chebyshev_rule.into_node_weight_pairs(),
                         alpha,
                         beta,
                     })
                 }
-                Err(_) => Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
-            };
-        } else if alpha == -0.5 && beta == -0.5 {
-            return match GaussChebyshevFirstKind::new(deg) {
-                Ok(chebyshev_rule) => Ok(Self {
-                    node_weight_pairs: chebyshev_rule.into_node_weight_pairs(),
-                    alpha,
-                    beta,
-                }),
-                Err(_) => Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
+                Err(_) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
             };
         } else if alpha == 0.5 && beta == 0.5 {
-            return match GaussChebyshevSecondKind::new(deg) {
-                Ok(chebyshev_rule) => Ok(Self {
-                    node_weight_pairs: chebyshev_rule.into_node_weight_pairs(),
-                    alpha,
-                    beta,
-                }),
-                Err(_) => Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
+            match GaussChebyshevSecondKind::new(deg) {
+                Ok(chebyshev_rule) => {
+                    return Ok(Self {
+                        node_weight_pairs: chebyshev_rule.into_node_weight_pairs(),
+                        alpha,
+                        beta,
+                    })
+                }
+                Err(_) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
             };
         }
 
