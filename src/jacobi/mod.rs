@@ -90,25 +90,24 @@ impl GaussJacobi {
 
         // Delegate the computation of nodes and weights when they have special values
         // that are equivalent to other rules that have faster implementations.
-        if alpha == 0.0 && beta == 0.0 {
-            if let Ok(legendre_rule) = GaussLegendre::new(deg) {
-                return Ok(legendre_rule.into());
-            } else {
-                // We know the only reason for these methods to return an error is if the degree is less than 2.
-                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree));
+        match (alpha, beta) {
+            (0.0, 0.0) => {
+                return GaussLegendre::new(deg)
+                    .map(GaussJacobi::from)
+                    // We know that the only reason that these methods could error is if the degree is less than 2.
+                    .map_err(|_| GaussJacobiError::new(GaussJacobiErrorReason::Degree));
             }
-        } else if alpha == -0.5 && beta == -0.5 {
-            if let Ok(chebyshev_rule) = GaussChebyshevFirstKind::new(deg) {
-                return Ok(chebyshev_rule.into());
-            } else {
-                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree));
-            };
-        } else if alpha == 0.5 && beta == 0.5 {
-            if let Ok(chebyshev_rule) = GaussChebyshevSecondKind::new(deg) {
-                return Ok(chebyshev_rule.into());
-            } else {
-                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree));
-            };
+            (-0.5, -0.5) => {
+                return GaussChebyshevFirstKind::new(deg)
+                    .map(GaussJacobi::from)
+                    .map_err(|_| GaussJacobiError::new(GaussJacobiErrorReason::Degree))
+            }
+            (0.5, 0.5) => {
+                return GaussChebyshevSecondKind::new(deg)
+                    .map(GaussJacobi::from)
+                    .map_err(|_| GaussJacobiError::new(GaussJacobiErrorReason::Degree))
+            }
+            _ => (),
         }
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
