@@ -51,11 +51,11 @@ Then to calculate the integral of a function call
 let integral = quad.integrate(a, b, f(x));
 ```
 
-where a and b (both f64) are the integral bounds and the f(x) the integrand (Fn(f64) -> f64).
-For example to integrate a parabola from 0..1 one can use a lambda expression as integrand and call:
+where `a` and `b` (both `f64`) are the integral bounds and `f(x)` is the integrand which implements the trait `Fn(f64) -> f64`.
+For example to integrate a parabola from 0 to 1 one can use a lambda expression as integrand and call:
 
 ```rust
-let integral = quad.integrate(0.0, 1.0, |x| x*x);
+let integral = quad.integrate(0.0, 1.0, |x| x * x);
 ```
 
 If the integral is improper, as in the case of Gauss-Laguerre and Gauss-Hermite integrals, no integral bounds should be passed and the call simplifies to
