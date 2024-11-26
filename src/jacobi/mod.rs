@@ -94,6 +94,7 @@ impl GaussJacobi {
             if let Ok(legendre_rule) = GaussLegendre::new(deg) {
                 return Ok(legendre_rule.into());
             } else {
+                // We know the only reason for these methods to return an error is if the degree is less than 2.
                 return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree));
             }
         } else if alpha == -0.5 && beta == -0.5 {
