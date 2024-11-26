@@ -94,7 +94,9 @@ impl GaussJacobi {
             match GaussLegendre::new(deg) {
                 Ok(legendre_rule) => {
                     let mut node_weight_pairs = legendre_rule.into_node_weight_pairs();
-                    // Gauss-Legendre nodes are generated in reverse sorted order. This corrects that.
+                    // Gauss-Legendre nodes are generated in reverse sorted order.
+                    // This corrects for that since Gauss-Jacobi nodes are currently always sorted
+                    // in ascending order.
                     node_weight_pairs.reverse();
                     return Ok(Self {
                         node_weight_pairs,
