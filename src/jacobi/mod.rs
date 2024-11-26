@@ -92,11 +92,16 @@ impl GaussJacobi {
         // that are equivalent to other rules that have faster implementations.
         if alpha == 0.0 && beta == 0.0 {
             return match GaussLegendre::new(deg) {
-                Ok(legendre_rule) => Ok(Self {
-                    node_weight_pairs: legendre_rule.into_node_weight_pairs(),
-                    alpha,
-                    beta,
-                }),
+                Ok(legendre_rule) => {
+                    let mut node_weight_pairs = legendre_rule.into_node_weight_pairs();
+                    // Gauss-Legendre nodes are generated in reverse sorted order. This corrects that.
+                    node_weight_pairs.reverse();
+                    Ok(Self {
+                        node_weight_pairs,
+                        alpha,
+                        beta,
+                    })
+                }
                 Err(_) => Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
             };
         } else if alpha == -0.5 && beta == -0.5 {
