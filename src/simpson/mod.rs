@@ -34,7 +34,12 @@
 //! # Ok::<(), SimpsonError>(())
 //! ```
 
-use crate::{impl_node_rule, impl_node_rule_iterators, Node};
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
+
+use crate::{Node, __impl_node_rule};
+
+use std::backtrace::Backtrace;
 
 /// A Simpson rule quadrature scheme.
 /// ```
@@ -65,7 +70,7 @@ impl Simpson {
                 nodes: (0..degree).map(|d| d as f64).collect(),
             })
         } else {
-            Err(SimpsonError)
+            Err(SimpsonError::new())
         }
     }
 
@@ -102,14 +107,45 @@ impl Simpson {
                 + integrand(a)
                 + integrand(b))
     }
+
+    #[cfg(feature = "rayon")]
+    /// Same as [`integrate`](Simpson::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let n = self.nodes.len() as f64;
+
+        let h = (b - a) / n;
+
+        let sum_over_interval_edges: f64 = self
+            .nodes
+            .par_iter()
+            .skip(1)
+            .map(|&node| integrand(a + node * h))
+            .sum();
+
+        let sum_over_midpoints: f64 = self
+            .nodes
+            .par_iter()
+            .skip(1)
+            .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+            .sum();
+
+        h / 6.0
+            * (2.0 * sum_over_interval_edges
+                + 4.0 * sum_over_midpoints
+                + 4.0 * integrand(a + (2.0 * n - 1.0) * h / 2.0)
+                + integrand(a)
+                + integrand(b))
+    }
 }
 
-impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
+__impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
 
 /// The error returned by [`Simpson::new`] if given a degree of 0.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SimpsonError;
+#[derive(Debug)]
+pub struct SimpsonError(Backtrace);
 
 use core::fmt;
 impl fmt::Display for SimpsonError {
@@ -118,9 +154,22 @@ impl fmt::Display for SimpsonError {
     }
 }
 
-impl std::error::Error for SimpsonError {}
+impl SimpsonError {
+    /// Calls [`Backtrace::capture`] and wraps the result in a `SimpsonError` struct.
+    fn new() -> Self {
+        Self(Backtrace::capture())
+    }
 
-impl_node_rule_iterators! {SimpsonIter, SimpsonIntoIter}
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
+    #[inline]
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
+    }
+}
+
+impl std::error::Error for SimpsonError {}
 
 #[cfg(test)]
 mod tests {
@@ -133,17 +182,30 @@ mod tests {
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_check_simpson_integration() {
+        let quad = Simpson::new(2).unwrap();
+        let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
+        approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
+    }
+
     #[test]
     fn check_simpson_error() {
-        assert!(Simpson::new(0).is_err());
+        let simpson_rule = Simpson::new(0);
+        assert!(simpson_rule.is_err());
+        assert_eq!(
+            format!("{}", simpson_rule.err().unwrap()),
+            "the degree of the Simpson rule must be at least 1."
+        );
     }
 
     #[test]
     fn check_derives() {
-        let quad = Simpson::new(10);
+        let quad = Simpson::new(10).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Simpson::new(3);
+        let other_quad = Simpson::new(3).unwrap();
         assert_ne!(quad, other_quad);
     }
 }

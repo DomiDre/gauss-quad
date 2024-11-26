@@ -5,6 +5,7 @@
 //! over the domain (-∞, ∞).
 //!
 //! # Example
+//!
 //! Integrate x^2 * e^(-x^2)
 //! ```
 //! use gauss_quad::hermite::GaussHermite;
@@ -12,17 +13,28 @@
 //! use approx::assert_abs_diff_eq;
 //!
 //! let quad = GaussHermite::new(10)?;
+//!
 //! let integral = quad.integrate(|x| x.powi(2));
+//!
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
 //! # Ok::<(), GaussHermiteError>(())
 //! ```
 
-use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, DMatrixf64, Node, Weight, PI};
+#[cfg(feature = "rayon")]
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+
+use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
+
+use core::f64::consts::PI;
+
+use std::backtrace::Backtrace;
 
 /// A Gauss-Hermite quadrature scheme.
 ///
 /// These rules can integrate integrands of the form e^(-x^2) * f(x) over the domain (-∞, ∞).
+///
 /// # Example
+///
 /// Integrate e^(-x^2) * cos(x)
 /// ```
 /// # use gauss_quad::hermite::{GaussHermite, GaussHermiteError};
@@ -46,6 +58,8 @@ pub struct GaussHermite {
 impl GaussHermite {
     /// Initializes Gauss-Hermite quadrature rule of the given degree by computing the needed nodes and weights.
     ///
+    /// A rule of degree `n` can integrate polynomials of degree 2`n`-1 exactly.
+    ///
     /// Applies the Golub-Welsch algorithm to determine Gauss-Hermite nodes & weights.
     /// Constructs the companion matrix A for the Hermite Polynomial using the relation:
     /// 1/2 H_{n+1} + n H_{n-1} = x H_n
@@ -60,7 +74,7 @@ impl GaussHermite {
     /// Returns an error if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Result<Self, GaussHermiteError> {
         if deg < 2 {
-            return Err(GaussHermiteError);
+            return Err(GaussHermiteError::new());
         }
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
         // Initialize symmetric companion matrix
@@ -93,7 +107,7 @@ impl GaussHermite {
         })
     }
 
-    /// Perform quadrature of e^(-x^2) * `integrand` over the domain (-∞, ∞).
+    /// Perform quadrature of e^(-x^2) * `integrand`(x) over the domain (-∞, ∞).
     pub fn integrate<F>(&self, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
@@ -105,16 +119,27 @@ impl GaussHermite {
             .sum();
         result
     }
+
+    #[cfg(feature = "rayon")]
+    /// Same as [`integrate`](GaussHermite::integrate) but runs in parallel.
+    pub fn par_integrate<F>(&self, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let result: f64 = self
+            .node_weight_pairs
+            .par_iter()
+            .map(|(x_val, w_val)| integrand(*x_val) * w_val)
+            .sum();
+        result
+    }
 }
 
-impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
-
-impl_node_weight_rule_iterators! {GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
+__impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
 
 /// The error returned by [`GaussHermite::new`] if it is given a degree of 0 or 1.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GaussHermiteError;
+#[derive(Debug)]
+pub struct GaussHermiteError(Backtrace);
 
 use core::fmt;
 impl fmt::Display for GaussHermiteError {
@@ -128,8 +153,25 @@ impl fmt::Display for GaussHermiteError {
 
 impl std::error::Error for GaussHermiteError {}
 
+impl GaussHermiteError {
+    /// Calls [`Backtrace::capture`] and wraps the result in a `GaussHermiteError` struct.
+    fn new() -> Self {
+        Self(Backtrace::capture())
+    }
+
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
+    #[inline]
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use approx::assert_abs_diff_eq;
+
     use super::*;
 
     #[test]
@@ -142,25 +184,72 @@ mod tests {
             0.295_408_975_150_919_35,
         ];
         for (i, x_val) in x_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
         }
         for (i, w_val) in w_should.iter().enumerate() {
-            approx::assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
+            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
         }
     }
 
     #[test]
     fn check_hermite_error() {
-        assert!(GaussHermite::new(0).is_err());
+        let hermite_rule = GaussHermite::new(0);
+        assert!(hermite_rule.is_err());
+        assert_eq!(
+            format!("{}", hermite_rule.err().unwrap()),
+            "the degree of the Gauss-Hermite quadrature rule must be at least 2"
+        );
+
         assert!(GaussHermite::new(1).is_err());
     }
 
     #[test]
     fn check_derives() {
-        let quad = GaussHermite::new(10);
+        let quad = GaussHermite::new(10).unwrap();
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussHermite::new(3);
+        let other_quad = GaussHermite::new(3).unwrap();
         assert_ne!(quad, other_quad);
+    }
+
+    #[test]
+    fn check_iterators() {
+        let rule = GaussHermite::new(3).unwrap();
+        let ans = core::f64::consts::PI.sqrt() / 2.0;
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            epsilon = 1e-14
+        );
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.nodes()
+                .zip(rule.weights())
+                .fold(0.0, |tot, (n, w)| tot + n * n * w),
+            epsilon = 1e-14
+        );
+
+        assert_abs_diff_eq!(
+            ans,
+            rule.into_iter().fold(0.0, |tot, (n, w)| tot + n * n * w),
+            epsilon = 1e-14
+        );
+    }
+
+    #[test]
+    fn integrate_one() {
+        let quad = GaussHermite::new(5).unwrap();
+        let integral = quad.integrate(|_x| 1.0);
+        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn par_integrate_one() {
+        let quad = GaussHermite::new(5).unwrap();
+        let integral = quad.par_integrate(|_x| 1.0);
+        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
     }
 }

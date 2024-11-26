@@ -5,7 +5,7 @@
 
 // We could use this to delegate some special cases of GaussJacobi.
 
-use crate::{impl_node_weight_rule, impl_node_weight_rule_iterators, Node, Weight};
+use crate::{__impl_node_weight_rule, Node, Weight};
 
 use core::{f64::consts::PI, fmt};
 
@@ -123,6 +123,4 @@ impl GaussChebyshev {
     }
 }
 
-impl_node_weight_rule! {GaussChebyshev, GaussChebyshevNodes, GaussChebyshevWeights, GaussChebyshevIter, GaussChebyshevIntoIter}
-
-impl_node_weight_rule_iterators! {GaussChebyshevNodes, GaussChebyshevWeights, GaussChebyshevIter, GaussChebyshevIntoIter}
+__impl_node_weight_rule! {GaussChebyshev, GaussChebyshevNodes, GaussChebyshevWeights, GaussChebyshevIter, GaussChebyshevIntoIter}

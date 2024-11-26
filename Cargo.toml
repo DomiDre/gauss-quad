@@ -1,12 +1,12 @@
 [package]
 name = "gauss-quad"
-version = "0.1.7"
-authors = ["DomiDre <dominiquedresen@gmail.com>", "Johanna Sörngård (jsorngard@gmail.com)"]
+version = "0.2.1"
+authors = ["DomiDre <dominiquedresen@gmail.com>", "Johanna Sörngård <jsorngard@gmail.com>"]
 keywords = ["gaussian", "quadrature", "numerics", "integration"]
-categories = ["Mathematics"]
-edition = "2018"
+categories = ["mathematics"]
+edition = "2021"
 description = "Library for applying Gaussian quadrature to integrate a function"
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/domidre/gauss-quad"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -15,19 +15,23 @@ repository = "https://github.com/domidre/gauss-quad"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
-nalgebra = {version = "0.32", default_features = false, features = ["std"]}
-serde = {version = "1.0.192", default_features = false, features = ["alloc", "derive"], optional = true}
+nalgebra = {version = "0.33", default-features = false, features = ["std"]}
+serde = {version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true}
+rayon = {version = "1.10", optional = true}
 
 [dev-dependencies]
 approx = "0.5.1"
 criterion = {version = "0.5", features = ["html_reports"]}
 
 [features]
+# Implements the `Serialize` and `Deserialize` traits from the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 serde = ["dep:serde"]
+# Enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
+rayon = ["dep:rayon"]
 
 [package.metadata.docs.rs]
+# Document all features
 all-features = true
-
 
 [[bench]]
 name = "legendre"
