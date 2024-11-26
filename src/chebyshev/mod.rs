@@ -1,7 +1,6 @@
 //! Numerical integration using the Chebyshev-Gauss quadrature rule.
 //!
-//! This rule can integrate formulas on the form (1 - x^2)^`a` f(x) where `a` is either -1/2 or 1/2,
-//! on intervals finite intervals.
+//! This rule can integrate formulas on the form f(x) * (1 - x^2)^`a` on finite intervals, where `a` is either -1/2 or 1/2.
 
 use crate::{Node, Weight, __impl_node_weight_rule};
 
