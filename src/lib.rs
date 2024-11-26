@@ -189,7 +189,7 @@ pub mod midpoint;
 pub mod simpson;
 
 #[doc(inline)]
-pub use chebyshev::GaussChebyshev;
+pub use chebyshev::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
 #[doc(inline)]
 pub use data_api::{Node, Weight};
 #[doc(inline)]
