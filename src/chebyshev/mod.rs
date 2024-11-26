@@ -61,6 +61,7 @@ impl GaussChebyshevFirstKind {
     }
 
     #[cfg(feature = "rayon")]
+    /// Same as [`new`](Self::new) but runs in parallel.
     pub fn par_new(degree: usize) -> Result<Self, GaussChebyshevError> {
         if degree < 2 {
             return Err(GaussChebyshevError);
