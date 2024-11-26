@@ -24,7 +24,7 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::gamma::gamma;
 use crate::{
-    DMatrixf64, GaussChebyshevFirstKind, GaussChebyshevSecondKind, Node, Weight,
+    DMatrixf64, GaussChebyshevFirstKind, GaussChebyshevSecondKind, GaussLegendre, Node, Weight,
     __impl_node_weight_rule,
 };
 
@@ -88,9 +88,18 @@ impl GaussJacobi {
         }
         .map_err(GaussJacobiError::new)?;
 
-        // Since Gauss-Jacobi is the same as Gauss-Chebyshev if alpha = beta = ±0.5
-        // we can just use that code, as it is faster.
-        if alpha == -0.5 && beta == -0.5 {
+        // Delegate the computation of nodes and weights when they have special values
+        // that are equivalent to other rules that have faster implementations.
+        if alpha == 0.0 && beta == 0.0 {
+            return match GaussLegendre::new(deg) {
+                Ok(legendre_rule) => Ok(Self {
+                    node_weight_pairs: legendre_rule.into_node_weight_pairs(),
+                    alpha,
+                    beta,
+                }),
+                Err(_) => Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
+            };
+        } else if alpha == -0.5 && beta == -0.5 {
             return match GaussChebyshevFirstKind::new(deg) {
                 Ok(chebyshev_rule) => Ok(Self {
                     node_weight_pairs: chebyshev_rule.into_node_weight_pairs(),
