@@ -12,7 +12,9 @@ use core::{f64::consts::PI, fmt};
 #[cfg(feature = "rayon")]
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
-/// A Gauss-Chebyshev quadrature scheme used to integrate functions of the form
+/// A Gauss-Chebyshev quadrature scheme of the first kind.
+/// 
+/// Used to integrate functions of the form
 /// f(x) / sqrt(1 - x^2) on finite intervals.
 ///
 /// # Example
@@ -112,7 +114,9 @@ impl GaussChebyshevFirstKind {
 
 __impl_node_weight_rule! {GaussChebyshevFirstKind, GaussChebyshevFirstKindNodes, GaussChebyshevFirstKindWeights, GaussChebyshevFirstKindIter, GaussChebyshevFirstKindIntoIter}
 
-/// A Gauss-Chebyshev quadrature scheme used to integrate functions of the form
+/// A Gauss-Chebyshev quadrature scheme of the second kind.
+/// 
+/// Used to integrate functions of the form
 /// f(x) * sqrt(1 - x^2) on finite intervals.
 ///
 /// # Example
@@ -227,7 +231,7 @@ impl GaussChebyshevSecondKind {
 
 __impl_node_weight_rule! {GaussChebyshevSecondKind, GaussChebyshevSecondKindNodes, GaussChebyshevSecondKindWeights, GaussChebyshevSecondKindIter, GaussChebyshevSecondKindIntoIter}
 
-/// The error returned when attempting to create a [`GaussChebyshev`] struct with a degree less than 2.
+/// The error returned when attempting to create a [`GaussChebyshevFirstKind`] or [`GaussChebyshevSecondKind`] struct with a degree less than 2.
 #[derive(Debug, Clone, Copy, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussChebyshevError;
