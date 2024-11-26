@@ -93,39 +93,18 @@ impl GaussJacobi {
         if alpha == 0.0 && beta == 0.0 {
             match GaussLegendre::new(deg) {
                 Ok(legendre_rule) => {
-                    let mut node_weight_pairs = legendre_rule.into_node_weight_pairs();
-                    // Gauss-Legendre nodes are generated in reverse sorted order.
-                    // This corrects for that since Gauss-Jacobi nodes are currently always sorted
-                    // in ascending order.
-                    node_weight_pairs.reverse();
-                    return Ok(Self {
-                        node_weight_pairs,
-                        alpha,
-                        beta,
-                    });
+                    return Ok(legendre_rule.into());
                 }
                 Err(_) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
             };
         } else if alpha == -0.5 && beta == -0.5 {
             match GaussChebyshevFirstKind::new(deg) {
-                Ok(chebyshev_rule) => {
-                    return Ok(Self {
-                        node_weight_pairs: chebyshev_rule.into_node_weight_pairs(),
-                        alpha,
-                        beta,
-                    })
-                }
+                Ok(chebyshev_rule) => return Ok(chebyshev_rule.into()),
                 Err(_) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
             };
         } else if alpha == 0.5 && beta == 0.5 {
             match GaussChebyshevSecondKind::new(deg) {
-                Ok(chebyshev_rule) => {
-                    return Ok(Self {
-                        node_weight_pairs: chebyshev_rule.into_node_weight_pairs(),
-                        alpha,
-                        beta,
-                    })
-                }
+                Ok(chebyshev_rule) => return Ok(chebyshev_rule.into()),
                 Err(_) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
             };
         }
@@ -305,6 +284,41 @@ impl fmt::Display for GaussJacobiError {
 }
 
 impl std::error::Error for GaussJacobiError {}
+
+impl From<GaussLegendre> for GaussJacobi {
+    fn from(value: GaussLegendre) -> Self {
+        let mut node_weight_pairs = value.into_node_weight_pairs();
+        // Gauss-Legendre nodes are generated in reverse sorted order.
+        // This corrects for that since Gauss-Jacobi nodes are currently always sorted
+        // in ascending order.
+        node_weight_pairs.reverse();
+        Self {
+            node_weight_pairs,
+            alpha: 0.0,
+            beta: 0.0,
+        }
+    }
+}
+
+impl From<GaussChebyshevFirstKind> for GaussJacobi {
+    fn from(value: GaussChebyshevFirstKind) -> Self {
+        Self {
+            node_weight_pairs: value.into_node_weight_pairs(),
+            alpha: -0.5,
+            beta: -0.5,
+        }
+    }
+}
+
+impl From<GaussChebyshevSecondKind> for GaussJacobi {
+    fn from(value: GaussChebyshevSecondKind) -> Self {
+        Self {
+            node_weight_pairs: value.into_node_weight_pairs(),
+            alpha: 0.5,
+            beta: 0.5,
+        }
+    }
+}
 
 /// The reason for the `GaussJacobiError`, returned by the [`GaussJacobiError::reason`] function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

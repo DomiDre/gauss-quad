@@ -64,7 +64,7 @@ impl GaussChebyshevFirstKind {
     /// Same as [`new`](Self::new) but runs in parallel.
     pub fn par_new(degree: usize) -> Result<Self, GaussChebyshevError> {
         if degree < 2 {
-            return Err(GaussChebyshevError);
+            return Err(GaussChebyshevError::new());
         }
 
         let n = degree as f64;
@@ -166,7 +166,7 @@ impl GaussChebyshevSecondKind {
     /// Same as [`new`](Self::new) but runs in parallel.
     pub fn par_new(degree: usize) -> Result<Self, GaussChebyshevError> {
         if degree < 2 {
-            return Err(GaussChebyshevError);
+            return Err(GaussChebyshevError::new());
         }
 
         let n = degree as f64;
@@ -232,7 +232,6 @@ __impl_node_weight_rule! {GaussChebyshevSecondKind, GaussChebyshevSecondKindNode
 
 /// The error returned when attempting to create a [`GaussChebyshevFirstKind`] or [`GaussChebyshevSecondKind`] struct with a degree less than 2.
 #[derive(Debug)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussChebyshevError(Backtrace);
 
 impl GaussChebyshevError {
