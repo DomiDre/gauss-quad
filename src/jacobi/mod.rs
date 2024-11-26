@@ -23,7 +23,10 @@
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::gamma::gamma;
-use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
+use crate::{
+    DMatrixf64, GaussChebyshevFirstKind, GaussChebyshevSecondKind, Node, Weight,
+    __impl_node_weight_rule,
+};
 
 use std::backtrace::Backtrace;
 
@@ -84,6 +87,28 @@ impl GaussJacobi {
             (false, false, false) => Err(GaussJacobiErrorReason::DegreeAlphaBeta),
         }
         .map_err(GaussJacobiError::new)?;
+
+        // Since Gauss-Jacobi is the same as Gauss-Chebyshev if alpha = beta = ±0.5
+        // we can just use that code, as it is faster.
+        if alpha == -0.5 && beta == -0.5 {
+            return match GaussChebyshevFirstKind::new(deg) {
+                Ok(chebyshev_rule) => Ok(Self {
+                    node_weight_pairs: chebyshev_rule.into_node_weight_pairs(),
+                    alpha,
+                    beta,
+                }),
+                Err(_) => Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
+            };
+        } else if alpha == 0.5 && beta == 0.5 {
+            return match GaussChebyshevSecondKind::new(deg) {
+                Ok(chebyshev_rule) => Ok(Self {
+                    node_weight_pairs: chebyshev_rule.into_node_weight_pairs(),
+                    alpha,
+                    beta,
+                }),
+                Err(_) => Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
+            };
+        }
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 

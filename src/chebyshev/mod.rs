@@ -8,12 +8,13 @@
 use crate::{Node, Weight, __impl_node_weight_rule};
 
 use core::{f64::consts::PI, fmt};
+use std::backtrace::Backtrace;
 
 #[cfg(feature = "rayon")]
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 /// A Gauss-Chebyshev quadrature scheme of the first kind.
-/// 
+///
 /// Used to integrate functions of the form
 /// f(x) / sqrt(1 - x^2) on finite intervals.
 ///
@@ -42,7 +43,7 @@ impl GaussChebyshevFirstKind {
     /// Returns an error if `degree` is less than 2.
     pub fn new(degree: usize) -> Result<Self, GaussChebyshevError> {
         if degree < 2 {
-            return Err(GaussChebyshevError);
+            return Err(GaussChebyshevError::new());
         }
 
         let n = degree as f64;
@@ -115,7 +116,7 @@ impl GaussChebyshevFirstKind {
 __impl_node_weight_rule! {GaussChebyshevFirstKind, GaussChebyshevFirstKindNodes, GaussChebyshevFirstKindWeights, GaussChebyshevFirstKindIter, GaussChebyshevFirstKindIntoIter}
 
 /// A Gauss-Chebyshev quadrature scheme of the second kind.
-/// 
+///
 /// Used to integrate functions of the form
 /// f(x) * sqrt(1 - x^2) on finite intervals.
 ///
@@ -144,7 +145,7 @@ impl GaussChebyshevSecondKind {
     /// Returns an error if `degree` is less than 2.
     pub fn new(degree: usize) -> Result<Self, GaussChebyshevError> {
         if degree < 2 {
-            return Err(GaussChebyshevError);
+            return Err(GaussChebyshevError::new());
         }
 
         let n = degree as f64;
@@ -232,9 +233,22 @@ impl GaussChebyshevSecondKind {
 __impl_node_weight_rule! {GaussChebyshevSecondKind, GaussChebyshevSecondKindNodes, GaussChebyshevSecondKindWeights, GaussChebyshevSecondKindIter, GaussChebyshevSecondKindIntoIter}
 
 /// The error returned when attempting to create a [`GaussChebyshevFirstKind`] or [`GaussChebyshevSecondKind`] struct with a degree less than 2.
-#[derive(Debug, Clone, Copy, Hash)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GaussChebyshevError;
+pub struct GaussChebyshevError(Backtrace);
+
+impl GaussChebyshevError {
+    pub(crate) fn new() -> Self {
+        Self(Backtrace::capture())
+    }
+
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.0
+    }
+}
 
 impl fmt::Display for GaussChebyshevError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
