@@ -91,21 +91,22 @@ impl GaussJacobi {
         // Delegate the computation of nodes and weights when they have special values
         // that are equivalent to other rules that have faster implementations.
         if alpha == 0.0 && beta == 0.0 {
-            match GaussLegendre::new(deg) {
-                Ok(legendre_rule) => {
-                    return Ok(legendre_rule.into());
-                }
-                Err(_) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
-            };
+            if let Ok(legendre_rule) = GaussLegendre::new(deg) {
+                return Ok(legendre_rule.into());
+            } else {
+                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree));
+            }
         } else if alpha == -0.5 && beta == -0.5 {
-            match GaussChebyshevFirstKind::new(deg) {
-                Ok(chebyshev_rule) => return Ok(chebyshev_rule.into()),
-                Err(_) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
+            if let Ok(chebyshev_rule) = GaussChebyshevFirstKind::new(deg) {
+                return Ok(chebyshev_rule.into());
+            } else {
+                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree));
             };
         } else if alpha == 0.5 && beta == 0.5 {
-            match GaussChebyshevSecondKind::new(deg) {
-                Ok(chebyshev_rule) => return Ok(chebyshev_rule.into()),
-                Err(_) => return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree)),
+            if let Ok(chebyshev_rule) = GaussChebyshevSecondKind::new(deg) {
+                return Ok(chebyshev_rule.into());
+            } else {
+                return Err(GaussJacobiError::new(GaussJacobiErrorReason::Degree));
             };
         }
 
