@@ -90,23 +90,14 @@ impl GaussJacobi {
 
         // Delegate the computation of nodes and weights when they have special values
         // that are equivalent to other rules that have faster implementations.
+        //
+        // UNWRAP: We have already verified that the degree is 2 or larger above.
+        // Since that is the only possible error cause for these quadrature rules
+        // this code can not fail, so we just `unwrap` the result.
         match (alpha, beta) {
-            (0.0, 0.0) => {
-                return GaussLegendre::new(deg)
-                    .map(GaussJacobi::from)
-                    // We know that the only reason that these methods could error is if the degree is less than 2.
-                    .map_err(|_| GaussJacobiError::new(GaussJacobiErrorReason::Degree));
-            }
-            (-0.5, -0.5) => {
-                return GaussChebyshevFirstKind::new(deg)
-                    .map(GaussJacobi::from)
-                    .map_err(|_| GaussJacobiError::new(GaussJacobiErrorReason::Degree))
-            }
-            (0.5, 0.5) => {
-                return GaussChebyshevSecondKind::new(deg)
-                    .map(GaussJacobi::from)
-                    .map_err(|_| GaussJacobiError::new(GaussJacobiErrorReason::Degree))
-            }
+            (0.0, 0.0) => return Ok(GaussLegendre::new(deg).unwrap().into()),
+            (-0.5, -0.5) => return Ok(GaussChebyshevFirstKind::new(deg).unwrap().into()),
+            (0.5, 0.5) => return Ok(GaussChebyshevSecondKind::new(deg).unwrap().into()),
             _ => (),
         }
 
