@@ -229,7 +229,7 @@ impl GaussChebyshevSecondKind {
     /// Same as [`integrate`](Self::integrate) but runs in parallel.
     pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
-        F: Sync + Fn(f64) -> f64,
+        F: Fn(f64) -> f64 + Sync,
     {
         let result: f64 = self
             .node_weight_pairs
