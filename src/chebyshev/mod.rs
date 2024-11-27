@@ -85,7 +85,7 @@ impl GaussChebyshevFirstKind {
     /// # use gauss_quad::chebyshev::{GaussChebyshevFirstKind, GaussChebyshevError};
     /// # use approx::assert_relative_eq;
     /// # use core::f64::consts::PI;
-    /// let rule = GaussChebyshevFirstKind::new(3)?;
+    /// let rule = GaussChebyshevFirstKind::new(2)?;
     ///
     /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), PI / 4.0);
     /// # Ok::<(), GaussChebyshevError>(())
@@ -202,7 +202,7 @@ impl GaussChebyshevSecondKind {
     /// # use gauss_quad::chebyshev::{GaussChebyshevSecondKind, GaussChebyshevError};
     /// # use approx::assert_relative_eq;
     /// # use core::f64::consts::PI;
-    /// let rule = GaussChebyshevSecondKind::new(3)?;
+    /// let rule = GaussChebyshevSecondKind::new(2)?;
     ///
     /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), -PI / 16.0);
     /// # Ok::<(), GaussChebyshevError>(())
@@ -300,5 +300,28 @@ mod test {
             assert_abs_diff_eq!(x, x_should);
             assert_abs_diff_eq!(w, w_should);
         }
+    }
+
+    #[test]
+    fn check_integral_of_line() {
+        let rule = GaussChebyshevFirstKind::new(2).unwrap();
+
+        assert_abs_diff_eq!(rule.integrate(0.0, 2.0, |x| x), PI);
+    }
+
+    #[test]
+    fn check_integral_of_legendre_2() {
+        let rule1 = GaussChebyshevFirstKind::new(2).unwrap();
+        let rule2 = GaussChebyshevSecondKind::new(2).unwrap();
+
+        assert_abs_diff_eq!(rule1.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), PI / 4.0);
+        assert_abs_diff_eq!(rule2.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), -PI / 16.0);
+    }
+
+    #[test]
+    fn check_integral_of_parabola() {
+        let rule = GaussChebyshevSecondKind::new(2).unwrap();
+
+        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x * x), PI / 8.0);
     }
 }
