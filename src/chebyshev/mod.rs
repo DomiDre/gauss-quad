@@ -264,6 +264,12 @@ mod test {
     use core::f64::consts::PI;
 
     #[test]
+    fn check_error() {
+        assert!(GaussChebyshevFirstKind::new(1).is_err());
+        assert!(GaussChebyshevSecondKind::new(1).is_err());
+    }
+
+    #[test]
     fn check_chebyshev_1st_deg_5() {
         // Source: https://mathworld.wolfram.com/Chebyshev-GaussQuadrature.html
         let ans = [
