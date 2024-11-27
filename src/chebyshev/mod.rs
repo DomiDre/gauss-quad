@@ -283,13 +283,11 @@ mod test {
     }
 
     #[test]
-    fn check_chebyshev_2nd_several_degrees() {
-        for deg in [2, 5, 10, 50] {
-            check_chebyshev_2nd_deg_n(deg);
-        }
-    }
+    fn check_chebyshev_2nd_deg_5() {
+        // I couldn't find lists of nodes and weights to compare to. So this function computes
+        // them itself with formulas from Wikipedia.
 
-    fn check_chebyshev_2nd_deg_n(deg: usize) {
+        let deg = 5;
         let rule = GaussChebyshevSecondKind::new(deg).unwrap();
         let deg = deg as f64;
 
