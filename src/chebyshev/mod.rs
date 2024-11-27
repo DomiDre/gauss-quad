@@ -334,4 +334,14 @@ mod test {
 
         assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x * x), PI / 8.0);
     }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn test_par_integrate() {
+        let rule1 = GaussChebyshevFirstKind::par_new(2).unwrap();
+        let rule2 = GaussChebyshevSecondKind::par_new(2).unwrap();
+
+        assert_abs_diff_eq!(rule1.par_integrate(0.0, 2.0, |x| x), PI);
+        assert_abs_diff_eq!(rule2.par_integrate(-1.0, 1.0, |x| x * x), PI / 8.0);
+    }
 }
