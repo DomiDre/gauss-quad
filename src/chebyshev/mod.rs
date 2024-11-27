@@ -259,7 +259,7 @@ impl std::error::Error for GaussChebyshevError {}
 mod test {
     use approx::assert_abs_diff_eq;
 
-    use super::GaussChebyshevFirstKind;
+    use super::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
 
     use core::f64::consts::PI;
 
@@ -277,6 +277,24 @@ mod test {
         let rule = GaussChebyshevFirstKind::new(5).unwrap();
 
         for ((x, w), (x_should, w_should)) in rule.into_iter().zip(ans.into_iter()) {
+            assert_abs_diff_eq!(x, x_should);
+            assert_abs_diff_eq!(w, w_should);
+        }
+    }
+
+    #[test]
+    fn check_chebyshev_2nd_deg_5() {
+        const DEG: usize = 5;
+
+        let rule = GaussChebyshevSecondKind::new(DEG).unwrap();
+        let deg = DEG as f64;
+
+        for (i, (x, w)) in rule.into_iter().enumerate() {
+            // Source: https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature
+            let ii = i as f64 + 1.0;
+            let x_should = (ii * PI / (deg + 1.0)).cos();
+            let w_should = PI / (deg + 1.0) * (ii * PI / (deg + 1.0)).sin().powi(2);
+
             assert_abs_diff_eq!(x, x_should);
             assert_abs_diff_eq!(w, w_should);
         }
