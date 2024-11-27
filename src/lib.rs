@@ -9,6 +9,7 @@
 //! * Gauss-Jacobi
 //! * Gauss-Laguerre
 //! * Gauss-Hermite
+//! * Gauss-Chebyshev
 //! * Midpoint
 //! * Simpson
 //!
@@ -164,7 +165,7 @@
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 //!
-//! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
+//! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
 
 // Only enable the nighlty `doc_auto_cfg` feature when
 // the `docsrs` configuration attribute is defined.
@@ -177,6 +178,7 @@ use nalgebra::{Dyn, Matrix, VecStorage};
 
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 
+pub mod chebyshev;
 mod data_api;
 mod gamma;
 pub mod hermite;
@@ -186,6 +188,8 @@ pub mod legendre;
 pub mod midpoint;
 pub mod simpson;
 
+#[doc(inline)]
+pub use chebyshev::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
 #[doc(inline)]
 pub use data_api::{Node, Weight};
 #[doc(inline)]

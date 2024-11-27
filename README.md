@@ -9,7 +9,7 @@ The `gauss-quad` crate is a small library to calculate integrals of the type
 
 $$\int_a^b f(x) w(x) \mathrm{d}x$$
 
-using Gaussian quadrature. 
+using Gaussian quadrature.
 
 Here $f(x)$ is a user supplied function
 and $w(x)$ is a weight function that depends on which rule is used.
@@ -30,14 +30,15 @@ The general call structure is to first initialize the n-point quadrature rule se
 
 where QUADRATURE_RULE can currently be set to calculate either:
 
-| QUADRATURE_RULE | Integral                                                   |
-| --------------- | ---------------------------------------------------------- |
-| Midpoint        | $$\int_a^b f(x) \mathrm{d}x$$                              |
-| Simpson         | $$\int_a^b f(x) \mathrm{d}x$$                              |
-| GaussLegendre   | $$\int_a^b f(x) \mathrm{d}x$$                              |
-| GaussJacobi     | $$\int_a^b f(x)(1-x)^\alpha (1&plus;x)^\beta \mathrm{d}x$$ |
-| GaussLaguerre   | $$\int_{0}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$        |
-| GaussHermite    | $$\int_{-\infty}^\infty f(x) e^{-x^2} \mathrm{d}x$$        |
+| QUADRATURE_RULE | Integral                                                        |
+| --------------- | --------------------------------------------------------------- |
+| Midpoint        | $$\int_a^b f(x) \mathrm{d}x$$                                   |
+| Simpson         | $$\int_a^b f(x) \mathrm{d}x$$                                   |
+| GaussLegendre   | $$\int_a^b f(x) \mathrm{d}x$$                                   |
+| GaussJacobi     | $$\int_a^b f(x)(1-x)^\alpha (1+x)^\beta \mathrm{d}x$$           |
+| GaussLaguerre   | $$\int_{0}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$             |
+| GaussHermite    | $$\int_{-\infty}^\infty f(x) e^{-x^2} \mathrm{d}x$$             |
+| GaussChebyshev  | $$\int_a^b f(x)(1-x^2)^a \mathrm{d}x,\qquad a=\pm\frac{1}{2}$$  |
 
 For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
 
@@ -70,7 +71,7 @@ Rules can be nested into double and higher integrals:
 let double_integral = quad.integrate(a, b, |x| quad.integrate(c(x), d(x), |y| f(x, y)));
 ```
 
-If the computation time for the evaluation of the integrand is large (≫100 µs), the `rayon` feature can be used to parallelize the computation on multiple cores (for low computation any gain is overshadowed by the overhead from parallelization)
+If the computation time for the evaluation of the integrand is large (≫100 µs), the `rayon` feature can be used to parallelize the computation on multiple cores (for quicker to compute integrands any gain is overshadowed by the overhead from parallelization)
 
 ```rust
 let slow_integral = quad.par_integrate(a, b, |x| f(x));

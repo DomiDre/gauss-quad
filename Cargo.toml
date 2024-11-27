@@ -26,7 +26,7 @@ criterion = {version = "0.5", features = ["html_reports"]}
 [features]
 # Implements the `Serialize` and `Deserialize` traits from the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 serde = ["dep:serde"]
-# Enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
+# Enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
 rayon = ["dep:rayon"]
 
 [package.metadata.docs.rs]
