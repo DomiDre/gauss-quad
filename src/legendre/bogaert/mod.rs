@@ -11,6 +11,7 @@
 #[rustfmt::skip]
 mod data;
 
+use crate::elementary::{cos, sin};
 use core::{cmp::Ordering, f64::consts::PI};
 use data::{CL, EVEN_THETA_ZEROS, EVEN_WEIGHTS, J1, JZ, ODD_THETA_ZEROS, ODD_WEIGHTS};
 
@@ -81,7 +82,7 @@ impl From<ThetaWeightPair> for NodeWeightPair {
     #[inline]
     fn from(value: ThetaWeightPair) -> Self {
         Self {
-            node: value.theta.cos(),
+            node: cos(value.theta),
             weight: value.weight,
         }
     }
@@ -142,7 +143,7 @@ impl ThetaWeightPair {
         let wsf3t = (((((((2.018_267_912_567_033e-9 * x - 4.386_471_225_202_067e-8) * x + 5.088_983_472_886_716e-7) * x - 3.979_333_165_191_352_5e-6) * x + 2.005_593_263_964_583_4e-5) * x - 4.228_880_592_829_212e-5) * x - 1.056_460_502_540_761_4e-4) * x - 9.479_693_089_585_773e-5) * x + 6.569_664_899_264_848e-3;
 
         // Then refine with the expansions from the paper
-        let nu_o_sin = nu / theta.sin();
+        let nu_o_sin = nu / sin(theta);
         let b_nu_o_sin = b * nu_o_sin;
         let w_inv_sinc = w * w * nu_o_sin;
         let wis2 = w_inv_sinc * w_inv_sinc;

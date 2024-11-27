@@ -22,10 +22,15 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
+use crate::elementary::{pow, sqrt};
 use crate::gamma::gamma;
 use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
+#[cfg(feature = "std")]
 use std::backtrace::Backtrace;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -94,9 +99,10 @@ impl GaussJacobi {
             let idx_p1 = idx_f64 + 1.0;
             let denom_sum = 2.0 * idx_p1 + alpha + beta;
             let off_diag = 2.0 / denom_sum
-                * (idx_p1 * (idx_p1 + alpha) * (idx_p1 + beta) * (idx_p1 + alpha + beta)
-                    / ((denom_sum + 1.0) * (denom_sum - 1.0)))
-                    .sqrt();
+                * sqrt(
+                    idx_p1 * (idx_p1 + alpha) * (idx_p1 + beta) * (idx_p1 + alpha + beta)
+                        / ((denom_sum + 1.0) * (denom_sum - 1.0)),
+                );
             unsafe {
                 *companion_matrix.get_unchecked_mut((idx, idx)) = diag;
                 *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;
@@ -110,10 +116,9 @@ impl GaussJacobi {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        let scale_factor =
-            (2.0f64).powf(alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
-                / gamma(alpha + beta + 1.0)
-                / (alpha + beta + 1.0);
+        let scale_factor = pow(2.0, alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
+            / gamma(alpha + beta + 1.0)
+            / (alpha + beta + 1.0);
 
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
         let mut node_weight_pairs: Vec<(f64, f64)> = eigen
@@ -202,6 +207,7 @@ __impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, Gau
 #[derive(Debug)]
 pub struct GaussJacobiError {
     reason: GaussJacobiErrorReason,
+    #[cfg(feature = "std")]
     backtrace: Backtrace,
 }
 
@@ -211,6 +217,7 @@ impl GaussJacobiError {
     pub(crate) fn new(reason: GaussJacobiErrorReason) -> Self {
         Self {
             reason,
+            #[cfg(feature = "std")]
             backtrace: Backtrace::capture(),
         }
     }
@@ -221,6 +228,7 @@ impl GaussJacobiError {
         self.reason
     }
 
+    #[cfg(feature = "std")]
     /// Returns a [`Backtrace`] to where the error was created.
     ///
     /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
@@ -253,7 +261,7 @@ impl fmt::Display for GaussJacobiError {
     }
 }
 
-impl std::error::Error for GaussJacobiError {}
+impl core::error::Error for GaussJacobiError {}
 
 /// The reason for the `GaussJacobiError`, returned by the [`GaussJacobiError::reason`] function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -309,6 +317,9 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use super::*;
+
+    #[cfg(not(feature = "std"))]
+    use alloc::format;
 
     #[test]
     fn check_alpha_beta_bounds() {
