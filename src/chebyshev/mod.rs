@@ -314,8 +314,12 @@ mod test {
         let rule1 = GaussChebyshevFirstKind::new(2).unwrap();
         let rule2 = GaussChebyshevSecondKind::new(2).unwrap();
 
-        assert_abs_diff_eq!(rule1.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), PI / 4.0);
-        assert_abs_diff_eq!(rule2.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), -PI / 16.0);
+        fn legendre_2(x: f64) -> f64 {
+            1.5 * x * x - 0.5
+        }
+
+        assert_abs_diff_eq!(rule1.integrate(-1.0, 1.0, legendre_2), PI / 4.0);
+        assert_abs_diff_eq!(rule2.integrate(-1.0, 1.0, legendre_2), -PI / 16.0);
     }
 
     #[test]
