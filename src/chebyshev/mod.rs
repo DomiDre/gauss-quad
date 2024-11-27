@@ -261,17 +261,17 @@ mod test {
 
     use super::GaussChebyshevFirstKind;
 
+    use core::f64::consts::PI;
+
     #[test]
     fn check_chebyshev_1st_deg_5() {
-        const PI_OVER_5: f64 = core::f64::consts::PI / 5.0;
-
         // Source: https://mathworld.wolfram.com/Chebyshev-GaussQuadrature.html
         let ans = [
-            (0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI_OVER_5),
-            (0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI_OVER_5),
-            (0.0, PI_OVER_5),
-            (-0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI_OVER_5),
-            (-0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI_OVER_5),
+            (0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (0.0, PI / 5.0),
+            (-0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (-0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
         ];
 
         let rule = GaussChebyshevFirstKind::new(5).unwrap();
