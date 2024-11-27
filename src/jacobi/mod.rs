@@ -391,8 +391,9 @@ mod tests {
 
     #[test]
     fn sanity_check_legendre_delegation() {
-        let jrule = GaussJacobi::new(200, 0.0, 0.0).unwrap();
-        let lrule = GaussLegendre::new(200).unwrap();
+        const DEG: usize = 200;
+        let jrule = GaussJacobi::new(DEG, 0.0, 0.0).unwrap();
+        let lrule = GaussLegendre::new(DEG).unwrap();
 
         assert_eq!(
             jrule.as_node_weight_pairs(),
