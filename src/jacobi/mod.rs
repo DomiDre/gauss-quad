@@ -376,6 +376,31 @@ mod tests {
     use super::*;
 
     #[test]
+    fn sanity_check_chebyshev_delegation() {
+        const DEG: usize = 200;
+        let jrule = GaussJacobi::new(DEG, -0.5, -0.5).unwrap();
+        let crule1 = GaussChebyshevFirstKind::new(DEG).unwrap();
+
+        assert_eq!(jrule.as_node_weight_pairs(), crule1.as_node_weight_pairs());
+
+        let jrule = GaussJacobi::new(DEG, 0.5, 0.5).unwrap();
+        let crule2 = GaussChebyshevSecondKind::new(DEG).unwrap();
+
+        assert_eq!(jrule.as_node_weight_pairs(), crule2.as_node_weight_pairs())
+    }
+
+    #[test]
+    fn sanity_check_legendre_delegation() {
+        let jrule = GaussJacobi::new(200, 0.0, 0.0).unwrap();
+        let lrule = GaussLegendre::new(200).unwrap();
+
+        assert_eq!(
+            jrule.as_node_weight_pairs(),
+            lrule.into_iter().rev().collect::<Vec<_>>(),
+        );
+    }
+
+    #[test]
     fn check_alpha_beta_bounds() {
         assert!(GaussJacobi::new(10, -1.0, -1.0).is_err());
     }
