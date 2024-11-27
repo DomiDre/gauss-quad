@@ -254,3 +254,31 @@ impl fmt::Display for GaussChebyshevError {
 }
 
 impl std::error::Error for GaussChebyshevError {}
+
+#[cfg(test)]
+mod test {
+    use approx::assert_abs_diff_eq;
+
+    use super::GaussChebyshevFirstKind;
+
+    use core::f64::consts::PI;
+
+    #[test]
+    fn check_chebyshev_1st_deg_5() {
+        // Source: https://mathworld.wolfram.com/Chebyshev-GaussQuadrature.html
+        let ans = [
+            (0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (0.0, PI / 5.0),
+            (-0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (-0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
+        ];
+
+        let rule = GaussChebyshevFirstKind::new(5).unwrap();
+
+        for ((x, w), (x_should, w_should)) in rule.into_iter().zip(ans.into_iter()) {
+            assert_abs_diff_eq!(x, x_should);
+            assert_abs_diff_eq!(w, w_should);
+        }
+    }
+}
