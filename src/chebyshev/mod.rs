@@ -283,11 +283,15 @@ mod test {
     }
 
     #[test]
-    fn check_chebyshev_2nd_deg_5() {
-        const DEG: usize = 5;
+    fn check_chebyshev_2nd_several_degrees() {
+        for deg in [2, 5, 10, 50] {
+            check_chebyshev_2nd_deg_n(deg);
+        }
+    }
 
-        let rule = GaussChebyshevSecondKind::new(DEG).unwrap();
-        let deg = DEG as f64;
+    fn check_chebyshev_2nd_deg_n(deg: usize) {
+        let rule = GaussChebyshevSecondKind::new(deg).unwrap();
+        let deg = deg as f64;
 
         for (i, (x, w)) in rule.into_iter().enumerate() {
             // Source: https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature
