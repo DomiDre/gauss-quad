@@ -9,7 +9,7 @@
 //! * Gauss-Jacobi
 //! * Gauss-Laguerre
 //! * Gauss-Hermite
-//! * Gauss-Chebyshev
+//! * [Gauss-Chebyshev](https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature)
 //! * Midpoint
 //! * Simpson
 //!
