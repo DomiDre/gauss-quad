@@ -1,4 +1,4 @@
-//! Numerical integration using the [Gauss-Hermite quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature) rule.
+//! Numerical integration using the Gauss-Hermite quadrature rule.
 //!
 //! This rule can integrate integrands of the form  
 //! e^(-x^2) * f(x)  

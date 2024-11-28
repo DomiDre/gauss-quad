@@ -1,4 +1,4 @@
-//! Numerical integration using the [midpoint rule](https://en.wikipedia.org/wiki/Riemann_sum#Midpoint_rule).
+//! Numerical integration using the midpoint rule.
 //!
 //! This is one of the simplest integration schemes.
 //!

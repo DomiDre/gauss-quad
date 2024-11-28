@@ -1,4 +1,4 @@
-//! Numerical integration using the [Gauss-Legendre quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Legendre_quadrature) rule.
+//! Numerical integration using the Gauss-Legendre quadrature rule.
 //!
 //! A Gauss-Legendre quadrature rule of degree n can integrate
 //! degree 2n-1 polynomials exactly.
