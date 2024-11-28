@@ -1,7 +1,7 @@
 //! Numerical integration using the Gauss-Legendre quadrature rule.
 //!
-//! A Gauss-Legendre quadrature rule of degree `n` can integrate
-//! degree 2`n`-1 polynomials exactly.
+//! A Gauss-Legendre quadrature rule of degree n can integrate
+//! degree 2n-1 polynomials exactly.
 //!
 //! Evaluation point x_i of a degree n rule is the i:th root
 //! of Legendre polynomial P_n and its weight is  
@@ -34,7 +34,7 @@ use crate::{Node, Weight, __impl_node_weight_rule};
 
 use std::backtrace::Backtrace;
 
-/// A [Gauss-Legendre quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Legendre_quadrature) scheme.
+/// A Gauss-Legendre quadrature scheme.
 ///
 /// These rules can integrate functions on the domain [a, b].
 ///

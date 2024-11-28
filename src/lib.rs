@@ -5,12 +5,12 @@
 //! ## Quadrature rules
 //!
 //! **gauss-quad** implements the following quadrature rules:
-//! * Gauss-Legendre
-//! * Gauss-Jacobi
-//! * Gauss-Laguerre
-//! * Gauss-Hermite
-//! * Midpoint
-//! * Simpson
+//! * [Gauss-Legendre](https://en.wikipedia.org/wiki/Gauss%E2%80%93Legendre_quadrature)
+//! * [Gauss-Jacobi](https://en.wikipedia.org/wiki/Gauss%E2%80%93Jacobi_quadrature)
+//! * [Gauss-Laguerre](https://en.wikipedia.org/wiki/Gauss%E2%80%93Laguerre_quadrature) (generalized)
+//! * [Gauss-Hermite](https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature)
+//! * [Midpoint](https://en.wikipedia.org/wiki/Riemann_sum#Midpoint_rule)
+//! * [Simpson](https://en.wikipedia.org/wiki/Simpson%27s_rule)
 //!
 //! ## Using **gauss-quad**
 //!
