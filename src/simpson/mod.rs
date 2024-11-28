@@ -41,7 +41,7 @@ use crate::{Node, __impl_node_rule};
 
 use std::backtrace::Backtrace;
 
-/// A Simpson rule quadrature scheme.
+/// A [Simpson rule quadrature](https://en.wikipedia.org/wiki/Simpson%27s_rule) scheme.
 /// ```
 /// # use gauss_quad::simpson::{Simpson, SimpsonError};
 /// // initialize a Simpson rule with 100 subintervals
