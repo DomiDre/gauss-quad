@@ -77,7 +77,7 @@ impl GaussChebyshevFirstKind {
         })
     }
 
-    /// Returns the value of the integral of the given `integrand` in the inverval [`a`, `b`].
+    /// Returns the value of the integral of the given `integrand` in the inverval \[`a`, `b`\].
     ///
     /// # Example
     ///
@@ -200,7 +200,7 @@ impl GaussChebyshevSecondKind {
         0.5 * (b - a)
     }
 
-    /// Returns the value of the integral of the given `integrand` in the inverval [`a`, `b`].
+    /// Returns the value of the integral of the given `integrand` in the inverval \[`a`, `b`\].
     ///
     /// # Example
     ///
