@@ -1,17 +1,17 @@
 //! # gauss-quad
 //!
-//! **gauss-quad** is a Gaussian quadrature library for numerical integration.
+//! **gauss-quad** is a [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature) library for numerical integration.
 //!
 //! ## Quadrature rules
 //!
 //! **gauss-quad** implements the following quadrature rules:
-//! * Gauss-Legendre
-//! * Gauss-Jacobi
-//! * Gauss-Laguerre
-//! * Gauss-Hermite
+//! * [Gauss-Legendre](https://en.wikipedia.org/wiki/Gauss%E2%80%93Legendre_quadrature)
+//! * [Gauss-Jacobi](https://en.wikipedia.org/wiki/Gauss%E2%80%93Jacobi_quadrature)
+//! * [Gauss-Laguerre](https://en.wikipedia.org/wiki/Gauss%E2%80%93Laguerre_quadrature) (generalized)
+//! * [Gauss-Hermite](https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature)
 //! * [Gauss-Chebyshev](https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature)
-//! * Midpoint
-//! * Simpson
+//! * [Midpoint](https://en.wikipedia.org/wiki/Riemann_sum#Midpoint_rule)
+//! * [Simpson](https://en.wikipedia.org/wiki/Simpson%27s_rule)
 //!
 //! ## Using **gauss-quad**
 //!
@@ -165,7 +165,7 @@
 //! `serde`: implements the [`Serialize`](serde::Serialize) and [`Deserialize`](serde::Deserialize) traits from
 //! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 //!
-//! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive.
+//! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
 
 // Only enable the nighlty `doc_auto_cfg` feature when
 // the `docsrs` configuration attribute is defined.

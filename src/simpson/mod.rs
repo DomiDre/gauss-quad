@@ -1,4 +1,4 @@
-//! Numerical integration using the Simpson rule.
+//! Numerical integration using a Simpson's rule.
 //!
 //! A popular quadrature rule (also known as Kepler's barrel rule). It can be derived
 //! in the simplest case by replacing the integrand with a parabola that has the same
@@ -41,7 +41,8 @@ use crate::{Node, __impl_node_rule};
 
 use std::backtrace::Backtrace;
 
-/// A Simpson rule quadrature scheme.
+/// A Simpson's rule.
+///
 /// ```
 /// # use gauss_quad::simpson::{Simpson, SimpsonError};
 /// // initialize a Simpson rule with 100 subintervals
@@ -118,19 +119,22 @@ impl Simpson {
 
         let h = (b - a) / n;
 
-        let sum_over_interval_edges: f64 = self
-            .nodes
-            .par_iter()
-            .skip(1)
-            .map(|&node| integrand(a + node * h))
-            .sum();
-
-        let sum_over_midpoints: f64 = self
-            .nodes
-            .par_iter()
-            .skip(1)
-            .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
-            .sum();
+        let (sum_over_interval_edges, sum_over_midpoints): (f64, f64) = rayon::join(
+            || {
+                self.nodes
+                    .par_iter()
+                    .skip(1)
+                    .map(|&node| integrand(a + node * h))
+                    .sum::<f64>()
+            },
+            || {
+                self.nodes
+                    .par_iter()
+                    .skip(1)
+                    .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+                    .sum::<f64>()
+            },
+        );
 
         h / 6.0
             * (2.0 * sum_over_interval_edges

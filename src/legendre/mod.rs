@@ -1,7 +1,7 @@
 //! Numerical integration using the Gauss-Legendre quadrature rule.
 //!
-//! A Gauss-Legendre quadrature rule of degree `n` can integrate
-//! degree 2`n`-1 polynomials exactly.
+//! A Gauss-Legendre quadrature rule of degree n can integrate
+//! degree 2n-1 polynomials exactly.
 //!
 //! Evaluation point x_i of a degree n rule is the i:th root
 //! of Legendre polynomial P_n and its weight is  
@@ -74,7 +74,7 @@ pub struct GaussLegendre {
 impl GaussLegendre {
     /// Initializes a Gauss-Legendre quadrature rule of the given degree by computing the needed nodes and weights.  
     ///
-    /// A rule of degree `n` can integrate polynomials of degree 2`n`-1 exactly.
+    /// A rule of degree n can integrate polynomials of degree 2n-1 exactly.
     ///
     /// Uses the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969), which has linear time
     /// complexity.

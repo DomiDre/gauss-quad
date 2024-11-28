@@ -48,7 +48,7 @@ use crate::{Node, __impl_node_rule};
 
 use std::backtrace::Backtrace;
 
-/// A midpoint rule quadrature scheme.
+/// A midpoint rule.
 /// ```
 /// # use gauss_quad::midpoint::{Midpoint, MidpointError};
 /// // initialize a midpoint rule with 100 cells
