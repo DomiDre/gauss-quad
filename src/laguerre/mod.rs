@@ -1,4 +1,4 @@
-//! Numerical integration using the generalized [Gauss-Laguerre quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Laguerre_quadrature#Generalized_Gauss%E2%80%93Laguerre_quadrature) rule.
+//! Numerical integration using the [generalized Gauss-Laguerre quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Laguerre_quadrature#Generalized_Gauss%E2%80%93Laguerre_quadrature) rule.
 //!
 //! A Gauss-Laguerre rule of degree `n` has nodes and weights chosen such that it
 //! can integrate polynomials of degree 2`n`-1 exactly
