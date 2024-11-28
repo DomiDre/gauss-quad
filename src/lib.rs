@@ -1,6 +1,6 @@
 //! # gauss-quad
 //!
-//! **gauss-quad** is a Gaussian quadrature library for numerical integration.
+//! **gauss-quad** is a [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature) library for numerical integration.
 //!
 //! ## Quadrature rules
 //!
