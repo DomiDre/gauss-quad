@@ -1,4 +1,4 @@
-//! Numerical integration using the Simpson rule.
+//! Numerical integration using the [Simpson rule](https://en.wikipedia.org/wiki/Simpson%27s_rule).
 //!
 //! A popular quadrature rule (also known as Kepler's barrel rule). It can be derived
 //! in the simplest case by replacing the integrand with a parabola that has the same
@@ -41,7 +41,7 @@ use crate::{Node, __impl_node_rule};
 
 use std::backtrace::Backtrace;
 
-/// A [Simpson rule quadrature](https://en.wikipedia.org/wiki/Simpson%27s_rule) scheme.
+/// A Simpson's rule.
 /// ```
 /// # use gauss_quad::simpson::{Simpson, SimpsonError};
 /// // initialize a Simpson rule with 100 subintervals

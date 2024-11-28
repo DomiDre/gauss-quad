@@ -1,4 +1,4 @@
-//! Numerical integration using the Gauss-Jacobi quadrature rule.
+//! Numerical integration using the [Gauss-Jacobi quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Jacobi_quadrature) rule.
 //!
 //! This rule can integrate expressions of the form (1 - x)^alpha * (1 + x)^beta * f(x),
 //! where f(x) is a smooth function on a finite domain, alpha > -1 and beta > -1, and where f(x) is transformed from the domain [a, b] to the domain [-1, 1].
@@ -27,7 +27,7 @@ use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
 use std::backtrace::Backtrace;
 
-/// A [Gauss-Jacobi quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Jacobi_quadrature) scheme.
+/// A Gauss-Jacobi quadrature scheme.
 ///
 /// This rule can integrate expressions of the form (1 - x)^alpha * (1 + x)^beta * f(x),
 /// where f(x) is a smooth function on a finite domain, alpha > -1 and beta > -1,

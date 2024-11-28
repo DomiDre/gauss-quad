@@ -1,4 +1,4 @@
-//! Numerical integration using the generalized Gauss-Laguerre quadrature rule.
+//! Numerical integration using the generalized [Gauss-Laguerre quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Laguerre_quadrature) rule.
 //!
 //! A Gauss-Laguerre rule of degree `n` has nodes and weights chosen such that it
 //! can integrate polynomials of degree 2`n`-1 exactly
@@ -26,7 +26,7 @@ use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
 use std::backtrace::Backtrace;
 
-/// A [Gauss-Laguerre quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Laguerre_quadrature) scheme.
+/// A Gauss-Laguerre quadrature scheme.
 ///
 /// These rules can perform integrals with integrands of the form x^alpha * e^(-x) * f(x) over the domain [0, ∞).
 ///

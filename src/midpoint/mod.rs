@@ -1,4 +1,4 @@
-//! Numerical integration using the midpoint rule.
+//! Numerical integration using the [midpoint rule](https://en.wikipedia.org/wiki/Riemann_sum#Midpoint_rule).
 //!
 //! This is one of the simplest integration schemes.
 //!
@@ -48,7 +48,7 @@ use crate::{Node, __impl_node_rule};
 
 use std::backtrace::Backtrace;
 
-/// A [midpoint rule quadrature](https://en.wikipedia.org/wiki/Riemann_sum#Midpoint_rule) scheme.
+/// A midpoint rule.
 /// ```
 /// # use gauss_quad::midpoint::{Midpoint, MidpointError};
 /// // initialize a midpoint rule with 100 cells

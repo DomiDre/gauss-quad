@@ -1,4 +1,4 @@
-//! Numerical integration using the Gauss-Hermite quadrature rule.
+//! Numerical integration using the [Gauss-Hermite quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature) rule.
 //!
 //! This rule can integrate integrands of the form  
 //! e^(-x^2) * f(x)  
@@ -29,7 +29,7 @@ use core::f64::consts::PI;
 
 use std::backtrace::Backtrace;
 
-/// A [Gauss-Hermite quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature) scheme.
+/// A Gauss-Hermite quadrature scheme.
 ///
 /// These rules can integrate integrands of the form e^(-x^2) * f(x) over the domain (-∞, ∞).
 ///
