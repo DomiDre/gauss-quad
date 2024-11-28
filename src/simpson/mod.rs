@@ -118,18 +118,16 @@ impl Simpson {
 
         let h = (b - a) / n;
 
-        let sum_over_interval_edges: f64 = self
+        let (sum_over_interval_edges, sum_over_midpoints) = self
             .nodes
             .par_iter()
             .skip(1)
-            .map(|&node| integrand(a + node * h))
-            .sum();
-
-        let sum_over_midpoints: f64 = self
-            .nodes
-            .par_iter()
-            .skip(1)
-            .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+            .map(|&node| {
+                (
+                    integrand(a + node * h),
+                    integrand(a + (2.0 * node - 1.0) * h / 2.0),
+                )
+            })
             .sum();
 
         h / 6.0
