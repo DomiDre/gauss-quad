@@ -34,7 +34,7 @@ use crate::{Node, Weight, __impl_node_weight_rule};
 
 use std::backtrace::Backtrace;
 
-/// A Gauss-Legendre quadrature scheme.
+/// A [Gauss-Legendre quadrature](https://en.wikipedia.org/wiki/Gauss%E2%80%93Legendre_quadrature) scheme.
 ///
 /// These rules can integrate functions on the domain [a, b].
 ///
