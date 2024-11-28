@@ -70,7 +70,7 @@ Rules can be nested into double and higher integrals:
 let double_integral = quad.integrate(a, b, |x| quad.integrate(c(x), d(x), |y| f(x, y)));
 ```
 
-If the computation time for the evaluation of the integrand is large (≫100 µs), the `rayon` feature can be used to parallelize the computation on multiple cores (for low computation any gain is overshadowed by the overhead from parallelization)
+If the computation time for the evaluation of the integrand is large (≫100 µs), the `rayon` feature can be used to parallelize the computation on multiple cores (for quicker to compute integrands any gain is overshadowed by the overhead from parallelization)
 
 ```rust
 let slow_integral = quad.par_integrate(a, b, |x| f(x));
