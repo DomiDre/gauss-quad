@@ -60,7 +60,7 @@ impl GaussJacobi {
     /// needed for the given parameters. `alpha` is the exponent of the (1 - x) factor and `beta` is the
     /// exponent of the (1 + x) factor.
     ///
-    /// A rule of degree `n` can integrate polynomials of degree 2`n`-1 exactly.
+    /// A rule of degree n can integrate polynomials of degree 2n-1 exactly.
     ///
     /// Applies the Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights.
     /// See Gil, Segura, Temme - Numerical Methods for Special Functions
