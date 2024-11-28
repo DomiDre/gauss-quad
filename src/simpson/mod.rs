@@ -42,7 +42,7 @@ use crate::{Node, __impl_node_rule};
 use std::backtrace::Backtrace;
 
 /// A Simpson's rule.
-/// 
+///
 /// ```
 /// # use gauss_quad::simpson::{Simpson, SimpsonError};
 /// // initialize a Simpson rule with 100 subintervals
