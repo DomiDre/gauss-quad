@@ -14,7 +14,7 @@ using [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature).
 Here $f(x)$ is a user supplied function
 and $w(x)$ is a weight function that depends on which rule is used.
 Gaussian quadrature is interesting because a rule of degree n can exactly integrate
-all polynomials of degree 2n-1.
+all polynomials of degree 2n-1 or less.
 
 To use the crate, the desired quadrature rule has to be included in the program, e.g. for a Gauss-Legendre rule
 
