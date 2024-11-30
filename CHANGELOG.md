@@ -1,5 +1,9 @@
 This document contains all changes to the crate since version 0.1.8.
 
+# 0.2.2
+
+- Add Gauss-Chebyshev quadrature of the first and second kinds.
+
 # 0.2.1
 
 - Add the `rayon` feature that enables certain calculations to be done in parallel. 

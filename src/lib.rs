@@ -9,6 +9,7 @@
 //! * [Gauss-Jacobi](https://en.wikipedia.org/wiki/Gauss%E2%80%93Jacobi_quadrature)
 //! * [Gauss-Laguerre](https://en.wikipedia.org/wiki/Gauss%E2%80%93Laguerre_quadrature) (generalized)
 //! * [Gauss-Hermite](https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature)
+//! * [Gauss-Chebyshev](https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature)
 //! * [Midpoint](https://en.wikipedia.org/wiki/Riemann_sum#Midpoint_rule)
 //! * [Simpson](https://en.wikipedia.org/wiki/Simpson%27s_rule)
 //!
@@ -177,6 +178,7 @@ use nalgebra::{Dyn, Matrix, VecStorage};
 
 type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 
+pub mod chebyshev;
 mod data_api;
 mod gamma;
 pub mod hermite;
@@ -186,6 +188,8 @@ pub mod legendre;
 pub mod midpoint;
 pub mod simpson;
 
+#[doc(inline)]
+pub use chebyshev::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
 #[doc(inline)]
 pub use data_api::{Node, Weight};
 #[doc(inline)]
