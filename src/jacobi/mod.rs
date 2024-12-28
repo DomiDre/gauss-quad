@@ -23,7 +23,10 @@
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::gamma::gamma;
-use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
+use crate::{
+    DMatrixf64, GaussChebyshevFirstKind, GaussChebyshevSecondKind, GaussLegendre, Node, Weight,
+    __impl_node_weight_rule,
+};
 
 use std::backtrace::Backtrace;
 
@@ -84,6 +87,19 @@ impl GaussJacobi {
             (false, false, false) => Err(GaussJacobiErrorReason::DegreeAlphaBeta),
         }
         .map_err(GaussJacobiError::new)?;
+
+        // Delegate the computation of nodes and weights when they have special values
+        // that are equivalent to other rules that have faster implementations.
+        //
+        // UNWRAP: We have already verified that the degree is 2 or larger above.
+        // Since that is the only possible error cause for these quadrature rules
+        // this code can not fail, so we just `unwrap` the result.
+        match (alpha, beta) {
+            (0.0, 0.0) => return Ok(GaussLegendre::new(deg).unwrap().into()),
+            (-0.5, -0.5) => return Ok(GaussChebyshevFirstKind::new(deg).unwrap().into()),
+            (0.5, 0.5) => return Ok(GaussChebyshevSecondKind::new(deg).unwrap().into()),
+            _ => (),
+        }
 
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
 
@@ -255,6 +271,44 @@ impl fmt::Display for GaussJacobiError {
 
 impl std::error::Error for GaussJacobiError {}
 
+/// Gauss-Legendre quadrature is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.
+impl From<GaussLegendre> for GaussJacobi {
+    fn from(value: GaussLegendre) -> Self {
+        let mut node_weight_pairs = value.into_node_weight_pairs();
+        // Gauss-Legendre nodes are generated in reverse sorted order.
+        // This corrects for that since Gauss-Jacobi nodes are currently always sorted
+        // in ascending order.
+        node_weight_pairs.reverse();
+        Self {
+            node_weight_pairs,
+            alpha: 0.0,
+            beta: 0.0,
+        }
+    }
+}
+
+/// Gauss-Chebyshev quadrature of the first kind is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = -0.5.
+impl From<GaussChebyshevFirstKind> for GaussJacobi {
+    fn from(value: GaussChebyshevFirstKind) -> Self {
+        Self {
+            node_weight_pairs: value.into_node_weight_pairs(),
+            alpha: -0.5,
+            beta: -0.5,
+        }
+    }
+}
+
+/// Gauss-Chebyshev quadrature of the second kind is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.5.
+impl From<GaussChebyshevSecondKind> for GaussJacobi {
+    fn from(value: GaussChebyshevSecondKind) -> Self {
+        Self {
+            node_weight_pairs: value.into_node_weight_pairs(),
+            alpha: 0.5,
+            beta: 0.5,
+        }
+    }
+}
+
 /// The reason for the `GaussJacobiError`, returned by the [`GaussJacobiError::reason`] function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -309,6 +363,32 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use super::*;
+
+    #[test]
+    fn sanity_check_chebyshev_delegation() {
+        const DEG: usize = 200;
+        let jrule = GaussJacobi::new(DEG, -0.5, -0.5).unwrap();
+        let crule1 = GaussChebyshevFirstKind::new(DEG).unwrap();
+
+        assert_eq!(jrule.as_node_weight_pairs(), crule1.as_node_weight_pairs());
+
+        let jrule = GaussJacobi::new(DEG, 0.5, 0.5).unwrap();
+        let crule2 = GaussChebyshevSecondKind::new(DEG).unwrap();
+
+        assert_eq!(jrule.as_node_weight_pairs(), crule2.as_node_weight_pairs())
+    }
+
+    #[test]
+    fn sanity_check_legendre_delegation() {
+        const DEG: usize = 200;
+        let jrule = GaussJacobi::new(DEG, 0.0, 0.0).unwrap();
+        let lrule = GaussLegendre::new(DEG).unwrap();
+
+        assert_eq!(
+            jrule.as_node_weight_pairs(),
+            lrule.into_iter().rev().collect::<Vec<_>>(),
+        );
+    }
 
     #[test]
     fn check_alpha_beta_bounds() {
