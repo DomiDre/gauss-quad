@@ -35,7 +35,7 @@ pub struct Trapezoid {
 
 impl Trapezoid {
     /// Create a new instance of the Trapezoid rule with the given degree.
-    pub fn new(degree: NonZeroU32) -> Self {
+    pub const fn new(degree: NonZeroU32) -> Self {
         Self { degree }
     }
 
