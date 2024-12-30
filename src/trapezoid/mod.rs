@@ -9,6 +9,8 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 /// A trapezoid rule.
 ///
+/// This rule does not allocate anything on the heap.
+///
 /// # Example
 ///
 /// ```
