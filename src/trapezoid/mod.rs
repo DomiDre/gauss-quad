@@ -232,4 +232,10 @@ mod test {
         let rule = Trapezoid::new(1.try_into().unwrap());
         assert_eq!(rule.integrate(0.0, 1.0, |x| x), 0.5);
     }
+
+    #[test]
+    fn test_two_nodes() {
+        let rule = Trapezoid::new(2.try_into().unwrap());
+        assert_eq!(rule.integrate(0.0, 1.0, |x| x), 0.5);
+    }
 }
