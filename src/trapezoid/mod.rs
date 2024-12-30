@@ -29,6 +29,7 @@ use crate::Node;
 /// # Ok::<(), core::num::TryFromIntError>(())
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Trapezoid {
     degree: NonZeroU32,
 }
@@ -57,9 +58,10 @@ impl Trapezoid {
     where
         F: Fn(f64) -> f64,
     {
-        let delta_x = (b - a) / f64::from(self.degree.get());
+        let degree = self.degree.get();
+        let delta_x = (b - a) / f64::from(degree);
         let edge_points = (integrand(a) + integrand(b)) / 2.0;
-        let sum: f64 = (1..self.degree.get())
+        let sum: f64 = (1..degree)
             .map(|x| integrand(a + f64::from(x) * delta_x))
             .sum();
         (edge_points + sum) * delta_x
@@ -71,9 +73,10 @@ impl Trapezoid {
     where
         F: Fn(f64) -> f64 + Sync,
     {
-        let delta_x = (b - a) / f64::from(self.degree.get());
+        let degree = self.degree.get();
+        let delta_x = (b - a) / f64::from(degree);
         let edge_points = (integrand(a) + integrand(b)) / 2.0;
-        let sum: f64 = (1..self.degree.get())
+        let sum: f64 = (1..degree)
             .into_par_iter()
             .map(|x| integrand(a + f64::from(x) * delta_x))
             .sum();
