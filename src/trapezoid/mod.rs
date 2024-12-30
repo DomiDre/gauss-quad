@@ -2,9 +2,7 @@
 //!
 //! This rule can integrate functions on finite intervals, [a, b].
 
-use core::iter::FusedIterator;
-
-use std::backtrace::Backtrace;
+use core::{iter::FusedIterator, num::NonZeroU32};
 
 #[cfg(feature = "rayon")]
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -19,36 +17,26 @@ use crate::Node;
 ///
 /// ```
 /// use gauss_quad::Trapezoid;
-/// # use gauss_quad::trapezoid::TrapezoidError;
 /// # use approx::assert_abs_diff_eq;
 ///
 /// // initialize a trapezoid rule with 1000 grid points.
-/// let rule = Trapezoid::new(1000)?;
+/// let rule = Trapezoid::new(1000.try_into()?);
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the rule.
 /// let integral = rule.integrate(-1.0, 1.0, |x| x * x - 1.0);
 ///
 /// assert_abs_diff_eq!(integral, -4.0 / 3.0, epsilon = 1e-5);
-///
-/// # Ok::<(), TrapezoidError>(())
+/// # Ok::<(), core::num::TryFromIntError>(())
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trapezoid {
-    degree: u32,
+    degree: NonZeroU32,
 }
 
 impl Trapezoid {
     /// Create a new instance of the Trapezoid rule with the given degree.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the degree is less than 2.
-    pub fn new(degree: u32) -> Result<Self, TrapezoidError> {
-        if degree < 2 {
-            return Err(TrapezoidError::new());
-        }
-
-        Ok(Self { degree })
+    pub fn new(degree: NonZeroU32) -> Self {
+        Self { degree }
     }
 
     /// Integrate a function using the trapezoidal rule.
@@ -57,21 +45,21 @@ impl Trapezoid {
     ///
     /// ```
     /// use gauss_quad::Trapezoid;
-    /// # use gauss_quad::trapezoid::TrapezoidError;
     /// # use approx::assert_abs_diff_eq;
     ///
-    /// let rule = Trapezoid::new(1000)?;
+    /// let rule = Trapezoid::new(1000.try_into()?);
     ///
     /// assert_abs_diff_eq!(rule.integrate(1.0, 2.0, |x| x * x), 7.0 / 3.0, epsilon = 1e-6);
-    /// # Ok::<(), TrapezoidError>(())
+    ///
+    /// # Ok::<(), core::num::TryFromIntError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64,
     {
-        let delta_x = (b - a) / f64::from(self.degree);
+        let delta_x = (b - a) / f64::from(self.degree.get());
         let edge_points = (integrand(a) + integrand(b)) / 2.0;
-        let sum: f64 = (1..self.degree)
+        let sum: f64 = (1..self.degree.get())
             .map(|x| integrand(a + f64::from(x) * delta_x))
             .sum();
         (edge_points + sum) * delta_x
@@ -93,7 +81,7 @@ impl Trapezoid {
     }
 
     /// Returns the degree of the rule.
-    pub const fn degree(&self) -> u32 {
+    pub const fn degree(&self) -> NonZeroU32 {
         self.degree
     }
 
@@ -127,8 +115,8 @@ impl IntoIterator for &Trapezoid {
 pub struct TrapezoidIter(core::iter::Map<core::ops::RangeInclusive<u32>, fn(u32) -> f64>);
 
 impl TrapezoidIter {
-    pub(crate) fn new(degree: u32) -> Self {
-        Self((0..=degree).map(f64::from))
+    pub(crate) fn new(degree: NonZeroU32) -> Self {
+        Self((0..=degree.get()).map(f64::from))
     }
 }
 
@@ -175,53 +163,18 @@ impl DoubleEndedIterator for TrapezoidIter {
 
 impl FusedIterator for TrapezoidIter {}
 
-/// The error returned when the given degree of the [`Trapezoid`] rule is 0 or 1.
-#[derive(Debug)]
-pub struct TrapezoidError {
-    backtrace: Backtrace,
-}
-
-impl TrapezoidError {
-    pub(crate) fn new() -> Self {
-        Self {
-            backtrace: Backtrace::capture(),
-        }
-    }
-
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`],
-    /// see it for more information about how to make it display information when printed.
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.backtrace
-    }
-}
-
-impl std::fmt::Display for TrapezoidError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "the degree of the Trapezoid rule must be at least 2.")
-    }
-}
-
-impl std::error::Error for TrapezoidError {}
-
 #[cfg(test)]
 mod test {
     use super::*;
 
+    use core::num::NonZeroU32;
+
     use approx::assert_abs_diff_eq;
 
     #[test]
-    fn test_error_in_new() {
-        assert!(Trapezoid::new(0).is_err());
-        assert!(Trapezoid::new(1).is_err());
-        assert!(Trapezoid::new(2).is_ok());
-    }
-
-    #[test]
     fn integrate_parabola() {
-        let rule = Trapezoid::new(1000).unwrap();
-        assert_eq!(rule.degree(), 1000);
+        let rule = Trapezoid::new(1000.try_into().unwrap());
+        assert_eq!(rule.degree().get(), 1000);
         assert_abs_diff_eq!(
             rule.integrate(1.0, 2.0, |x| x * x),
             7.0 / 3.0,
@@ -232,7 +185,7 @@ mod test {
     #[cfg(feature = "rayon")]
     #[test]
     fn test_par_integration() {
-        let rule = Trapezoid::new(1000).unwrap();
+        let rule = Trapezoid::new(1000.try_into().unwrap());
         assert_abs_diff_eq!(
             rule.par_integrate(1.0, 2.0, |x| x * x),
             7.0 / 3.0,
@@ -242,7 +195,7 @@ mod test {
 
     #[test]
     fn test_iter() {
-        let rule = Trapezoid::new(1000).unwrap();
+        let rule = Trapezoid::new(1000.try_into().unwrap());
         assert_eq!(rule.iter().size_hint(), (1001, Some(1001)));
         assert_eq!(rule.iter().next(), Some(0.0));
         assert_eq!(rule.iter().nth(999), Some(999.0));
@@ -254,15 +207,15 @@ mod test {
 
     #[test]
     fn test_into_iter() {
-        const DEGREE: u32 = 1000;
+        const DEGREE: NonZeroU32 = NonZeroU32::new(1000).unwrap();
 
-        let rule = Trapezoid::new(DEGREE).unwrap();
+        let rule = Trapezoid::new(DEGREE);
 
-        for (node, ans) in (&rule).into_iter().zip(0..=DEGREE) {
+        for (node, ans) in (&rule).into_iter().zip(0..=DEGREE.get()) {
             assert_eq!(node, ans as f64);
         }
 
-        for (node, ans) in rule.into_iter().zip(0..=DEGREE) {
+        for (node, ans) in rule.into_iter().zip(0..=DEGREE.get()) {
             assert_eq!(node, ans as f64);
         }
     }
