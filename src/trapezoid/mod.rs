@@ -122,7 +122,7 @@ impl IntoIterator for Trapezoid {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        TrapezoidIter::new(self.degree)
+        TrapezoidIter::new(self.degree())
     }
 }
 
@@ -132,7 +132,7 @@ impl IntoIterator for &Trapezoid {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        TrapezoidIter::new(self.degree)
+        TrapezoidIter::new(self.degree())
     }
 }
 
