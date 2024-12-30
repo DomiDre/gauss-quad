@@ -2,10 +2,12 @@
 //!
 //! This rule can integrate functions on finite intervals, [a, b].
 
-use std::backtrace::Backtrace;
+use std::{backtrace::Backtrace, iter::FusedIterator};
 
 #[cfg(feature = "rayon")]
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+
+use crate::Node;
 
 /// A trapezoid rule.
 ///
@@ -107,9 +109,61 @@ impl Trapezoid {
             Err(e) => Err(e),
         }
     }
+
+    /// Returns an iterator over the nodes of the rule.
+    pub fn nodes(&self) -> TrapezoidNodes {
+        TrapezoidNodes::new(self.degree)
+    }
 }
 
-/// The error returned when the given degree of hte [`Trapezoid`] rule is 0 or 1.
+#[derive(Debug, Clone)]
+pub struct TrapezoidNodes(core::iter::Map<core::ops::RangeInclusive<usize>, fn(usize) -> f64>);
+
+impl TrapezoidNodes {
+    pub(crate) fn new(degree: usize) -> Self {
+        Self((0..=degree).map(|x| x as f64))
+    }
+}
+
+impl Iterator for TrapezoidNodes {
+    type Item = Node;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next()
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
+
+    #[inline]
+    fn count(self) -> usize {
+        self.0.count()
+    }
+
+    #[inline]
+    fn last(self) -> Option<Self::Item> {
+        self.0.last()
+    }
+
+    #[inline]
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        self.0.nth(n)
+    }
+}
+
+impl DoubleEndedIterator for TrapezoidNodes {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.0.next_back()
+    }
+}
+
+impl FusedIterator for TrapezoidNodes {}
+
+/// The error returned when the given degree of the [`Trapezoid`] rule is 0 or 1.
 #[derive(Debug)]
 pub struct TrapezoidError {
     backtrace: Backtrace,
