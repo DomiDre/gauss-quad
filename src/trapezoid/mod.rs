@@ -188,6 +188,10 @@ impl TrapezoidError {
         }
     }
 
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// This backtrace is captured with [`Backtrace::capture`],
+    /// see it for more information about how to make it display information when printed.
     pub fn backtrace(&self) -> &Backtrace {
         &self.backtrace
     }
