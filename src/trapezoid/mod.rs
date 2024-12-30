@@ -66,7 +66,7 @@ impl Trapezoid {
     }
 
     #[cfg(feature = "rayon")]
-    /// Same as [integrate](Self::integrate) but runs in parallel.
+    /// Same as [`integrate`](Self::integrate) but runs in parallel.
     pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
         F: Fn(f64) -> f64 + Sync,
