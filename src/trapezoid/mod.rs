@@ -118,6 +118,7 @@ impl IntoIterator for &Trapezoid {
 pub struct TrapezoidIter(core::iter::Map<core::ops::RangeInclusive<u32>, fn(u32) -> f64>);
 
 impl TrapezoidIter {
+    #[inline]
     pub(crate) fn new(degree: NonZeroU32) -> Self {
         Self((0..=degree.get()).map(f64::from))
     }
