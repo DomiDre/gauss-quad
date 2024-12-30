@@ -32,7 +32,7 @@ use crate::Node;
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trapezoid {
-    degree: usize,
+    degree: u32,
 }
 
 impl Trapezoid {
@@ -41,7 +41,7 @@ impl Trapezoid {
     /// # Errors
     ///
     /// Returns an error if the degree is less than 2.
-    pub fn new(degree: usize) -> Result<Self, TrapezoidError> {
+    pub fn new(degree: u32) -> Result<Self, TrapezoidError> {
         if degree < 2 {
             return Err(TrapezoidError::new());
         }
@@ -67,10 +67,10 @@ impl Trapezoid {
     where
         F: Fn(f64) -> f64,
     {
-        let delta_x = (b - a) / self.degree as f64;
+        let delta_x = (b - a) / f64::from(self.degree);
         let edge_points = (integrand(a) + integrand(b)) / 2.0;
         let sum: f64 = (1..self.degree)
-            .map(|x| integrand(a + x as f64 * delta_x))
+            .map(|x| integrand(a + f64::from(x as f64) * delta_x))
             .sum();
         (edge_points + sum) * delta_x
     }
@@ -81,17 +81,17 @@ impl Trapezoid {
     where
         F: Fn(f64) -> f64 + Sync,
     {
-        let delta_x = (b - a) / self.degree as f64;
+        let delta_x = (b - a) / f64::from(self.degree);
         let edge_points = (integrand(a) + integrand(b)) / 2.0;
         let sum: f64 = (1..self.degree)
             .into_par_iter()
-            .map(|x| integrand(a + x as f64 * delta_x))
+            .map(|x| integrand(a + f64::from(x) * delta_x))
             .sum();
         (edge_points + sum) * delta_x
     }
 
     /// Returns the degree of the rule.
-    pub const fn degree(&self) -> usize {
+    pub const fn degree(&self) -> u32 {
         self.degree
     }
 
@@ -100,7 +100,7 @@ impl Trapezoid {
     /// # Errors
     ///
     /// Returns an error if the given degree is less than 2.
-    pub fn change_degree(&mut self, new_degree: usize) -> Result<(), TrapezoidError> {
+    pub fn change_degree(&mut self, new_degree: u32) -> Result<(), TrapezoidError> {
         match Self::new(new_degree) {
             Ok(rule) => {
                 *self = rule;
@@ -137,11 +137,11 @@ impl IntoIterator for &Trapezoid {
 }
 
 #[derive(Debug, Clone)]
-pub struct TrapezoidIter(core::iter::Map<core::ops::RangeInclusive<usize>, fn(usize) -> f64>);
+pub struct TrapezoidIter(core::iter::Map<core::ops::RangeInclusive<u32>, fn(u32) -> f64>);
 
 impl TrapezoidIter {
-    pub(crate) fn new(degree: usize) -> Self {
-        Self((0..=degree).map(|x| x as f64))
+    pub(crate) fn new(degree: u32) -> Self {
+        Self((0..=degree).map(f64::from))
     }
 }
 
