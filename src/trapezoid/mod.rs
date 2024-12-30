@@ -111,21 +111,21 @@ impl Trapezoid {
     }
 
     /// Returns an iterator over the nodes of the rule.
-    pub fn nodes(&self) -> TrapezoidNodes {
-        TrapezoidNodes::new(self.degree)
+    pub fn iter(&self) -> TrapezoidIter {
+        TrapezoidIter::new(self.degree)
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct TrapezoidNodes(core::iter::Map<core::ops::RangeInclusive<usize>, fn(usize) -> f64>);
+pub struct TrapezoidIter(core::iter::Map<core::ops::RangeInclusive<usize>, fn(usize) -> f64>);
 
-impl TrapezoidNodes {
+impl TrapezoidIter {
     pub(crate) fn new(degree: usize) -> Self {
         Self((0..=degree).map(|x| x as f64))
     }
 }
 
-impl Iterator for TrapezoidNodes {
+impl Iterator for TrapezoidIter {
     type Item = Node;
 
     #[inline]
@@ -154,7 +154,7 @@ impl Iterator for TrapezoidNodes {
     }
 }
 
-impl DoubleEndedIterator for TrapezoidNodes {
+impl DoubleEndedIterator for TrapezoidIter {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.0.next_back()
@@ -166,7 +166,7 @@ impl DoubleEndedIterator for TrapezoidNodes {
     }
 }
 
-impl FusedIterator for TrapezoidNodes {}
+impl FusedIterator for TrapezoidIter {}
 
 /// The error returned when the given degree of the [`Trapezoid`] rule is 0 or 1.
 #[derive(Debug)]
@@ -249,12 +249,12 @@ mod test {
     #[test]
     fn test_nodes_iter() {
         let rule = Trapezoid::new(1000).unwrap();
-        assert_eq!(rule.nodes().size_hint(), (1001, Some(1001)));
-        assert_eq!(rule.nodes().next(), Some(0.0));
-        assert_eq!(rule.nodes().nth(999), Some(999.0));
-        assert_eq!(rule.nodes().last(), Some(1000.0));
-        assert_eq!(rule.nodes().count(), 1001);
-        assert_eq!(rule.nodes().next_back(), Some(1000.0));
-        assert_eq!(rule.nodes().nth_back(999), Some(1.0));
+        assert_eq!(rule.iter().size_hint(), (1001, Some(1001)));
+        assert_eq!(rule.iter().next(), Some(0.0));
+        assert_eq!(rule.iter().nth(999), Some(999.0));
+        assert_eq!(rule.iter().last(), Some(1000.0));
+        assert_eq!(rule.iter().count(), 1001);
+        assert_eq!(rule.iter().next_back(), Some(1000.0));
+        assert_eq!(rule.iter().nth_back(999), Some(1.0));
     }
 }
