@@ -2,7 +2,9 @@
 //!
 //! This rule can integrate functions on finite intervals, [a, b].
 
-use std::{backtrace::Backtrace, iter::FusedIterator};
+use core::iter::FusedIterator;
+
+use std::backtrace::Backtrace;
 
 #[cfg(feature = "rayon")]
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
