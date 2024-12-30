@@ -116,6 +116,26 @@ impl Trapezoid {
     }
 }
 
+impl IntoIterator for Trapezoid {
+    type Item = Node;
+    type IntoIter = TrapezoidIter;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        TrapezoidIter::new(self.degree)
+    }
+}
+
+impl IntoIterator for &Trapezoid {
+    type Item = Node;
+    type IntoIter = TrapezoidIter;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        TrapezoidIter::new(self.degree)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct TrapezoidIter(core::iter::Map<core::ops::RangeInclusive<usize>, fn(usize) -> f64>);
 
