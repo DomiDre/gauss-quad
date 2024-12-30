@@ -159,6 +159,11 @@ impl DoubleEndedIterator for TrapezoidNodes {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.0.next_back()
     }
+
+    #[inline]
+    fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
+        self.0.nth_back(n)
+    }
 }
 
 impl FusedIterator for TrapezoidNodes {}
@@ -250,5 +255,6 @@ mod test {
         assert_eq!(rule.nodes().last(), Some(1000.0));
         assert_eq!(rule.nodes().count(), 1001);
         assert_eq!(rule.nodes().next_back(), Some(1000.0));
+        assert_eq!(rule.nodes().nth_back(999), Some(1.0));
     }
 }
