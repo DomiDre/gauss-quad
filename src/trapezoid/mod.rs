@@ -70,7 +70,7 @@ impl Trapezoid {
         let delta_x = (b - a) / f64::from(self.degree);
         let edge_points = (integrand(a) + integrand(b)) / 2.0;
         let sum: f64 = (1..self.degree)
-            .map(|x| integrand(a + f64::from(x as f64) * delta_x))
+            .map(|x| integrand(a + f64::from(x) * delta_x))
             .sum();
         (edge_points + sum) * delta_x
     }
