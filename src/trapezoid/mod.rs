@@ -1,4 +1,4 @@
-//! Numerical integration using the uniform [Trapezoidal rule](https://en.wikipedia.org/wiki/Trapezoidal_rule).
+//! Numerical integration using the uniform Trapezoidal rule.
 //!
 //! This rule can integrate functions on finite intervals, [a, b].
 
