@@ -117,3 +117,41 @@ impl std::fmt::Display for TrapezoidError {
 }
 
 impl std::error::Error for TrapezoidError {}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use approx::assert_abs_diff_eq;
+
+    #[test]
+    fn test_error_in_new() {
+        assert!(Trapezoid::new(0).is_err());
+        assert!(Trapezoid::new(1).is_err());
+        assert!(Trapezoid::new(2).is_ok());
+    }
+
+    #[test]
+    fn integrate_parabola() {
+        let rule = Trapezoid::new(1000).unwrap();
+        assert_abs_diff_eq!(
+            rule.integrate(1.0, 2.0, |x| x * x),
+            7.0 / 3.0,
+            epsilon = 1e-6
+        );
+    }
+
+    #[test]
+    fn test_change_degree() {
+        let mut rule = Trapezoid::new(1000).unwrap();
+        assert!(rule.change_degree(0).is_err());
+        assert!(rule.change_degree(1).is_err());
+        assert!(rule.change_degree(2).is_ok());
+
+        assert_abs_diff_eq!(
+            rule.integrate(1.0, 2.0, |x| x * x),
+            7.0 / 3.0,
+            epsilon = 1e-1
+        );
+    }
+}
