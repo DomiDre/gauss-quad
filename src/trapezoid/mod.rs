@@ -240,7 +240,7 @@ mod test {
     }
 
     #[test]
-    fn test_nodes_iter() {
+    fn test_iter() {
         let rule = Trapezoid::new(1000).unwrap();
         assert_eq!(rule.iter().size_hint(), (1001, Some(1001)));
         assert_eq!(rule.iter().next(), Some(0.0));
@@ -249,5 +249,18 @@ mod test {
         assert_eq!(rule.iter().count(), 1001);
         assert_eq!(rule.iter().next_back(), Some(1000.0));
         assert_eq!(rule.iter().nth_back(999), Some(1.0));
+    }
+
+    #[test]
+    fn test_into_iter() {
+        let rule = Trapezoid::new(1000).unwrap();
+
+        for (node, ans) in (&rule).into_iter().zip(0..=1000) {
+            assert_eq!(node, ans as f64);
+        }
+
+        for (node, ans) in rule.into_iter().zip(0..=1000) {
+            assert_eq!(node, ans as f64);
+        }
     }
 }
