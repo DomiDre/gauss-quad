@@ -240,4 +240,13 @@ mod test {
             epsilon = 1e-6
         );
     }
+
+    #[test]
+    fn test_nodes_iter() {
+        let rule = Trapezoid::new(1000).unwrap();
+        let mut nodes: TrapezoidNodes = rule.nodes();
+        assert_eq!(nodes.size_hint(), (1001, Some(1001)));
+        assert_eq!(nodes.next(), Some(0.0));
+        assert_eq!(nodes.last(), Some(1000.0));
+    }
 }
