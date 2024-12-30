@@ -219,4 +219,10 @@ mod test {
             assert_eq!(node, ans as f64);
         }
     }
+
+    #[test]
+    fn test_single_node() {
+        let rule = Trapezoid::new(1.try_into().unwrap());
+        assert_eq!(rule.integrate(0.0, 1.0, |x| x), 0.5);
+    }
 }
