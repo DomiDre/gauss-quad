@@ -47,7 +47,18 @@ jobs:
           tool: cargo-all-features
       - name: Test all feature combinations
         run: cargo test-all-features
-        
+
+  semver_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-semver-checks
+      - name: Check for semver violations
+        run: cargo semver-checks
+    
   coverage:
     runs-on: ubuntu-latest
     steps:
@@ -55,12 +66,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: llvm-tools-preview
-      - name: cargo install cargo-llvm-cov
+      - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: cargo generate-lockfile
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
-      - name: cargo llvm-cov
+      - name: Generate coverage reports
         run: cargo llvm-cov --locked --all-features --lcov --output-path lcov.info
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
