@@ -253,13 +253,15 @@ mod test {
 
     #[test]
     fn test_into_iter() {
-        let rule = Trapezoid::new(1000).unwrap();
+        const DEGREE: u32 = 1000;
 
-        for (node, ans) in (&rule).into_iter().zip(0..=1000) {
+        let rule = Trapezoid::new(DEGREE).unwrap();
+
+        for (node, ans) in (&rule).into_iter().zip(0..=DEGREE) {
             assert_eq!(node, ans as f64);
         }
 
-        for (node, ans) in rule.into_iter().zip(0..=1000) {
+        for (node, ans) in rule.into_iter().zip(0..=DEGREE) {
             assert_eq!(node, ans as f64);
         }
     }
