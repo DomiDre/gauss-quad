@@ -71,9 +71,9 @@ impl Trapezoid {
     where
         F: Fn(f64) -> f64 + Sync,
     {
-        let delta_x = (b - a) / f64::from(self.degree);
+        let delta_x = (b - a) / f64::from(self.degree.get());
         let edge_points = (integrand(a) + integrand(b)) / 2.0;
-        let sum: f64 = (1..self.degree)
+        let sum: f64 = (1..self.degree.get())
             .into_par_iter()
             .map(|x| integrand(a + f64::from(x) * delta_x))
             .sum();
