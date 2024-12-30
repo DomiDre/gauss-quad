@@ -112,7 +112,7 @@ impl IntoIterator for &Trapezoid {
 }
 
 /// An iterator over the nodes of the trapezoid rule.
-/// 
+///
 /// Created by the [`iter`](Trapezoid::iter) method on [`Trapezoid`].
 #[derive(Debug, Clone)]
 pub struct TrapezoidIter(core::iter::Map<core::ops::RangeInclusive<u32>, fn(u32) -> f64>);
