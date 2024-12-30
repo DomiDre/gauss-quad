@@ -68,6 +68,21 @@ impl Trapezoid {
         (edge_points + sum) * delta_x
     }
 
+    #[cfg(feature = "rayon")]
+    /// Same as [integrate](Self::integrate) but runs in parallel.
+    fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    where
+        F: Fn(f64) -> f64 + Sync,
+    {
+        let delta_x = (b - a) / self.degree as f64;
+        let edge_points = (integrand(a) + integrand(b)) / 2.0;
+        let sum: f64 = (1..self.degree)
+            .into_par_iter()
+            .map(|x| integrand(a + x as f64 * delta_x))
+            .sum();
+        (edge_points + sum) * delta_x
+    }
+
     /// Returns the degree of the rule.
     pub const fn degree(&self) -> usize {
         self.degree
@@ -134,6 +149,7 @@ mod test {
     #[test]
     fn integrate_parabola() {
         let rule = Trapezoid::new(1000).unwrap();
+        assert_eq!(rule.degree(), 1000);
         assert_abs_diff_eq!(
             rule.integrate(1.0, 2.0, |x| x * x),
             7.0 / 3.0,
