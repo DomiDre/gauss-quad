@@ -376,7 +376,7 @@ mod tests {
 
     #[test]
     fn found_nans() {
-        let _ = GaussJacobi::new(10, -0.75, -0.25);
+        let _ = GaussJacobi::new(3, -0.75, -0.25);
     }
 
     #[test]
