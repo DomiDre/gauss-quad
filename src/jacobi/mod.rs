@@ -126,10 +126,14 @@ impl GaussJacobi {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
+        println!("eigen: {eigen:?}");
+
         let scale_factor =
             (2.0f64).powf(alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
                 / gamma(alpha + beta + 1.0)
                 / (alpha + beta + 1.0);
+
+        println!("scale_factor: {scale_factor}");
 
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
         let mut node_weight_pairs: Vec<(f64, f64)> = eigen
@@ -144,6 +148,8 @@ impl GaussJacobi {
                     .map(|x| x * x * scale_factor),
             )
             .collect();
+
+        println!("node_weight_pairs: {node_weight_pairs:?}");
 
         node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
