@@ -365,6 +365,11 @@ mod tests {
     use super::*;
 
     #[test]
+    fn found_nans() {
+        let _ = GaussJacobi::new(10, -0.75, -0.25);
+    }
+
+    #[test]
     fn sanity_check_chebyshev_delegation() {
         const DEG: usize = 200;
         let jrule = GaussJacobi::new(DEG, -0.5, -0.5).unwrap();
