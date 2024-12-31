@@ -89,7 +89,7 @@ impl Trapezoid {
     }
 
     /// Change the degree of the rule.
-    pub const fn change_degree(&mut self, new_degree: NonZeroU32) {
+    pub fn change_degree(&mut self, new_degree: NonZeroU32) {
         self.degree = new_degree;
     }
 
