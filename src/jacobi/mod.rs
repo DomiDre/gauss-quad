@@ -109,6 +109,9 @@ impl GaussJacobi {
             let idx_f64 = idx as f64;
             let idx_p1 = idx_f64 + 1.0;
             let denom_sum = 2.0 * idx_p1 + alpha + beta;
+            // This expression is only correct if alpha + beta is never -1 or 1.
+            // If that happens one of the terms in the denominator
+            // will be zero and the expression will be NaN when the index is 0.
             let off_diag = 2.0 / denom_sum
                 * (idx_p1 * (idx_p1 + alpha) * (idx_p1 + beta) * (idx_p1 + alpha + beta)
                     / ((denom_sum + 1.0) * (denom_sum - 1.0)))
@@ -128,6 +131,7 @@ impl GaussJacobi {
 
         println!("eigen: {eigen:?}");
 
+        // This expression is only correct when alpha + beta is not -1, as then the denominator will be zero.
         let scale_factor =
             (2.0f64).powf(alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
                 / gamma(alpha + beta + 1.0)
