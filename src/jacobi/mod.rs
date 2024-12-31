@@ -108,9 +108,11 @@ impl GaussJacobi {
         for idx in 0..deg - 1 {
             let idx_f64 = idx as f64;
             let idx_p1 = idx_f64 + 1.0;
+            // When alpha + beta = -1, denom_sum is 1 when idx is 0.
             let denom_sum = 2.0 * idx_p1 + alpha + beta;
             let off_diag = 2.0 / denom_sum
                 * (idx_p1 * (idx_p1 + alpha) * (idx_p1 + beta) * (idx_p1 + alpha + beta)
+                    // that means that the second term in the denominator here is 0.
                     / ((denom_sum + 1.0) * (denom_sum - 1.0)))
                     .sqrt();
             unsafe {
