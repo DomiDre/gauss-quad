@@ -103,6 +103,7 @@ impl GaussHermite {
                         .iter()
                         .copied(),
                 )
+                .rev()
                 .collect(),
         })
     }
@@ -177,7 +178,7 @@ mod tests {
     #[test]
     fn golub_welsch_3() {
         let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3).unwrap().into_iter().unzip();
-        let x_should = [1.224_744_871_391_589, 0.0, -1.224_744_871_391_589];
+        let x_should = [-1.224_744_871_391_589, 0.0, 1.224_744_871_391_589];
         let w_should = [
             0.295_408_975_150_919_35,
             1.181_635_900_603_677_4,
@@ -242,7 +243,7 @@ mod tests {
     fn integrate_one() {
         let quad = GaussHermite::new(5).unwrap();
         let integral = quad.integrate(|_x| 1.0);
-        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
+        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 2e-15);
     }
 
     #[cfg(feature = "rayon")]
