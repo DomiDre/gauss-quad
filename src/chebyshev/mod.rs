@@ -47,6 +47,7 @@ impl GaussChebyshevFirstKind {
 
         Ok(Self {
             node_weight_pairs: (1..degree + 1)
+                .rev()
                 .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
                 .collect(),
         })
@@ -285,11 +286,11 @@ mod test {
     fn check_chebyshev_1st_deg_5() {
         // Source: https://mathworld.wolfram.com/Chebyshev-GaussQuadrature.html
         let ans = [
-            (0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
-            (0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
-            (0.0, PI / 5.0),
-            (-0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
             (-0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (-0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (0.0, PI / 5.0),
+            (0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
         ];
 
         let rule = GaussChebyshevFirstKind::new(5).unwrap();
