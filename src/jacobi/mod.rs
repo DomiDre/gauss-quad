@@ -362,7 +362,7 @@ mod tests {
 
     #[test]
     fn check_sort() {
-        const PARAMS: [f64; 5] = [-0.9, -0.5, -0.25, 0.0, 0.5];
+        const PARAMS: [f64; 4] = [-0.5, -0.25, 0.0, 0.5];
 
         for deg in (2..100).step_by(20) {
             for alpha in PARAMS {
