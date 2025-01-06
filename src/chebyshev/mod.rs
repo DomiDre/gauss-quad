@@ -47,6 +47,7 @@ impl GaussChebyshevFirstKind {
 
         Ok(Self {
             node_weight_pairs: (1..degree + 1)
+                .rev()
                 .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
                 .collect(),
         })
@@ -156,6 +157,7 @@ impl GaussChebyshevSecondKind {
 
         Ok(Self {
             node_weight_pairs: (1..degree + 1)
+                .rev()
                 .map(|i| {
                     let over_n_plus_1 = 1.0 / (n + 1.0);
                     let sin_val = (PI * i as f64 * over_n_plus_1).sin();
@@ -282,14 +284,24 @@ mod test {
     }
 
     #[test]
+    fn check_sorted() {
+        for deg in (2..100).step_by(10) {
+            let rule1 = GaussChebyshevFirstKind::new(deg).unwrap();
+            assert!(rule1.as_node_weight_pairs().is_sorted());
+            let rule2 = GaussChebyshevSecondKind::new(deg).unwrap();
+            assert!(rule2.as_node_weight_pairs().is_sorted());
+        }
+    }
+
+    #[test]
     fn check_chebyshev_1st_deg_5() {
         // Source: https://mathworld.wolfram.com/Chebyshev-GaussQuadrature.html
         let ans = [
-            (0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
-            (0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
-            (0.0, PI / 5.0),
-            (-0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
             (-0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (-0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (0.0, PI / 5.0),
+            (0.5 * (0.5 * (5.0 - f64::sqrt(5.0))).sqrt(), PI / 5.0),
+            (0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
         ];
 
         let rule = GaussChebyshevFirstKind::new(5).unwrap();
@@ -311,7 +323,7 @@ mod test {
 
         for (i, (x, w)) in rule.into_iter().enumerate() {
             // Source: https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature
-            let ii = i as f64 + 1.0;
+            let ii = deg - i as f64;
             let x_should = (ii * PI / (deg + 1.0)).cos();
             let w_should = PI / (deg + 1.0) * (ii * PI / (deg + 1.0)).sin().powi(2);
 
