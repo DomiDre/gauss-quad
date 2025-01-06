@@ -94,11 +94,6 @@ impl Trapezoid {
         self.degree
     }
 
-    /// Change the degree of the rule.
-    pub fn change_degree(&mut self, new_degree: u32) -> Result<(), TrapezoidError> {
-        Self::new(new_degree).map(|rule| *self = rule)
-    }
-
     /// Returns an iterator over the nodes of the rule.
     pub fn iter(&self) -> TrapezoidIter {
         TrapezoidIter::new(self.degree)
@@ -240,19 +235,6 @@ mod test {
         let rule = Trapezoid::new(1000).unwrap();
         assert_abs_diff_eq!(
             rule.par_integrate(1.0, 2.0, |x| x * x),
-            7.0 / 3.0,
-            epsilon = 1e-6
-        );
-    }
-
-    #[test]
-    fn test_degree_change() {
-        let mut rule = Trapezoid::new(1).unwrap();
-        assert_eq!(rule.degree().get(), 1);
-        rule.change_degree(1000).unwrap();
-        assert_eq!(rule.degree().get(), 1000);
-        assert_abs_diff_eq!(
-            rule.integrate(1.0, 2.0, |x| x * x),
             7.0 / 3.0,
             epsilon = 1e-6
         );
