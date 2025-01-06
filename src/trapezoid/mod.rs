@@ -36,36 +36,6 @@ pub struct Trapezoid {
     degree: NonZeroU32,
 }
 
-#[derive(Debug)]
-pub struct TrapezoidError {
-    backtrace: Backtrace,
-}
-
-impl fmt::Display for TrapezoidError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "degree must be greater than 0")
-    }
-}
-
-impl std::error::Error for TrapezoidError {}
-
-impl TrapezoidError {
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
-    #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.backtrace
-    }
-
-    #[inline]
-    pub(crate) fn new() -> Self {
-        Self {
-            backtrace: Backtrace::capture(),
-        }
-    }
-}
-
 impl Trapezoid {
     /// Create a new instance of the Trapezoid rule with the given degree.
     pub fn new(degree: u32) -> Result<Self, TrapezoidError> {
@@ -132,6 +102,36 @@ impl Trapezoid {
     /// Returns an iterator over the nodes of the rule.
     pub fn iter(&self) -> TrapezoidIter {
         TrapezoidIter::new(self.degree)
+    }
+}
+
+#[derive(Debug)]
+pub struct TrapezoidError {
+    backtrace: Backtrace,
+}
+
+impl fmt::Display for TrapezoidError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "degree must be greater than 0")
+    }
+}
+
+impl std::error::Error for TrapezoidError {}
+
+impl TrapezoidError {
+    /// Returns a [`Backtrace`] to where the error was created.
+    ///
+    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
+    #[inline]
+    pub fn backtrace(&self) -> &Backtrace {
+        &self.backtrace
+    }
+
+    #[inline]
+    pub(crate) fn new() -> Self {
+        Self {
+            backtrace: Backtrace::capture(),
+        }
     }
 }
 
