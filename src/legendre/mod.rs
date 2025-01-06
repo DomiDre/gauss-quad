@@ -41,6 +41,7 @@ use std::backtrace::Backtrace;
 /// # Examples
 ///
 /// Basic usage:
+///
 /// ```
 /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 /// # use approx::assert_abs_diff_eq;
@@ -53,8 +54,10 @@ use std::backtrace::Backtrace;
 /// assert_abs_diff_eq!(integral, 0.0);
 /// # Ok::<(), GaussLegendreError>(())
 /// ```
+///
 /// The nodes and weights are computed in O(n) time,
 /// so large quadrature rules are feasible:
+///
 /// ```
 /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
 /// # use approx::assert_abs_diff_eq;
