@@ -365,6 +365,19 @@ mod tests {
     use super::*;
 
     #[test]
+    fn check_sort() {
+        const PARAMS: [f64; 4] = [-0.9, -0.25, 0.0, 0.5];
+        for deg in (2..100).step_by(20) {
+            for alpha in PARAMS {
+                for beta in PARAMS {
+                    let rule = GaussJacobi::new(deg, alpha, beta).unwrap();
+                    assert!(rule.as_node_weight_pairs().is_sorted());
+                }
+            }
+        }
+    }
+
+    #[test]
     fn sanity_check_chebyshev_delegation() {
         const DEG: usize = 200;
         let jrule = GaussJacobi::new(DEG, -0.5, -0.5).unwrap();
