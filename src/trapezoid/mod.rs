@@ -231,7 +231,7 @@ mod test {
     #[cfg(feature = "rayon")]
     #[test]
     fn test_par_integration() {
-        let rule = Trapezoid::new(1000.try_into().unwrap());
+        let rule = Trapezoid::new(1000).unwrap();
         assert_abs_diff_eq!(
             rule.par_integrate(1.0, 2.0, |x| x * x),
             7.0 / 3.0,
