@@ -362,6 +362,12 @@ mod tests {
 
     #[test]
     fn check_sort() {
+        // This contains values such that all the possible combinations of two of them
+        // contains the combinations
+        // (0, 0), which is Gauss-Legendre
+        // (-0.5, -0.5), which is Gauss-Chebyshev of the first kind
+        // (0.5, 0.5), which is Gauss-Chebyshev of the second kind
+        // and all the other combinations of the values are Gauss-Jacobi
         const PARAMS: [f64; 4] = [-0.5, -0.25, 0.0, 0.5];
 
         for deg in (2..100).step_by(20) {
