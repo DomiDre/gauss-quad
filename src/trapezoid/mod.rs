@@ -218,6 +218,12 @@ mod test {
     use approx::assert_abs_diff_eq;
 
     #[test]
+    fn check_error() {
+        assert!(Trapezoid::new(0).is_err());
+        assert!(Trapezoid::new(1).is_ok());
+    }
+
+    #[test]
     fn integrate_parabola() {
         let rule = Trapezoid::new(1000).unwrap();
         assert_eq!(rule.degree().get(), 1000);
