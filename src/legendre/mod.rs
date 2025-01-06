@@ -24,7 +24,9 @@
 //! ```
 
 #[cfg(feature = "rayon")]
-use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use rayon::prelude::{
+    IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
+};
 
 mod bogaert;
 
@@ -112,6 +114,7 @@ impl GaussLegendre {
         Ok(Self {
             node_weight_pairs: (1..deg + 1)
                 .into_par_iter()
+                .rev()
                 .map(|k| NodeWeightPair::new(deg, k).into_tuple())
                 .collect(),
         })
@@ -220,6 +223,15 @@ mod tests {
     fn check_sorted() {
         for deg in (2..100).step_by(10) {
             let rule = GaussLegendre::new(deg).unwrap();
+            assert!(rule.as_node_weight_pairs().is_sorted());
+        }
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn check_par_sorted_order() {
+        for deg in (2..100).step_by(10) {
+            let rule = GaussLegendre::par_new(deg).unwrap();
             assert!(rule.as_node_weight_pairs().is_sorted());
         }
     }
