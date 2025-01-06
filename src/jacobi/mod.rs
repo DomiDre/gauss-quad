@@ -274,13 +274,8 @@ impl std::error::Error for GaussJacobiError {}
 /// Gauss-Legendre quadrature is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.
 impl From<GaussLegendre> for GaussJacobi {
     fn from(value: GaussLegendre) -> Self {
-        let mut node_weight_pairs = value.into_node_weight_pairs();
-        // Gauss-Legendre nodes are generated in reverse sorted order.
-        // This corrects for that since Gauss-Jacobi nodes are currently always sorted
-        // in ascending order.
-        node_weight_pairs.reverse();
         Self {
-            node_weight_pairs,
+            node_weight_pairs: value.into_node_weight_pairs(),
             alpha: 0.0,
             beta: 0.0,
         }
@@ -399,10 +394,7 @@ mod tests {
         let jrule = GaussJacobi::new(DEG, 0.0, 0.0).unwrap();
         let lrule = GaussLegendre::new(DEG).unwrap();
 
-        assert_eq!(
-            jrule.as_node_weight_pairs(),
-            lrule.into_iter().rev().collect::<Vec<_>>(),
-        );
+        assert_eq!(jrule.as_node_weight_pairs(), lrule.as_node_weight_pairs(),);
     }
 
     #[test]
