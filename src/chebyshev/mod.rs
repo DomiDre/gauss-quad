@@ -8,7 +8,9 @@ use core::{f64::consts::PI, fmt};
 use std::backtrace::Backtrace;
 
 #[cfg(feature = "rayon")]
-use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use rayon::iter::{
+    IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
+};
 
 /// A Gauss-Chebyshev quadrature scheme of the first kind.
 ///
@@ -73,6 +75,7 @@ impl GaussChebyshevFirstKind {
         Ok(Self {
             node_weight_pairs: (1..degree + 1)
                 .into_par_iter()
+                .rev()
                 .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
                 .collect(),
         })
@@ -182,6 +185,7 @@ impl GaussChebyshevSecondKind {
         Ok(Self {
             node_weight_pairs: (1..degree + 1)
                 .into_par_iter()
+                .rev()
                 .map(|i| {
                     let over_n_plus_1 = 1.0 / (n + 1.0);
                     let sin_val = (PI * i as f64 * over_n_plus_1).sin();
@@ -289,6 +293,17 @@ mod test {
             let rule1 = GaussChebyshevFirstKind::new(deg).unwrap();
             assert!(rule1.as_node_weight_pairs().is_sorted());
             let rule2 = GaussChebyshevSecondKind::new(deg).unwrap();
+            assert!(rule2.as_node_weight_pairs().is_sorted());
+        }
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn check_par_sorted() {
+        for deg in (2..100).step_by(10) {
+            let rule1 = GaussChebyshevFirstKind::par_new(deg).unwrap();
+            assert!(rule1.as_node_weight_pairs().is_sorted());
+            let rule2 = GaussChebyshevSecondKind::par_new(deg).unwrap();
             assert!(rule2.as_node_weight_pairs().is_sorted());
         }
     }
