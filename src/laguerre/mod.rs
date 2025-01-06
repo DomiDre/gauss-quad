@@ -238,6 +238,16 @@ mod tests {
     use core::f64::consts::PI;
 
     #[test]
+    fn check_sorted() {
+        for deg in (2..100).step_by(10) {
+            for alpha in [-0.9, -0.5, 0.0, 0.5] {
+                let rule = GaussLaguerre::new(deg, alpha).unwrap();
+                assert!(rule.as_node_weight_pairs().is_sorted());
+            }
+        }
+    }
+
+    #[test]
     fn golub_welsch_2_alpha_5() {
         let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(2, 5.0).unwrap().into_iter().unzip();
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
