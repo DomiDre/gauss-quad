@@ -366,7 +366,9 @@ mod tests {
 
     #[test]
     fn check_sort() {
+        // Does not contain the value -0.5 due to <https://github.com/DomiDre/gauss-quad/issues/51>.
         const PARAMS: [f64; 4] = [-0.9, -0.25, 0.0, 0.5];
+        
         for deg in (2..100).step_by(20) {
             for alpha in PARAMS {
                 for beta in PARAMS {
