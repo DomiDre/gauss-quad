@@ -206,6 +206,8 @@ impl DoubleEndedIterator for TrapezoidIter {
 
 impl FusedIterator for TrapezoidIter {}
 
+impl ExactSizeIterator for TrapezoidIter {}
+
 #[cfg(test)]
 mod test {
     use super::*;
