@@ -221,7 +221,7 @@ mod tests {
 
     #[test]
     fn check_sorted() {
-        for deg in (2..100).step_by(10) {
+        for deg in (2..200).step_by(10) {
             let rule = GaussLegendre::new(deg).unwrap();
             assert!(rule.as_node_weight_pairs().is_sorted());
         }
