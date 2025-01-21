@@ -23,7 +23,9 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
+use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule, data_api::INLINE_SIZE};
+
+use smallvec::SmallVec;
 
 use core::f64::consts::PI;
 
@@ -52,7 +54,7 @@ use std::backtrace::Backtrace;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussHermite {
-    node_weight_pairs: Vec<(Node, Weight)>,
+    node_weight_pairs: SmallVec<[(Node, Weight); INLINE_SIZE]>,
 }
 
 impl GaussHermite {

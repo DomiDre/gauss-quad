@@ -14,6 +14,8 @@ pub type Node = f64;
 /// A weight in a quadrature rule.
 pub type Weight = f64;
 
+pub const INLINE_SIZE: usize = 10;
+
 /// This macro implements the data access API for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Vec<(Node, Weight)>`.
 /// It takes in the name of the quadrature rule struct as well as the names it should give the iterators
@@ -62,7 +64,7 @@ macro_rules! __impl_node_weight_rule {
             type Item = &'a ($crate::Node, $crate::Weight);
             #[inline]
             fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_iter::new(self.node_weight_pairs.iter())
+                $quadrature_rule_iter::new(self.node_weight_pairs.as_slice().iter())
             }
         }
 
@@ -93,10 +95,10 @@ macro_rules! __impl_node_weight_rule {
 
             /// Converts the quadrature rule into a vector of node-weight pairs.
             ///
-            /// This function just returns the underlying vector without any computation or cloning.
+            /// This function just returns the underlying data.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> ::std::vec::Vec<($crate::Node, $crate::Weight)> {
+            pub fn into_node_weight_pairs(self) -> ::smallvec::SmallVec<[($crate::Node, $crate::Weight); $crate::data_api::INLINE_SIZE]> {
                 self.node_weight_pairs
             }
 
@@ -214,12 +216,14 @@ macro_rules! __impl_node_weight_rule {
         /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<($crate::Node, $crate::Weight)>);
+        pub struct $quadrature_rule_into_iter(
+            ::smallvec::IntoIter<[($crate::Node, $crate::Weight); $crate::data_api::INLINE_SIZE]>
+        );
 
         impl $quadrature_rule_into_iter {
             #[inline]
             const fn new(
-                node_weight_pairs: ::std::vec::IntoIter<($crate::Node, $crate::Weight)>,
+                node_weight_pairs: ::smallvec::IntoIter<[($crate::Node, $crate::Weight); $crate::data_api::INLINE_SIZE]>,
             ) -> Self {
                 Self(node_weight_pairs)
             }
@@ -238,7 +242,7 @@ macro_rules! __impl_node_weight_rule {
         {
             #[inline]
             fn as_ref(&self) -> &[($crate::Node, $crate::Weight)] {
-                self.0.as_ref()
+                self.0.as_slice()
             }
         }
 
@@ -364,7 +368,7 @@ macro_rules! __impl_node_rule {
             /// This function just returns the underlying data without any computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_nodes(self) -> Vec<$crate::Node> {
+            pub fn into_nodes(self) -> SmallVec<[$crate::Node; $crate::data_api::INLINE_SIZE]> {
                 self.nodes
             }
 
@@ -415,11 +419,15 @@ macro_rules! __impl_node_rule {
         /// Created by the [`IntoIterator`] trait implementation of the rule struct.
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<$crate::Node>);
+        pub struct $quadrature_rule_into_iter(
+            ::smallvec::IntoIter<[$crate::Node; $crate::data_api::INLINE_SIZE]>,
+        );
 
         impl $quadrature_rule_into_iter {
             #[inline]
-            const fn new(iter: ::std::vec::IntoIter<$crate::Node>) -> Self {
+            const fn new(
+                iter: ::smallvec::IntoIter<[$crate::Node; $crate::data_api::INLINE_SIZE]>,
+            ) -> Self {
                 Self(iter)
             }
 
@@ -435,7 +443,7 @@ macro_rules! __impl_node_rule {
         impl ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_into_iter {
             #[inline]
             fn as_ref(&self) -> &[$crate::Node] {
-                self.0.as_ref()
+                self.0.as_slice()
             }
         }
 
@@ -449,12 +457,13 @@ macro_rules! __impl_node_rule {
 mod tests {
     use super::*;
     use core::fmt;
+    use smallvec::SmallVec;
     use std::backtrace::Backtrace;
 
     #[derive(Debug, Clone, PartialEq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct MockQuadrature {
-        node_weight_pairs: Vec<(Node, Weight)>,
+        node_weight_pairs: SmallVec<[(Node, Weight); INLINE_SIZE]>,
     }
 
     #[derive(Debug)]

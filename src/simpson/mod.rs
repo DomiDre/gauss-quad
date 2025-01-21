@@ -37,9 +37,11 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
-use crate::{Node, __impl_node_rule};
+use crate::{Node, __impl_node_rule, data_api::INLINE_SIZE};
 
 use std::backtrace::Backtrace;
+
+use smallvec::SmallVec;
 
 /// A Simpson's rule.
 ///
@@ -56,7 +58,7 @@ use std::backtrace::Backtrace;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Simpson {
     /// The dimensionless Simpsons nodes.
-    nodes: Vec<Node>,
+    nodes: SmallVec<[Node; INLINE_SIZE]>,
 }
 
 impl Simpson {

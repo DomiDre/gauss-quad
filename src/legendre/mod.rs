@@ -29,6 +29,7 @@ use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIter
 mod bogaert;
 
 use bogaert::NodeWeightPair;
+use smallvec::SmallVec;
 
 use crate::{Node, Weight, __impl_node_weight_rule};
 
@@ -68,7 +69,7 @@ use std::backtrace::Backtrace;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
-    node_weight_pairs: Vec<(Node, Weight)>,
+    node_weight_pairs: SmallVec<[(Node, Weight); 10]>,
 }
 
 impl GaussLegendre {
@@ -105,11 +106,13 @@ impl GaussLegendre {
             return Err(GaussLegendreError::new());
         }
 
+        let node_weight_pairs: Vec<_> = (1..deg + 1)
+            .into_par_iter()
+            .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+            .collect();
+
         Ok(Self {
-            node_weight_pairs: (1..deg + 1)
-                .into_par_iter()
-                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
-                .collect(),
+            node_weight_pairs: node_weight_pairs.into(),
         })
     }
 

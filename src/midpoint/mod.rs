@@ -44,9 +44,11 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{Node, __impl_node_rule};
+use crate::{Node, __impl_node_rule, data_api::INLINE_SIZE};
 
 use std::backtrace::Backtrace;
+
+use smallvec::SmallVec;
 
 /// A midpoint rule.
 /// ```
@@ -62,7 +64,7 @@ use std::backtrace::Backtrace;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Midpoint {
     /// The dimensionless midpoints
-    nodes: Vec<Node>,
+    nodes: SmallVec<[Node; INLINE_SIZE]>,
 }
 
 impl Midpoint {
