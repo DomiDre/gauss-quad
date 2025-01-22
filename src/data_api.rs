@@ -22,9 +22,8 @@ pub type Weight = f64;
 pub const INLINE_SIZE: usize = 4;
 
 /// The number of elements to store inline on the stack before spilling to the heap for a rule that has only nodes.
-///
-/// This can be twice as large as the `INLINE_SIZE` for a rule that has both nodes and weights, since each
-/// element is half the size.
+// This can be twice as large as the `INLINE_SIZE` for a rule that has both nodes and weights, since each
+// element is half the size.
 pub const NODE_RULE_INLINE_SIZE: usize = 2 * INLINE_SIZE;
 
 /// This macro implements the data access API for the given quadrature rule struct that contains
