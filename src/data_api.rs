@@ -18,7 +18,7 @@ pub type Weight = f64;
 ///
 /// Set so that the total memory size of the inlined portion is less than 64 bytes,
 /// the cache line size of most modern CPUs.
-/// Two 64 bit floats times    4    is 64 bytes.
+// Two 64 bit floats times     4    is 64 bytes.
 pub const INLINE_SIZE: usize = 4;
 
 /// The number of elements to store inline on the stack before spilling to the heap for a rule that has only nodes.
