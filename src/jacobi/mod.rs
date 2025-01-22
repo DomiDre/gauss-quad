@@ -276,7 +276,7 @@ impl std::error::Error for GaussJacobiError {}
 /// Gauss-Legendre quadrature is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.
 impl From<GaussLegendre> for GaussJacobi {
     fn from(value: GaussLegendre) -> Self {
-        let mut node_weight_pairs = value.into_node_weight_pairs();
+        let mut node_weight_pairs = value.into_smallvec_of_node_weight_pairs();
         // Gauss-Legendre nodes are generated in reverse sorted order.
         // This corrects for that since Gauss-Jacobi nodes are currently always sorted
         // in ascending order.
@@ -293,7 +293,7 @@ impl From<GaussLegendre> for GaussJacobi {
 impl From<GaussChebyshevFirstKind> for GaussJacobi {
     fn from(value: GaussChebyshevFirstKind) -> Self {
         Self {
-            node_weight_pairs: value.into_node_weight_pairs(),
+            node_weight_pairs: value.into_smallvec_of_node_weight_pairs(),
             alpha: -0.5,
             beta: -0.5,
         }
@@ -304,7 +304,7 @@ impl From<GaussChebyshevFirstKind> for GaussJacobi {
 impl From<GaussChebyshevSecondKind> for GaussJacobi {
     fn from(value: GaussChebyshevSecondKind) -> Self {
         Self {
-            node_weight_pairs: value.into_node_weight_pairs(),
+            node_weight_pairs: value.into_smallvec_of_node_weight_pairs(),
             alpha: 0.5,
             beta: 0.5,
         }

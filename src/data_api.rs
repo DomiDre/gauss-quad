@@ -98,7 +98,15 @@ macro_rules! __impl_node_weight_rule {
             /// This function just returns the underlying data.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> ::smallvec::SmallVec<[($crate::Node, $crate::Weight); $crate::data_api::INLINE_SIZE]> {
+            pub fn into_node_weight_pairs(self) -> Vec<($crate::Node, $crate::Weight)> {
+                self.node_weight_pairs.to_vec()
+            }
+
+            #[allow(dead_code)]
+            /// Can be used internally to pass the `SmallVec` to another struct without cloning.
+            #[inline]
+            #[must_use = "`self` will be dropped if the result is not used"]
+            pub(crate) fn into_smallvec_of_node_weight_pairs(self) -> SmallVec<[($crate::Node, $crate::Weight); $crate::data_api::INLINE_SIZE]> {
                 self.node_weight_pairs
             }
 
