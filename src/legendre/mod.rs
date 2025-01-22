@@ -31,7 +31,7 @@ mod bogaert;
 use bogaert::NodeWeightPair;
 use smallvec::SmallVec;
 
-use crate::{Node, Weight, __impl_node_weight_rule};
+use crate::{Node, Weight, __impl_node_weight_rule, data_api::INLINE_SIZE};
 
 use std::backtrace::Backtrace;
 
@@ -69,7 +69,7 @@ use std::backtrace::Backtrace;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
-    node_weight_pairs: SmallVec<[(Node, Weight); 10]>,
+    node_weight_pairs: SmallVec<[(Node, Weight); INLINE_SIZE]>,
 }
 
 impl GaussLegendre {
