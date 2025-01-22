@@ -2,7 +2,7 @@
 //!
 //! This rule can integrate formulas on the form f(x) * (1 - x^2)^`a` on finite intervals, where `a` is either -1/2 or 1/2.
 
-use crate::{Node, Weight, __impl_node_weight_rule, data_api::INLINE_SIZE};
+use crate::{Node, Weight, __impl_node_weight_rule, data_api::NODE_WEIGHT_RULE_INLINE_SIZE};
 
 use core::{f64::consts::PI, fmt};
 use std::backtrace::Backtrace;
@@ -30,7 +30,7 @@ use smallvec::SmallVec;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussChebyshevFirstKind {
-    node_weight_pairs: SmallVec<[(Node, Weight); INLINE_SIZE]>,
+    node_weight_pairs: SmallVec<[(Node, Weight); NODE_WEIGHT_RULE_INLINE_SIZE]>,
 }
 
 impl GaussChebyshevFirstKind {
@@ -141,7 +141,7 @@ __impl_node_weight_rule! {GaussChebyshevFirstKind, GaussChebyshevFirstKindNodes,
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussChebyshevSecondKind {
-    node_weight_pairs: SmallVec<[(Node, Weight); INLINE_SIZE]>,
+    node_weight_pairs: SmallVec<[(Node, Weight); NODE_WEIGHT_RULE_INLINE_SIZE]>,
 }
 
 impl GaussChebyshevSecondKind {

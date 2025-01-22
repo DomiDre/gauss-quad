@@ -19,12 +19,12 @@ pub type Weight = f64;
 /// Set so that the total memory size of the inlined portion is less than 64 bytes,
 /// the cache line size of most modern CPUs.
 // Two 64 bit floats times     4    is 64 bytes.
-pub const INLINE_SIZE: usize = 4;
+pub const NODE_WEIGHT_RULE_INLINE_SIZE: usize = 4;
 
 /// The number of elements to store inline on the stack before spilling to the heap for a rule that has only nodes.
 // This can be twice as large as the `INLINE_SIZE` for a rule that has both nodes and weights, since each
 // element is half the size.
-pub const NODE_RULE_INLINE_SIZE: usize = 2 * INLINE_SIZE;
+pub const NODE_RULE_INLINE_SIZE: usize = 2 * NODE_WEIGHT_RULE_INLINE_SIZE;
 
 /// This macro implements the data access API for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Vec<(Node, Weight)>`.
@@ -116,7 +116,7 @@ macro_rules! __impl_node_weight_rule {
             /// Can be used internally to pass the `SmallVec` to another struct without cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub(crate) fn into_smallvec_of_node_weight_pairs(self) -> SmallVec<[($crate::Node, $crate::Weight); $crate::data_api::INLINE_SIZE]> {
+            pub(crate) fn into_smallvec_of_node_weight_pairs(self) -> SmallVec<[($crate::Node, $crate::Weight); $crate::data_api::NODE_WEIGHT_RULE_INLINE_SIZE]> {
                 self.node_weight_pairs
             }
 
@@ -235,13 +235,13 @@ macro_rules! __impl_node_weight_rule {
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_into_iter(
-            ::smallvec::IntoIter<[($crate::Node, $crate::Weight); $crate::data_api::INLINE_SIZE]>
+            ::smallvec::IntoIter<[($crate::Node, $crate::Weight); $crate::data_api::NODE_WEIGHT_RULE_INLINE_SIZE]>
         );
 
         impl $quadrature_rule_into_iter {
             #[inline]
             const fn new(
-                node_weight_pairs: ::smallvec::IntoIter<[($crate::Node, $crate::Weight); $crate::data_api::INLINE_SIZE]>,
+                node_weight_pairs: ::smallvec::IntoIter<[($crate::Node, $crate::Weight); $crate::data_api::NODE_WEIGHT_RULE_INLINE_SIZE]>,
             ) -> Self {
                 Self(node_weight_pairs)
             }
@@ -483,7 +483,7 @@ mod tests {
     #[derive(Debug, Clone, PartialEq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct MockQuadrature {
-        node_weight_pairs: SmallVec<[(Node, Weight); INLINE_SIZE]>,
+        node_weight_pairs: SmallVec<[(Node, Weight); NODE_WEIGHT_RULE_INLINE_SIZE]>,
     }
 
     #[derive(Debug)]
