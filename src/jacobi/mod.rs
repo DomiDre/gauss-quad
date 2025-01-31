@@ -70,10 +70,10 @@ impl GaussJacobi {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2, and/or if `alpha` and/or `beta` are smaller than or equal to -1.
+    /// Returns an error if `deg` is 0, and/or if `alpha` and/or `beta` are smaller than or equal to -1.
     pub fn new(deg: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
         match (
-            deg >= 2,
+            deg > 0,
             (alpha.is_finite() && alpha > -1.0),
             (beta.is_finite() && beta > -1.0),
         ) {
@@ -91,7 +91,7 @@ impl GaussJacobi {
         // Delegate the computation of nodes and weights when they have special values
         // that are equivalent to other rules that have faster implementations.
         //
-        // UNWRAP: We have already verified that the degree is 2 or larger above.
+        // UNWRAP: We have already verified that the degree is 1 or larger above.
         // Since that is the only possible error cause for these quadrature rules
         // this code can not fail, so we just `unwrap` the result.
         match (alpha, beta) {
@@ -213,7 +213,7 @@ impl GaussJacobi {
 
 __impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
-/// The error returned by [`GaussJacobi::new`] if given a degree, `deg`, less than 2
+/// The error returned by [`GaussJacobi::new`] if given a degree, `deg`, of 0
 /// and/or an `alpha` and/or `beta` less than or equal to -1.
 #[derive(Debug)]
 pub struct GaussJacobiError {
@@ -249,7 +249,7 @@ impl GaussJacobiError {
 use core::fmt;
 impl fmt::Display for GaussJacobiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        const DEGREE_LIMIT: &str = "must be at least 2";
+        const DEGREE_LIMIT: &str = "must be at least 1";
         const EXPONENT_LIMIT: &str = "must be finite and larger than -1.0";
         match self.reason() {
             GaussJacobiErrorReason::Degree => write!(f, "degree {DEGREE_LIMIT}"),
@@ -313,7 +313,7 @@ impl From<GaussChebyshevSecondKind> for GaussJacobi {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussJacobiErrorReason {
-    /// The degree was less than 2.
+    /// The degree was less than 1.
     Degree,
     /// The `alpha` exponent was less than or equal to -1.
     Alpha,
@@ -321,11 +321,11 @@ pub enum GaussJacobiErrorReason {
     Beta,
     /// Both the `alpha` and `beta` exponents were less than or equal to -1.
     AlphaBeta,
-    /// The degree was less than 2 and the `alpha` exponent was less than or equal to -1.
+    /// The degree was less than 1 and the `alpha` exponent was less than or equal to -1.
     DegreeAlpha,
-    /// The degree was less than 2 and the `beta` exponent was less than or equal to -1.
+    /// The degree was less than 1 and the `beta` exponent was less than or equal to -1.
     DegreeBeta,
-    /// The degree was less than 2 and both the `alpha` and `beta` exponents were less than or equal to -1.
+    /// The degree was less than 1 and both the `alpha` and `beta` exponents were less than or equal to -1.
     DegreeAlphaBeta,
 }
 
@@ -363,6 +363,11 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use super::*;
+
+    #[test]
+    fn check_degree_1() {
+        todo!("Come up with good tests for this");
+    }
 
     #[test]
     fn sanity_check_chebyshev_delegation() {
@@ -664,11 +669,7 @@ mod tests {
             .is_err_and(|x| x.reason() == GaussJacobiErrorReason::Degree));
         assert_eq!(
             format!("{}", jacobi_rule.err().unwrap()),
-            "degree must be at least 2"
-        );
-        assert_eq!(
-            GaussJacobi::new(1, 0.5, 0.5).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Degree)
+            "degree must be at least 1"
         );
 
         let jacobi_rule = GaussJacobi::new(0, -1.0, 0.5);
@@ -677,7 +678,7 @@ mod tests {
             .is_err_and(|x| x.reason() == GaussJacobiErrorReason::DegreeAlpha));
         assert_eq!(
             format!("{}", jacobi_rule.err().unwrap()),
-            "degree must be at least 2 and alpha must be finite and larger than -1.0"
+            "degree must be at least 1 and alpha must be finite and larger than -1.0"
         );
         assert_eq!(
             GaussJacobi::new(0, -2.0, 0.5).map_err(|e| e.reason()),
@@ -685,7 +686,7 @@ mod tests {
         );
         assert_eq!(
             GaussJacobi::new(1, -1.0, 0.5).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::DegreeAlpha)
+            Err(GaussJacobiErrorReason::Alpha)
         );
 
         let jacobi_rule = GaussJacobi::new(0, 0.5, -1.0);
@@ -694,7 +695,7 @@ mod tests {
             .is_err_and(|x| x.reason() == GaussJacobiErrorReason::DegreeBeta));
         assert_eq!(
             format!("{}", jacobi_rule.err().unwrap()),
-            "degree must be at least 2 and beta must be finite and larger than -1.0"
+            "degree must be at least 1 and beta must be finite and larger than -1.0"
         );
         assert_eq!(
             GaussJacobi::new(3, -2.0, -2.0).map_err(|e| e.reason()),
@@ -711,7 +712,7 @@ mod tests {
             .is_err_and(|x| x.reason() == GaussJacobiErrorReason::DegreeAlphaBeta));
         assert_eq!(
             format!("{}", jacobi_rule.err().unwrap()),
-            "degree must be at least 2, alpha and beta must be finite and larger than -1.0"
+            "degree must be at least 1, alpha and beta must be finite and larger than -1.0"
         );
         assert_eq!(
             GaussJacobi::new(3, -2.0, -1.0).map_err(|e| e.reason()),
@@ -726,10 +727,6 @@ mod tests {
             GaussJacobi::new(0, 0.5, 0.5).map_err(|e| e.reason()),
             Err(GaussJacobiErrorReason::Degree)
         );
-        assert_eq!(
-            GaussJacobi::new(1, 0.5, 0.5).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Degree)
-        );
 
         assert_eq!(
             GaussJacobi::new(0, -1.0, 0.5).map_err(|e| e.reason()),
@@ -741,11 +738,11 @@ mod tests {
         );
         assert_eq!(
             GaussJacobi::new(1, -1.0, 0.5).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::DegreeAlpha)
+            Err(GaussJacobiErrorReason::Alpha)
         );
         assert_eq!(
             GaussJacobi::new(1, -2.0, 0.5).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::DegreeAlpha)
+            Err(GaussJacobiErrorReason::Alpha)
         );
 
         assert_eq!(
@@ -758,11 +755,11 @@ mod tests {
         );
         assert_eq!(
             GaussJacobi::new(1, 0.5, -1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::DegreeBeta)
+            Err(GaussJacobiErrorReason::Beta)
         );
         assert_eq!(
             GaussJacobi::new(1, 0.5, -2.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::DegreeBeta)
+            Err(GaussJacobiErrorReason::Beta)
         );
 
         assert_eq!(
@@ -775,11 +772,11 @@ mod tests {
         );
         assert_eq!(
             GaussJacobi::new(1, -1.0, -1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+            Err(GaussJacobiErrorReason::AlphaBeta)
         );
         assert_eq!(
             GaussJacobi::new(1, -2.0, -2.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+            Err(GaussJacobiErrorReason::AlphaBeta)
         );
         assert_eq!(
             GaussJacobi::new(0, -1.0, -2.0).map_err(|e| e.reason()),
@@ -791,11 +788,11 @@ mod tests {
         );
         assert_eq!(
             GaussJacobi::new(1, -1.0, -2.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+            Err(GaussJacobiErrorReason::AlphaBeta)
         );
         assert_eq!(
             GaussJacobi::new(1, -2.0, -1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::DegreeAlphaBeta)
+            Err(GaussJacobiErrorReason::AlphaBeta)
         );
     }
 
