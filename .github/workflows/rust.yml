@@ -79,3 +79,14 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           fail_ci_if_error: true
+
+  beta_test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@beta
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-all-features 
+    - name: Test the crate on Rust beta
+      run: cargo test-all-features
