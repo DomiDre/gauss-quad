@@ -71,9 +71,9 @@ impl GaussHermite {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2.
+    /// Returns an error if `deg` is 0.
     pub fn new(deg: usize) -> Result<Self, GaussHermiteError> {
-        if deg < 2 {
+        if deg == 0 {
             return Err(GaussHermiteError::new());
         }
         let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
@@ -137,7 +137,7 @@ impl GaussHermite {
 
 __impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
 
-/// The error returned by [`GaussHermite::new`] if it is given a degree of 0 or 1.
+/// The error returned by [`GaussHermite::new`] if it is given a degree of 0.
 #[derive(Debug)]
 pub struct GaussHermiteError(Backtrace);
 
@@ -146,7 +146,7 @@ impl fmt::Display for GaussHermiteError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "the degree of the Gauss-Hermite quadrature rule must be at least 2"
+            "the degree of the Gauss-Hermite quadrature rule must be at least 1"
         )
     }
 }
@@ -175,6 +175,15 @@ mod tests {
     use super::*;
 
     #[test]
+    fn check_degree_1() {
+        let rule = GaussHermite::new(1).unwrap();
+        assert_eq!(rule.as_node_weight_pairs(), &[(0.0, PI.sqrt())]);
+        for constant in (1..100).step_by(10) {
+            assert_abs_diff_eq!(rule.integrate(|x| f64::from(constant) * x), 0.0);
+        }
+    }
+
+    #[test]
     fn golub_welsch_3() {
         let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3).unwrap().into_iter().unzip();
         let x_should = [1.224_744_871_391_589, 0.0, -1.224_744_871_391_589];
@@ -197,10 +206,8 @@ mod tests {
         assert!(hermite_rule.is_err());
         assert_eq!(
             format!("{}", hermite_rule.err().unwrap()),
-            "the degree of the Gauss-Hermite quadrature rule must be at least 2"
+            "the degree of the Gauss-Hermite quadrature rule must be at least 1"
         );
-
-        assert!(GaussHermite::new(1).is_err());
     }
 
     #[test]
