@@ -81,9 +81,9 @@ impl GaussLegendre {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2.
+    /// Returns an error if `deg` is 0.
     pub fn new(deg: usize) -> Result<Self, GaussLegendreError> {
-        if deg < 2 {
+        if deg == 0 {
             return Err(GaussLegendreError::new());
         }
 
@@ -99,9 +99,9 @@ impl GaussLegendre {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2.
+    /// Returns an error if `deg` is 0.
     pub fn par_new(deg: usize) -> Result<Self, GaussLegendreError> {
-        if deg < 2 {
+        if deg == 0 {
             return Err(GaussLegendreError::new());
         }
 
@@ -175,7 +175,7 @@ impl GaussLegendre {
 
 __impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
 
-/// The error returned by [`GaussLegendre::new`] if it's given a degree of 0 or 1.
+/// The error returned by [`GaussLegendre::new`] if it's given a degree of 0.
 #[derive(Debug)]
 pub struct GaussLegendreError(Backtrace);
 
@@ -184,7 +184,7 @@ impl fmt::Display for GaussLegendreError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
+            "the degree of the Gauss-Legendre quadrature rule must be at least 1"
         )
     }
 }
@@ -211,6 +211,13 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use super::*;
+
+    #[test]
+    fn check_degree_1() {
+        let rule = GaussLegendre::new(1).unwrap();
+        assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), 0.5);
+        assert_abs_diff_eq!(rule.integrate(-1.0, 2.0, |x| 2.0 * x), 3.0, epsilon = 1e-15);
+    }
 
     #[test]
     fn check_degree_3() {
@@ -254,14 +261,7 @@ mod tests {
         assert!(legendre_rule.is_err());
         assert_eq!(
             format!("{}", legendre_rule.err().unwrap()),
-            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
-        );
-
-        let legendre_rule = GaussLegendre::new(1);
-        assert!(legendre_rule.is_err());
-        assert_eq!(
-            format!("{}", legendre_rule.err().unwrap()),
-            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
+            "the degree of the Gauss-Legendre quadrature rule must be at least 1"
         );
     }
 
