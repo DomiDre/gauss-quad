@@ -37,9 +37,9 @@ impl GaussChebyshevFirstKind {
     ///
     /// # Errors
     ///
-    /// Returns an error if `degree` is less than 2.
+    /// Returns an error if `degree` is 0.
     pub fn new(degree: usize) -> Result<Self, GaussChebyshevError> {
-        if degree < 2 {
+        if degree == 0 {
             return Err(GaussChebyshevError::new());
         }
 
@@ -63,7 +63,7 @@ impl GaussChebyshevFirstKind {
     #[cfg(feature = "rayon")]
     /// Same as [`new`](Self::new) but runs in parallel.
     pub fn par_new(degree: usize) -> Result<Self, GaussChebyshevError> {
-        if degree < 2 {
+        if degree == 0 {
             return Err(GaussChebyshevError::new());
         }
 
@@ -146,9 +146,9 @@ impl GaussChebyshevSecondKind {
     ///
     /// # Errors
     ///
-    /// Returns an error if `degree` is less than 2.
+    /// Returns an error if `degree` is 0.
     pub fn new(degree: usize) -> Result<Self, GaussChebyshevError> {
-        if degree < 2 {
+        if degree == 0 {
             return Err(GaussChebyshevError::new());
         }
 
@@ -171,7 +171,7 @@ impl GaussChebyshevSecondKind {
     #[cfg(feature = "rayon")]
     /// Same as [`new`](Self::new) but runs in parallel.
     pub fn par_new(degree: usize) -> Result<Self, GaussChebyshevError> {
-        if degree < 2 {
+        if degree == 0 {
             return Err(GaussChebyshevError::new());
         }
 
@@ -242,7 +242,7 @@ impl GaussChebyshevSecondKind {
 
 __impl_node_weight_rule! {GaussChebyshevSecondKind, GaussChebyshevSecondKindNodes, GaussChebyshevSecondKindWeights, GaussChebyshevSecondKindIter, GaussChebyshevSecondKindIntoIter}
 
-/// The error returned when attempting to create a [`GaussChebyshevFirstKind`] or [`GaussChebyshevSecondKind`] struct with a degree less than 2.
+/// The error returned when attempting to create a [`GaussChebyshevFirstKind`] or [`GaussChebyshevSecondKind`] struct with a degree of 0.
 #[derive(Debug)]
 pub struct GaussChebyshevError(Backtrace);
 
@@ -261,7 +261,7 @@ impl GaussChebyshevError {
 
 impl fmt::Display for GaussChebyshevError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "the degree must be at least 2")
+        write!(f, "the degree must be at least 1")
     }
 }
 
@@ -277,8 +277,27 @@ mod test {
 
     #[test]
     fn check_error() {
-        assert!(GaussChebyshevFirstKind::new(1).is_err());
-        assert!(GaussChebyshevSecondKind::new(1).is_err());
+        assert!(GaussChebyshevFirstKind::new(0).is_err());
+        assert!(GaussChebyshevSecondKind::new(0).is_err());
+    }
+
+    #[test]
+    fn check_degree_1() {
+        let rule = GaussChebyshevFirstKind::new(1).unwrap();
+
+        assert_abs_diff_eq!(*rule.nodes().next().unwrap(), 0.0);
+        assert_abs_diff_eq!(*rule.weights().next().unwrap(), PI);
+
+        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), 0.0);
+
+        let rule = GaussChebyshevSecondKind::new(1).unwrap();
+
+        assert_abs_diff_eq!(*rule.nodes().next().unwrap(), 0.0);
+        assert_abs_diff_eq!(*rule.weights().next().unwrap(), PI / 2.0);
+
+        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), 0.0);
+
+        todo!("Make tests in other intervals")
     }
 
     #[test]
