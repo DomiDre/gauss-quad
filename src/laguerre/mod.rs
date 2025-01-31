@@ -69,9 +69,9 @@ impl GaussLaguerre {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2, or if `alpha` is smaller than -1.
+    /// Returns an error if `deg` is 0, or if `alpha` is smaller than -1.
     pub fn new(deg: usize, alpha: f64) -> Result<Self, GaussLaguerreError> {
-        match (deg >= 2, (alpha.is_finite() && alpha > -1.0)) {
+        match (deg > 0, (alpha.is_finite() && alpha > -1.0)) {
             (true, true) => Ok(()),
             (false, true) => Err(GaussLaguerreErrorReason::Degree),
             (true, false) => Err(GaussLaguerreErrorReason::Alpha),
@@ -158,7 +158,7 @@ impl GaussLaguerre {
 
 __impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
 
-/// The error returned by [`GaussLaguerre::new`] if given a degree, `deg`, less than 2 and/or an `alpha` of -1 or less.
+/// The error returned by [`GaussLaguerre::new`] if given a degree, `deg`, of 0 and/or an `alpha` of -1 or less.
 #[derive(Debug)]
 pub struct GaussLaguerreError {
     reason: GaussLaguerreErrorReason,
@@ -168,7 +168,7 @@ pub struct GaussLaguerreError {
 use core::fmt;
 impl fmt::Display for GaussLaguerreError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        const DEGREE_LIMIT: &str = "degree must be at least 2";
+        const DEGREE_LIMIT: &str = "degree must be at least 1";
         const ALPHA_LIMIT: &str = "alpha must be larger than -1.0";
         match self.reason() {
             GaussLaguerreErrorReason::Degree => write!(f, "{DEGREE_LIMIT}"),
@@ -209,11 +209,11 @@ impl std::error::Error for GaussLaguerreError {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GaussLaguerreErrorReason {
-    /// The given degree was less than 2.
+    /// The given degree 0.
     Degree,
     /// The given `alpha` exponent was less than or equal to -1.
     Alpha,
-    /// The given degree was less than 2 and the given `alpha` exponent was less than or equal to -1.
+    /// The given degree was 0 and the given `alpha` exponent was less than or equal to -1.
     DegreeAlpha,
 }
 
@@ -236,6 +236,15 @@ mod tests {
     use super::*;
     use approx::assert_abs_diff_eq;
     use core::f64::consts::PI;
+
+    #[test]
+    fn check_degree_1() {
+        let rule = GaussLaguerre::new(1, 0.0).unwrap();
+
+        for constant in (0..100).step_by(10).map(f64::from) {
+            assert_abs_diff_eq!(rule.integrate(|x| constant * x), constant, epsilon = 1e-13);
+        }
+    }
 
     #[test]
     fn golub_welsch_2_alpha_5() {
@@ -326,15 +335,10 @@ mod tests {
             .is_err_and(|x| x.reason() == GaussLaguerreErrorReason::Degree));
         assert_eq!(
             format!("{}", laguerre_rule.err().unwrap()),
-            "degree must be at least 2"
+            "degree must be at least 1"
         );
         assert_eq!(
             GaussLaguerre::new(0, -0.25).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::Degree)
-        );
-
-        assert_eq!(
-            GaussLaguerre::new(1, -0.25).map_err(|e| e.reason()),
             Err(GaussLaguerreErrorReason::Degree)
         );
 
@@ -362,7 +366,7 @@ mod tests {
             .is_err_and(|x| x.reason() == GaussLaguerreErrorReason::DegreeAlpha));
         assert_eq!(
             format!("{}", laguerre_rule.err().unwrap()),
-            "degree must be at least 2, and alpha must be larger than -1.0"
+            "degree must be at least 1, and alpha must be larger than -1.0"
         );
 
         assert_eq!(
@@ -376,11 +380,11 @@ mod tests {
         );
         assert_eq!(
             GaussLaguerre::new(1, -1.0).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::DegreeAlpha)
+            Err(GaussLaguerreErrorReason::Alpha)
         );
         assert_eq!(
             GaussLaguerre::new(1, -2.0).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::DegreeAlpha)
+            Err(GaussLaguerreErrorReason::Alpha)
         );
     }
 
