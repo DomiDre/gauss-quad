@@ -290,6 +290,10 @@ mod test {
 
         assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), 0.0);
 
+        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x + 1.0), PI);
+
+        assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 4.0);
+
         let rule = GaussChebyshevSecondKind::new(1).unwrap();
 
         assert_abs_diff_eq!(*rule.nodes().next().unwrap(), 0.0);
@@ -297,7 +301,7 @@ mod test {
 
         assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), 0.0);
 
-        todo!("Make tests in other intervals")
+        assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 8.0);
     }
 
     #[test]
