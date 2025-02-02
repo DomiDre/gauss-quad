@@ -364,9 +364,28 @@ mod tests {
 
     use super::*;
 
+    use core::f64::consts::PI;
+
     #[test]
     fn check_degree_1() {
-        todo!("Come up with good tests for this");
+        let rule = GaussJacobi::new(1, 0.0, 0.0).unwrap();
+
+        assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), 0.5);
+
+        let rule = GaussJacobi::new(1, -0.5, -0.5).unwrap();
+
+        assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 4.0);
+
+        let rule = GaussJacobi::new(1, 0.5, 0.5).unwrap();
+
+        assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 8.0);
+
+        let rule = GaussJacobi::new(1, -1.0 / 2.0, 1.0 / 2.0).unwrap();
+
+        // Calculated with Wolfram Mathematica
+        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), PI / 2.0);
+
+        todo!("Add more tests of other intervals");
     }
 
     #[test]
