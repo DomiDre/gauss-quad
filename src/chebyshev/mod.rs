@@ -292,6 +292,7 @@ mod test {
 
         assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x + 1.0), PI);
 
+        // Calculated with wolfram alpha
         assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 4.0);
 
         let rule = GaussChebyshevSecondKind::new(1).unwrap();
@@ -301,6 +302,7 @@ mod test {
 
         assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), 0.0);
 
+        // Calculated with wolfram alpha
         assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 8.0);
     }
 
