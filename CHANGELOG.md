@@ -1,6 +1,6 @@
 This document contains all changes to the crate since version 0.1.8.
 
-# Unreleased (0.3.0)
+# 0.3.0 (unreleased)
 
 - Made all quadrature rules store their nodes 
  sorted in ascending order. 
