@@ -3,7 +3,9 @@ This document contains all changes to the crate since version 0.1.8.
 # 0.3.0 (unreleased)
 
 - Made all quadrature rules store their nodes sorted in ascending order.
- This means that all functions that return some view of the nodes (and weights), e.g. a slice, `Vec`, or iterator, now return them in sorted order.
+ This means that all functions that return some view of the nodes (and weights) now return them in sorted order.
+ Examples of affected functions include `QuadratureRule::iter()`, `QuadratureRule::nodes()` and `QuadratureRule::into_node_weight_pairs()`.
+ 
 
 # 0.2.2
 
