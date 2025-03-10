@@ -10,6 +10,7 @@
 //! * [Gauss-Laguerre](https://en.wikipedia.org/wiki/Gauss%E2%80%93Laguerre_quadrature) (generalized)
 //! * [Gauss-Hermite](https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature)
 //! * [Gauss-Chebyshev](https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature)
+//! * [Trapezoid](https://en.wikipedia.org/wiki/Trapezoidal_rule)
 //! * [Midpoint](https://en.wikipedia.org/wiki/Riemann_sum#Midpoint_rule)
 //! * [Simpson](https://en.wikipedia.org/wiki/Simpson%27s_rule)
 //!
@@ -187,6 +188,7 @@ pub mod laguerre;
 pub mod legendre;
 pub mod midpoint;
 pub mod simpson;
+pub mod trapezoid;
 
 #[doc(inline)]
 pub use chebyshev::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
@@ -204,3 +206,5 @@ pub use legendre::GaussLegendre;
 pub use midpoint::Midpoint;
 #[doc(inline)]
 pub use simpson::Simpson;
+#[doc(inline)]
+pub use trapezoid::Trapezoid;
