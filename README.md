@@ -11,9 +11,9 @@ $$\int_a^b f(x) \mathrm{d}x \approx \sum_{i=1}^nw_if(x_i)$$
 
 using [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature).
 
-Here $f(x)$ is a user supplied function
-and $w_i$ is a weight that depends on which rule is used.
-This library can compute the weights, $w_i$, and nodes, $x_i$, for several different common quadrature rules.
+Here $f(x)$ is a user supplied function, $x_i$ are specific x-values called nodes,
+and $w_i$ are weights that depend on which rule is used.
+This library can compute the weights and nodes for several different common quadrature rules.
 Gaussian quadrature is interesting because a rule of degree n can exactly integrate
 all polynomials of degree 2n-1 or less while evaluating them at only n points.
 
