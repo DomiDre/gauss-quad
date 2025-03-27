@@ -5,14 +5,15 @@
 [![Build Status](https://github.com/domidre/gauss-quad/actions/workflows/rust.yml/badge.svg)](https://github.com/domidre/gauss-quad/actions/workflows/rust.yml)
 [![codecov](https://codecov.io/gh/DomiDre/gauss-quad/graph/badge.svg?token=YUP5Y77ER2)](https://codecov.io/gh/DomiDre/gauss-quad)
 
-The `gauss-quad` crate is a small library to calculate integrals of the type
+The `gauss-quad` crate is a small library to approximate integrals as
 
-$$\int_a^b f(x) w(x) \mathrm{d}x$$
+$$\int_a^b f(x) \mathrm{d}x \approx \sum_{i=1}^nw_if(x_i)$$
 
 using [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature).
 
 Here $f(x)$ is a user supplied function
-and $w(x)$ is a weight function that depends on which rule is used.
+and $w_i$ is a weight that depends on which rule is used.
+This library can compute the weights, $w_i$, and nodes, $x_i$, for several different common quadrature rules.
 Gaussian quadrature is interesting because a rule of degree n can exactly integrate
 all polynomials of degree 2n-1 or less while evaluating them at only n points.
 
