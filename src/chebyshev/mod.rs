@@ -213,9 +213,9 @@ impl GaussChebyshevSecondKind {
     /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), -PI / 16.0);
     /// # Ok::<(), GaussChebyshevError>(())
     /// ```
-    pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    pub fn integrate<F>(&self, a: f64, b: f64, mut integrand: F) -> f64
     where
-        F: Fn(f64) -> f64,
+        F: FnMut(f64) -> f64,
     {
         let result: f64 = self
             .node_weight_pairs
