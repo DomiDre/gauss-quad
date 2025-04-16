@@ -172,9 +172,9 @@ impl GaussJacobi {
     /// Perform quadrature of integrand from `a` to `b`. This will integrate  
     /// (1 - x)^`alpha` * (1 + x)^`beta` * `integrand`(x)  
     /// where `alpha` and `beta` were given in the call to [`new`](Self::new), and the integrand is transformed from the domain [a, b] to the domain [-1, 1].
-    pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    pub fn integrate<F>(&self, a: f64, b: f64, mut integrand: F) -> f64
     where
-        F: Fn(f64) -> f64,
+        F: FnMut(f64) -> f64,
     {
         let result: f64 = self
             .node_weight_pairs

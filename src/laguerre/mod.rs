@@ -123,9 +123,9 @@ impl GaussLaguerre {
     /// Perform quadrature of  
     /// x^`alpha` * e^(-x) * `integrand`(x)  
     /// over the domain `[0, ∞)`, where `alpha` was given in the call to [`new`](Self::new).
-    pub fn integrate<F>(&self, integrand: F) -> f64
+    pub fn integrate<F>(&self, mut integrand: F) -> f64
     where
-        F: Fn(f64) -> f64,
+        F: FnMut(f64) -> f64,
     {
         let result: f64 = self
             .node_weight_pairs
