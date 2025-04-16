@@ -76,9 +76,9 @@ impl Simpson {
     }
 
     /// Integrate over the domain [a, b].
-    pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    pub fn integrate<F>(&self, a: f64, b: f64, mut integrand: F) -> f64
     where
-        F: Fn(f64) -> f64,
+        F: FnMut(f64) -> f64,
     {
         let n = self.nodes.len() as f64;
 

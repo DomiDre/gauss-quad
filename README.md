@@ -5,16 +5,17 @@
 [![Build Status](https://github.com/domidre/gauss-quad/actions/workflows/rust.yml/badge.svg)](https://github.com/domidre/gauss-quad/actions/workflows/rust.yml)
 [![codecov](https://codecov.io/gh/DomiDre/gauss-quad/graph/badge.svg?token=YUP5Y77ER2)](https://codecov.io/gh/DomiDre/gauss-quad)
 
-The `gauss-quad` crate is a small library to calculate integrals of the type
+The `gauss-quad` crate is a small library to approximate integrals as
 
-$$\int_a^b f(x) w(x) \mathrm{d}x$$
+$$\int_a^b f(x) \mathrm{d}x \approx \sum_{i=1}^nw_if(x_i)$$
 
 using [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature).
 
-Here $f(x)$ is a user supplied function
-and $w(x)$ is a weight function that depends on which rule is used.
+Here $f(x)$ is a user supplied function, $x_i$ are specific x-values called nodes,
+and $w_i$ are weights.
+This library can compute the weights and nodes for several different common quadrature rules.
 Gaussian quadrature is interesting because a rule of degree n can exactly integrate
-all polynomials of degree 2n-1 or less.
+all polynomials of degree 2n-1 or less while evaluating them at only n points.
 
 To use the crate, the desired quadrature rule has to be included in the program, e.g. for a Gauss-Legendre rule
 
@@ -52,7 +53,7 @@ Then to calculate the integral of a function call
 let integral = quad.integrate(a, b, f(x));
 ```
 
-where `a` and `b` (both `f64`) are the integral bounds and `f(x)` is the integrand which implements the trait `Fn(f64) -> f64`.
+where `a` and `b` (both `f64`) are the integral bounds and `f(x)` is the integrand which implements the trait `FnMut(f64) -> f64`.
 For example to integrate a parabola from 0 to 1 one can use a lambda expression as integrand and call:
 
 ```rust

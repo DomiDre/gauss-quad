@@ -7,6 +7,9 @@ This document contains all changes to the crate since version 0.1.8.
  This affects the Gauss-Legendre, Gauss-Hermite and Gauss-Chebyshev rules.
  The affected functions are `QuadratureRule::iter()`, `QuadratureRule::into_iter()`, `QuadratureRule::nodes()`, `QuadratureRule::weights()`, `QuadratureRule::as_node_weight_pairs()` and `QuadratureRule::into_node_weight_pairs()`.
  
+# 0.2.3
+
+- Make the `QuadratureRule::integrate` functions take a `FnMut` instead of a `Fn`.
 
 # 0.2.2
 
