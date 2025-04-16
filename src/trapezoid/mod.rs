@@ -57,7 +57,6 @@ impl Trapezoid {
     /// let rule = Trapezoid::new(1000)?;
     ///
     /// assert_abs_diff_eq!(rule.integrate(1.0, 2.0, |x| x * x), 7.0 / 3.0, epsilon = 1e-6);
-    ///
     /// # Ok::<(), TrapezoidError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
