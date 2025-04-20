@@ -6,6 +6,9 @@ This document contains all changes to the crate since version 0.1.8.
 
 - Make the `QuadratureRule::integrate` functions take a `FnMut` instead of a `Fn`.
 - Documentation improvements.
+- CI improvements.
+- Updated dependencies.
+- Implemented `Iterator::last` by calling `DoubleEndedIterator::next_back` where applicable.
 
 ## 0.2.2
 
