@@ -8,6 +8,7 @@ edition = "2021"
 description = "Library for applying Gaussian quadrature to integrate a function"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/domidre/gauss-quad"
+documentation = "https://docs.rs/gauss-quad/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
