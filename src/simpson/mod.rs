@@ -174,4 +174,11 @@ mod tests {
         let other_quad = Simpson::new(3).unwrap();
         assert_ne!(quad, other_quad);
     }
+
+    #[test]
+    fn verify_from_equivalence() {
+        let new = Simpson::new(100).unwrap();
+        let from = Simpson::from(NonZeroU32::new(100).unwrap());
+        assert_eq!(new, from);
+    }
 }

@@ -93,7 +93,7 @@ impl From<NonZeroU32> for Trapezoid {
 
 #[cfg(test)]
 mod test {
-    use super::Trapezoid;
+    use super::*;
     use approx::assert_abs_diff_eq;
 
     #[test]
@@ -114,5 +114,12 @@ mod test {
     #[test]
     fn check_failure() {
         assert!(Trapezoid::new(0).is_none());
+    }
+
+    #[test]
+    fn verify_from_equivalence() {
+        let new = Trapezoid::new(100).unwrap();
+        let from = Trapezoid::from(NonZeroU32::new(100).unwrap());
+        assert_eq!(new, from);
     }
 }

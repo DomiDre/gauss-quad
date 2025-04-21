@@ -178,4 +178,11 @@ mod tests {
             epsilon = 1e-4
         );
     }
+
+    #[test]
+    fn verify_from_equivalence() {
+        let new = Midpoint::new(100).unwrap();
+        let from = Midpoint::from(NonZeroU32::new(100).unwrap());
+        assert_eq!(new, from);
+    }
 }
