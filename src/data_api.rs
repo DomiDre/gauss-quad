@@ -355,7 +355,7 @@ macro_rules! __impl_node_rule {
 
             /// Returns the degree of the rule.
             #[inline]
-            pub fn degree(&self) -> ::core::num::NonZeroUsize {
+            pub fn degree(&self) -> ::core::num::NonZeroU32 {
                 self.degree
             }
         }
@@ -366,13 +366,13 @@ macro_rules! __impl_node_rule {
         #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_iter(
-            ::core::iter::Map<core::ops::Range<usize>, fn(usize) -> $crate::Node>,
+            ::core::iter::Map<core::ops::Range<u32>, fn(u32) -> $crate::Node>,
         );
 
         impl $quadrature_rule_iter {
             #[inline]
             const fn new(
-                iter: ::core::iter::Map<core::ops::Range<usize>, fn(usize) -> $crate::Node>,
+                iter: ::core::iter::Map<core::ops::Range<u32>, fn(u32) -> $crate::Node>,
             ) -> Self {
                 Self(iter)
             }
