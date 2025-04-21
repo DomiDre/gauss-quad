@@ -69,9 +69,9 @@ impl GaussLaguerre {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2, or if `alpha` is smaller than -1.
-    pub fn new(deg: usize, alpha: f64) -> Result<Self, GaussLaguerreError> {
-        match (deg >= 2, (alpha.is_finite() && alpha > -1.0)) {
+    /// Returns an error if `degree` is smaller than 2, or if `alpha` is smaller than -1.
+    pub fn new(degree: usize, alpha: f64) -> Result<Self, GaussLaguerreError> {
+        match (degree >= 2, (alpha.is_finite() && alpha > -1.0)) {
             (true, true) => Ok(()),
             (false, true) => Err(GaussLaguerreErrorReason::Degree),
             (true, false) => Err(GaussLaguerreErrorReason::Alpha),
@@ -79,11 +79,11 @@ impl GaussLaguerre {
         }
         .map_err(GaussLaguerreError::new)?;
 
-        let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
+        let mut companion_matrix = DMatrixf64::from_element(degree, degree, 0.0);
 
         let mut diag = alpha + 1.0;
         // Initialize symmetric companion matrix
-        for idx in 0..deg - 1 {
+        for idx in 0..degree - 1 {
             let idx_f64 = 1.0 + idx as f64;
             let off_diag = (idx_f64 * (idx_f64 + alpha)).sqrt();
             unsafe {
@@ -94,7 +94,7 @@ impl GaussLaguerre {
             diag += 2.0;
         }
         unsafe {
-            *companion_matrix.get_unchecked_mut((deg - 1, deg - 1)) = diag;
+            *companion_matrix.get_unchecked_mut((degree - 1, degree - 1)) = diag;
         }
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
@@ -112,7 +112,9 @@ impl GaussLaguerre {
                     .copied(),
             )
             .collect();
-        node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+
+        node_weight_pairs
+            .sort_unstable_by(|(node1, _), (node2, _)| node1.partial_cmp(node2).unwrap());
 
         Ok(GaussLaguerre {
             node_weight_pairs,
@@ -236,6 +238,16 @@ mod tests {
     use super::*;
     use approx::assert_abs_diff_eq;
     use core::f64::consts::PI;
+
+    #[test]
+    fn check_sorted() {
+        for deg in (2..100).step_by(10) {
+            for alpha in [-0.9, -0.5, 0.0, 0.5] {
+                let rule = GaussLaguerre::new(deg, alpha).unwrap();
+                assert!(rule.as_node_weight_pairs().is_sorted());
+            }
+        }
+    }
 
     #[test]
     fn golub_welsch_2_alpha_5() {

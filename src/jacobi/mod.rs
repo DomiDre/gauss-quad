@@ -70,10 +70,10 @@ impl GaussJacobi {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2, and/or if `alpha` and/or `beta` are smaller than or equal to -1.
-    pub fn new(deg: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
+    /// Returns an error if `degree` is smaller than 2, and/or if `alpha` and/or `beta` are smaller than or equal to -1.
+    pub fn new(degree: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
         match (
-            deg >= 2,
+            degree >= 2,
             (alpha.is_finite() && alpha > -1.0),
             (beta.is_finite() && beta > -1.0),
         ) {
@@ -95,17 +95,17 @@ impl GaussJacobi {
         // Since that is the only possible error cause for these quadrature rules
         // this code can not fail, so we just `unwrap` the result.
         match (alpha, beta) {
-            (0.0, 0.0) => return Ok(GaussLegendre::new(deg).unwrap().into()),
-            (-0.5, -0.5) => return Ok(GaussChebyshevFirstKind::new(deg).unwrap().into()),
-            (0.5, 0.5) => return Ok(GaussChebyshevSecondKind::new(deg).unwrap().into()),
+            (0.0, 0.0) => return Ok(GaussLegendre::new(degree).unwrap().into()),
+            (-0.5, -0.5) => return Ok(GaussChebyshevFirstKind::new(degree).unwrap().into()),
+            (0.5, 0.5) => return Ok(GaussChebyshevSecondKind::new(degree).unwrap().into()),
             _ => (),
         }
 
-        let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
+        let mut companion_matrix = DMatrixf64::from_element(degree, degree, 0.0);
 
         let mut diag = (beta - alpha) / (2.0 + beta + alpha);
         // Initialize symmetric companion matrix
-        for idx in 0..deg - 1 {
+        for idx in 0..degree - 1 {
             let idx_f64 = idx as f64;
             let idx_p1 = idx_f64 + 1.0;
             let denom_sum = 2.0 * idx_p1 + alpha + beta;
@@ -121,7 +121,7 @@ impl GaussJacobi {
             diag = (beta * beta - alpha * alpha) / (denom_sum * (denom_sum + 2.0));
         }
         unsafe {
-            *companion_matrix.get_unchecked_mut((deg - 1, deg - 1)) = diag;
+            *companion_matrix.get_unchecked_mut((degree - 1, degree - 1)) = diag;
         }
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
@@ -145,13 +145,14 @@ impl GaussJacobi {
             )
             .collect();
 
-        node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        node_weight_pairs
+            .sort_unstable_by(|(node1, _), (node2, _)| node1.partial_cmp(node2).unwrap());
 
         // TO FIX: implement correction
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
         // for now... manual correction seems to do the trick
-        if deg % 2 == 1 {
-            node_weight_pairs[deg / 2].0 = 0.0;
+        if degree % 2 == 1 {
+            node_weight_pairs[degree / 2].0 = 0.0;
         }
 
         Ok(Self {
@@ -274,13 +275,8 @@ impl std::error::Error for GaussJacobiError {}
 /// Gauss-Legendre quadrature is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.
 impl From<GaussLegendre> for GaussJacobi {
     fn from(value: GaussLegendre) -> Self {
-        let mut node_weight_pairs = value.into_node_weight_pairs();
-        // Gauss-Legendre nodes are generated in reverse sorted order.
-        // This corrects for that since Gauss-Jacobi nodes are currently always sorted
-        // in ascending order.
-        node_weight_pairs.reverse();
         Self {
-            node_weight_pairs,
+            node_weight_pairs: value.into_node_weight_pairs(),
             alpha: 0.0,
             beta: 0.0,
         }
@@ -365,6 +361,26 @@ mod tests {
     use super::*;
 
     #[test]
+    fn check_sort() {
+        // This contains values such that all the possible combinations of two of them
+        // contains the combinations
+        // (0, 0), which is Gauss-Legendre
+        // (-0.5, -0.5), which is Gauss-Chebyshev of the first kind
+        // (0.5, 0.5), which is Gauss-Chebyshev of the second kind
+        // and all the other combinations of the values are Gauss-Jacobi
+        const PARAMS: [f64; 4] = [-0.5, -0.25, 0.0, 0.5];
+
+        for deg in (2..100).step_by(20) {
+            for alpha in PARAMS {
+                for beta in PARAMS {
+                    let rule = GaussJacobi::new(deg, alpha, beta).unwrap();
+                    assert!(rule.as_node_weight_pairs().is_sorted());
+                }
+            }
+        }
+    }
+
+    #[test]
     fn sanity_check_chebyshev_delegation() {
         const DEG: usize = 200;
         let jrule = GaussJacobi::new(DEG, -0.5, -0.5).unwrap();
@@ -384,10 +400,7 @@ mod tests {
         let jrule = GaussJacobi::new(DEG, 0.0, 0.0).unwrap();
         let lrule = GaussLegendre::new(DEG).unwrap();
 
-        assert_eq!(
-            jrule.as_node_weight_pairs(),
-            lrule.into_iter().rev().collect::<Vec<_>>(),
-        );
+        assert_eq!(jrule.as_node_weight_pairs(), lrule.as_node_weight_pairs(),);
     }
 
     #[test]

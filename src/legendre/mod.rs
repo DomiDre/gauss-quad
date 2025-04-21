@@ -12,27 +12,25 @@
 //!
 //! ```
 //! use gauss_quad::legendre::GaussLegendre;
-//! # use gauss_quad::legendre::GaussLegendreError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussLegendre::new(10)?;
+//! let quad = GaussLegendre::new(10).unwrap();
 //! let integral = quad.integrate(-1.0, 1.0,
 //!     |x| 0.125 * (63.0 * x.powi(5) - 70.0 * x.powi(3) + 15.0 * x)
 //! );
 //! assert_abs_diff_eq!(integral, 0.0);
-//! # Ok::<(), GaussLegendreError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
-use rayon::prelude::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use rayon::prelude::{
+    IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
+};
 
 mod bogaert;
 
 use bogaert::NodeWeightPair;
 
 use crate::{Node, Weight, __impl_node_weight_rule};
-
-use std::backtrace::Backtrace;
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -41,29 +39,30 @@ use std::backtrace::Backtrace;
 /// # Examples
 ///
 /// Basic usage:
+///
 /// ```
-/// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+/// # use gauss_quad::legendre::GaussLegendre;
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Legendre rule with 2 nodes
-/// let quad = GaussLegendre::new(2)?;
+/// let quad = GaussLegendre::new(2).unwrap();
 ///
 /// // numerically integrate x^2 - 1/3 over the domain [0, 1]
 /// let integral = quad.integrate(0.0, 1.0, |x| x * x - 1.0 / 3.0);
 ///
 /// assert_abs_diff_eq!(integral, 0.0);
-/// # Ok::<(), GaussLegendreError>(())
 /// ```
+///
 /// The nodes and weights are computed in O(n) time,
 /// so large quadrature rules are feasible:
+///
 /// ```
-/// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+/// # use gauss_quad::legendre::GaussLegendre;
 /// # use approx::assert_abs_diff_eq;
-/// let quad = GaussLegendre::new(1_000_000)?;
+/// let quad = GaussLegendre::new(1_000_000).unwrap();
 ///
 /// let integral = quad.integrate(-3.0, 3.0, |x| x.sin());
 ///
-/// assert_abs_diff_eq!(integral, 0.0);
-/// # Ok::<(), GaussLegendreError>(())
+/// assert_abs_diff_eq!(integral, 0.0, epsilon = 8e-16);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -79,17 +78,16 @@ impl GaussLegendre {
     /// Uses the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969), which has linear time
     /// complexity.
     ///
-    /// # Errors
-    ///
-    /// Returns an error if `deg` is smaller than 2.
-    pub fn new(deg: usize) -> Result<Self, GaussLegendreError> {
-        if deg < 2 {
-            return Err(GaussLegendreError::new());
+    /// Returns `None` if `degree` is smaller than 2.
+    pub fn new(degree: usize) -> Option<Self> {
+        if degree < 2 {
+            return None;
         }
 
-        Ok(Self {
-            node_weight_pairs: (1..deg + 1)
-                .map(|k: usize| NodeWeightPair::new(deg, k).into_tuple())
+        Some(Self {
+            node_weight_pairs: (1..degree + 1)
+                .rev()
+                .map(|k: usize| NodeWeightPair::new(degree, k).into_tuple())
                 .collect(),
         })
     }
@@ -97,18 +95,17 @@ impl GaussLegendre {
     #[cfg(feature = "rayon")]
     /// Same as [`new`](GaussLegendre::new) but runs in parallel.
     ///
-    /// # Errors
-    ///
-    /// Returns an error if `deg` is smaller than 2.
-    pub fn par_new(deg: usize) -> Result<Self, GaussLegendreError> {
-        if deg < 2 {
-            return Err(GaussLegendreError::new());
+    /// Returns `None` if `degree` is smaller than 2.
+    pub fn par_new(degree: usize) -> Option<Self> {
+        if degree < 2 {
+            return None;
         }
 
-        Ok(Self {
-            node_weight_pairs: (1..deg + 1)
+        Some(Self {
+            node_weight_pairs: (1..degree + 1)
                 .into_par_iter()
-                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+                .rev()
+                .map(|k| NodeWeightPair::new(degree, k).into_tuple())
                 .collect(),
         })
     }
@@ -127,13 +124,11 @@ impl GaussLegendre {
     ///
     /// Basic usage
     /// ```
-    /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+    /// # use gauss_quad::legendre::GaussLegendre;
     /// # use approx::assert_abs_diff_eq;
-    /// let glq_rule = GaussLegendre::new(3)?;
+    /// let glq_rule = GaussLegendre::new(3).unwrap();
     ///
     /// assert_abs_diff_eq!(glq_rule.integrate(-1.0, 1.0, |x| x.powi(5)), 0.0);
-    ///
-    /// # Ok::<(), GaussLegendreError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, mut integrand: F) -> f64
     where
@@ -153,12 +148,11 @@ impl GaussLegendre {
     /// # Example
     ///
     /// ```
-    /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+    /// # use gauss_quad::legendre::GaussLegendre;
     /// # use approx::assert_abs_diff_eq;
-    /// let glq_rule = GaussLegendre::par_new(1_000_000)?;
+    /// let glq_rule = GaussLegendre::par_new(1_000_000).unwrap();
     ///
     /// assert_abs_diff_eq!(glq_rule.par_integrate(0.0, 1.0, |x| x.ln()), -1.0, epsilon = 1e-12);
-    /// # Ok::<(), GaussLegendreError>(())
     /// ```
     pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
@@ -175,37 +169,6 @@ impl GaussLegendre {
 
 __impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
 
-/// The error returned by [`GaussLegendre::new`] if it's given a degree of 0 or 1.
-#[derive(Debug)]
-pub struct GaussLegendreError(Backtrace);
-
-use core::fmt;
-impl fmt::Display for GaussLegendreError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
-        )
-    }
-}
-
-impl GaussLegendreError {
-    /// Calls [`Backtrace::capture`] and wraps the result in a `GaussLegendreError` struct.
-    fn new() -> Self {
-        Self(Backtrace::capture())
-    }
-
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
-    #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.0
-    }
-}
-
-impl std::error::Error for GaussLegendreError {}
-
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
@@ -213,10 +176,27 @@ mod tests {
     use super::*;
 
     #[test]
+    fn check_sorted() {
+        for deg in (2..200).step_by(10) {
+            let rule = GaussLegendre::new(deg).unwrap();
+            assert!(rule.as_node_weight_pairs().is_sorted());
+        }
+    }
+
+    #[cfg(feature = "rayon")]
+    #[test]
+    fn check_par_sorted_order() {
+        for deg in (2..100).step_by(10) {
+            let rule = GaussLegendre::par_new(deg).unwrap();
+            assert!(rule.as_node_weight_pairs().is_sorted());
+        }
+    }
+
+    #[test]
     fn check_degree_3() {
         let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).unwrap().into_iter().unzip();
 
-        let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
+        let x_should = [-0.7745966692414834, 0.0000000000000000, 0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];
         for (i, x_val) in x_should.iter().enumerate() {
             assert_abs_diff_eq!(*x_val, x[i]);
@@ -240,8 +220,8 @@ mod tests {
         #[allow(clippy::excessive_precision)]
         let w_should = [0.0244461801962625182113259,0.0244315690978500450548486,0.0244023556338495820932980,0.0243585572646906258532685,0.0243002001679718653234426,0.0242273192228152481200933,0.0241399579890192849977167,0.0240381686810240526375873,0.0239220121367034556724504,0.0237915577810034006387807,0.0236468835844476151436514,0.0234880760165359131530253,0.0233152299940627601224157,0.0231284488243870278792979,0.0229278441436868469204110,0.0227135358502364613097126,0.0224856520327449668718246,0.0222443288937997651046291,0.0219897106684604914341221,0.0217219495380520753752610,0.0214412055392084601371119,0.0211476464682213485370195,0.0208414477807511491135839,0.0205227924869600694322850,0.0201918710421300411806732,0.0198488812328308622199444,0.0194940280587066028230219,0.0191275236099509454865185,0.0187495869405447086509195,0.0183604439373313432212893,0.0179603271850086859401969,0.0175494758271177046487069,0.0171281354231113768306810,0.0166965578015892045890915,0.0162550009097851870516575,0.0158037286593993468589656,0.0153430107688651440859909,0.0148731226021473142523855,0.0143943450041668461768239,0.0139069641329519852442880,0.0134112712886163323144890,0.0129075627392673472204428,0.0123961395439509229688217,0.0118773073727402795758911,0.0113513763240804166932817,0.0108186607395030762476596,0.0102794790158321571332153,0.0097341534150068058635483,0.0091830098716608743344787,0.0086263777986167497049788,0.0080645898904860579729286,0.0074979819256347286876720,0.0069268925668988135634267,0.0063516631617071887872143,0.0057726375428656985893346,0.0051901618326763302050708,0.0046045842567029551182905,0.0040162549837386423131943,0.0034255260409102157743378,0.0028327514714579910952857,0.0022382884309626187436221,0.0016425030186690295387909,0.0010458126793403487793129,0.0004493809602920903763943];
 
-        for (i, x_val) in x_should.iter().rev().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 0.000_000_1);
+        for (i, &x_val) in x_should.iter().rev().enumerate() {
+            assert_abs_diff_eq!(-x_val, x[i], epsilon = 0.000_000_1);
         }
         for (i, w_val) in w_should.iter().rev().enumerate() {
             assert_abs_diff_eq!(*w_val, w[i], epsilon = 0.000_000_1);
@@ -251,18 +231,10 @@ mod tests {
     #[test]
     fn check_legendre_error() {
         let legendre_rule = GaussLegendre::new(0);
-        assert!(legendre_rule.is_err());
-        assert_eq!(
-            format!("{}", legendre_rule.err().unwrap()),
-            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
-        );
+        assert!(legendre_rule.is_none());
 
         let legendre_rule = GaussLegendre::new(1);
-        assert!(legendre_rule.is_err());
-        assert_eq!(
-            format!("{}", legendre_rule.err().unwrap()),
-            "the degree of the Gauss-Legendre quadrature rule must be at least 2"
-        );
+        assert!(legendre_rule.is_none());
     }
 
     #[test]
@@ -331,7 +303,7 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn check_legendre_error_rayon() {
-        assert!(GaussLegendre::par_new(0).is_err());
-        assert!(GaussLegendre::par_new(1).is_err());
+        assert!(GaussLegendre::par_new(0).is_none());
+        assert!(GaussLegendre::par_new(1).is_none());
     }
 }
