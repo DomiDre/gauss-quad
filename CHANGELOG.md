@@ -14,7 +14,7 @@ This document contains all changes to the crate since version 0.1.8.
 - Made the `Simpson` and `Midpoint` rules not allocate any memory. This removes all the functions on those types that access some view of the nodes.
 - Made the `new` functions that can only fail for a single reason return an `Option` instead of a `Result<Self, CustomError>`.
 - Made the quadrature rule structs that store a `Vec` of nodes and weights instead store a boxed slice. This makes them take up less space on the stack.
- This affects the `QuadratureRule::into_note_weight_pairs()` functions.
+ This affects the `QuadratureRule::into_node_weight_pairs()` functions.
 
 ### Other changes
 
