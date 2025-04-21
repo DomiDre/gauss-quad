@@ -112,17 +112,15 @@ impl Simpson {
 
         let (sum_over_interval_edges, sum_over_midpoints): (f64, f64) = rayon::join(
             || {
-                self.iter()
+                (1..self.degree().get())
                     .into_par_iter()
-                    .skip(1)
-                    .map(|node| integrand(a + node * h))
+                    .map(|node| integrand(a + node as f64 * h))
                     .sum::<f64>()
             },
             || {
-                self.iter()
+                (1..self.degree().get())
                     .into_par_iter()
-                    .skip(1)
-                    .map(|node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+                    .map(|node| integrand(a + (2.0 * node as f64 - 1.0) * h / 2.0))
                     .sum::<f64>()
             },
         );

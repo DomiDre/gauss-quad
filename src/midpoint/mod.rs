@@ -98,10 +98,9 @@ impl Midpoint {
     {
         let rect_width = (b - a) / self.degree().get() as f64;
 
-        let sum: f64 = self
-            .iter()
+        let sum: f64 = (0..self.degree().get())
             .into_par_iter()
-            .map(|node| integrand(a + rect_width * (0.5 + node)))
+            .map(|node| integrand(a + rect_width * (0.5 + node as f64)))
             .sum();
 
         sum * rect_width
