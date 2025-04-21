@@ -80,7 +80,7 @@ impl Midpoint {
     where
         F: FnMut(f64) -> f64,
     {
-        let rect_width = (b - a) / self.degree().get() as f64;
+        let rect_width = (b - a) / f64::from(self.degree().get());
 
         let sum: f64 = self
             .iter()
@@ -96,11 +96,11 @@ impl Midpoint {
     where
         F: Fn(f64) -> f64 + Sync,
     {
-        let rect_width = (b - a) / self.degree().get() as f64;
+        let rect_width = (b - a) / f64::from(self.degree().get());
 
         let sum: f64 = (0..self.degree().get())
             .into_par_iter()
-            .map(|node| integrand(a + rect_width * (0.5 + node as f64)))
+            .map(|node| integrand(a + rect_width * (0.5 + f64::from(node))))
             .sum();
 
         sum * rect_width

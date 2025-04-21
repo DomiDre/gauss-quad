@@ -104,7 +104,7 @@ impl Simpson {
     where
         F: Fn(f64) -> f64 + Sync,
     {
-        let n = self.degree().get() as f64;
+        let n = f64::from(self.degree().get());
 
         let h = (b - a) / n;
 
@@ -112,13 +112,13 @@ impl Simpson {
             || {
                 (1..self.degree().get())
                     .into_par_iter()
-                    .map(|node| integrand(a + node as f64 * h))
+                    .map(|node| integrand(a + f64::from(node) * h))
                     .sum::<f64>()
             },
             || {
                 (1..self.degree().get())
                     .into_par_iter()
-                    .map(|node| integrand(a + (2.0 * node as f64 - 1.0) * h / 2.0))
+                    .map(|node| integrand(a + (2.0 * f64::from(node) - 1.0) * h / 2.0))
                     .sum::<f64>()
             },
         );
