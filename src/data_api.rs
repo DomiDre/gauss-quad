@@ -47,7 +47,7 @@ macro_rules! __impl_node_weight_rule {
             type Item = ($crate::Node, $crate::Weight);
             #[inline]
             fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_into_iter::new(self.node_weight_pairs.into_iter())
+                $quadrature_rule_into_iter::new(self.node_weight_pairs.into_vec().into_iter())
             }
         }
 
@@ -96,7 +96,7 @@ macro_rules! __impl_node_weight_rule {
             /// This function just returns the underlying vector without any computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> ::std::vec::Vec<($crate::Node, $crate::Weight)> {
+            pub fn into_node_weight_pairs(self) -> ::std::boxed::Box<[($crate::Node, $crate::Weight)]> {
                 self.node_weight_pairs
             }
 
@@ -454,7 +454,7 @@ mod tests {
     #[derive(Debug, Clone, PartialEq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct MockQuadrature {
-        node_weight_pairs: Vec<(Node, Weight)>,
+        node_weight_pairs: Box<[(Node, Weight)]>,
     }
 
     #[derive(Debug)]
