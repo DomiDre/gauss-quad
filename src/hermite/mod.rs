@@ -47,7 +47,7 @@ use core::f64::consts::PI;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussHermite {
-    node_weight_pairs: Vec<(Node, Weight)>,
+    node_weight_pairs: Box<[(Node, Weight)]>,
 }
 
 impl GaussHermite {
@@ -84,8 +84,8 @@ impl GaussHermite {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        // zip together the iterator over nodes with the one over weights and collect into a Vec<(f64, f64)>
-        let mut node_weight_pairs: Vec<(Node, Weight)> = eigen
+        // zip together the iterator over nodes with the one over weights and collect into a Box<[(f64, f64)]>
+        let mut node_weight_pairs: Box<[(Node, Weight)]> = eigen
             .eigenvalues
             .iter()
             .copied()
