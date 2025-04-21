@@ -62,19 +62,19 @@ impl GaussChebyshevFirstKind {
     #[cfg(feature = "rayon")]
     /// Same as [`new`](Self::new) but runs in parallel.
     pub fn par_new(degree: usize) -> Option<Self> {
-        if degree >= 2 {
-            let n = degree as f64;
-
-            Some(Self {
-                node_weight_pairs: (1..degree + 1)
-                    .into_par_iter()
-                    .rev()
-                    .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
-                    .collect(),
-            })
-        } else {
-            None
+        if degree < 2 {
+            return None;
         }
+
+        let n = degree as f64;
+
+        Some(Self {
+            node_weight_pairs: (1..degree + 1)
+                .into_par_iter()
+                .rev()
+                .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
+                .collect(),
+        })
     }
 
     /// Returns the value of the integral of the given `integrand` in the inverval \[`a`, `b`\].
