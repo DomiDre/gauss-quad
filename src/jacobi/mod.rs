@@ -145,7 +145,8 @@ impl GaussJacobi {
             )
             .collect();
 
-        node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        node_weight_pairs
+            .sort_unstable_by(|(node1, _), (node2, _)| node1.partial_cmp(node2).unwrap());
 
         // TO FIX: implement correction
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
@@ -274,13 +275,8 @@ impl std::error::Error for GaussJacobiError {}
 /// Gauss-Legendre quadrature is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.
 impl From<GaussLegendre> for GaussJacobi {
     fn from(value: GaussLegendre) -> Self {
-        let mut node_weight_pairs = value.into_node_weight_pairs();
-        // Gauss-Legendre nodes are generated in reverse sorted order.
-        // This corrects for that since Gauss-Jacobi nodes are currently always sorted
-        // in ascending order.
-        node_weight_pairs.reverse();
         Self {
-            node_weight_pairs,
+            node_weight_pairs: value.into_node_weight_pairs(),
             alpha: 0.0,
             beta: 0.0,
         }
@@ -365,6 +361,26 @@ mod tests {
     use super::*;
 
     #[test]
+    fn check_sort() {
+        // This contains values such that all the possible combinations of two of them
+        // contains the combinations
+        // (0, 0), which is Gauss-Legendre
+        // (-0.5, -0.5), which is Gauss-Chebyshev of the first kind
+        // (0.5, 0.5), which is Gauss-Chebyshev of the second kind
+        // and all the other combinations of the values are Gauss-Jacobi
+        const PARAMS: [f64; 4] = [-0.5, -0.25, 0.0, 0.5];
+
+        for deg in (2..100).step_by(20) {
+            for alpha in PARAMS {
+                for beta in PARAMS {
+                    let rule = GaussJacobi::new(deg, alpha, beta).unwrap();
+                    assert!(rule.as_node_weight_pairs().is_sorted());
+                }
+            }
+        }
+    }
+
+    #[test]
     fn sanity_check_chebyshev_delegation() {
         const DEG: usize = 200;
         let jrule = GaussJacobi::new(DEG, -0.5, -0.5).unwrap();
@@ -384,10 +400,7 @@ mod tests {
         let jrule = GaussJacobi::new(DEG, 0.0, 0.0).unwrap();
         let lrule = GaussLegendre::new(DEG).unwrap();
 
-        assert_eq!(
-            jrule.as_node_weight_pairs(),
-            lrule.into_iter().rev().collect::<Vec<_>>(),
-        );
+        assert_eq!(jrule.as_node_weight_pairs(), lrule.as_node_weight_pairs(),);
     }
 
     #[test]

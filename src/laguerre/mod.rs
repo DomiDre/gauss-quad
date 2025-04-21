@@ -112,7 +112,9 @@ impl GaussLaguerre {
                     .copied(),
             )
             .collect();
-        node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+
+        node_weight_pairs
+            .sort_unstable_by(|(node1, _), (node2, _)| node1.partial_cmp(node2).unwrap());
 
         Ok(GaussLaguerre {
             node_weight_pairs,
@@ -236,6 +238,16 @@ mod tests {
     use super::*;
     use approx::assert_abs_diff_eq;
     use core::f64::consts::PI;
+
+    #[test]
+    fn check_sorted() {
+        for deg in (2..100).step_by(10) {
+            for alpha in [-0.9, -0.5, 0.0, 0.5] {
+                let rule = GaussLaguerre::new(deg, alpha).unwrap();
+                assert!(rule.as_node_weight_pairs().is_sorted());
+            }
+        }
+    }
 
     #[test]
     fn golub_welsch_2_alpha_5() {

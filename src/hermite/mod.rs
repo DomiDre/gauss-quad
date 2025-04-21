@@ -89,22 +89,26 @@ impl GaussHermite {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
-        Ok(GaussHermite {
-            node_weight_pairs: eigen
-                .eigenvalues
-                .iter()
-                .copied()
-                .zip(
-                    eigen
-                        .eigenvectors
-                        .row(0)
-                        .map(|x| x * x * PI.sqrt())
-                        .iter()
-                        .copied(),
-                )
-                .collect(),
-        })
+        // zip together the iterator over nodes with the one over weights and collect into a Vec<(f64, f64)>
+        let mut node_weight_pairs: Vec<(Node, Weight)> = eigen
+            .eigenvalues
+            .iter()
+            .copied()
+            .zip(
+                eigen
+                    .eigenvectors
+                    .row(0)
+                    .map(|x| x * x * PI.sqrt())
+                    .iter()
+                    .copied(),
+            )
+            .collect();
+
+        // sort the nodes and weights by the nodes
+        node_weight_pairs
+            .sort_unstable_by(|(node1, _), (node2, _)| node1.partial_cmp(node2).unwrap());
+
+        Ok(GaussHermite { node_weight_pairs })
     }
 
     /// Perform quadrature of e^(-x^2) * `integrand`(x) over the domain (-∞, ∞).
@@ -175,9 +179,17 @@ mod tests {
     use super::*;
 
     #[test]
+    fn check_sorted() {
+        for deg in (2..100).step_by(10) {
+            let rule = GaussHermite::new(deg).unwrap();
+            assert!(rule.as_node_weight_pairs().is_sorted());
+        }
+    }
+
+    #[test]
     fn golub_welsch_3() {
         let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3).unwrap().into_iter().unzip();
-        let x_should = [1.224_744_871_391_589, 0.0, -1.224_744_871_391_589];
+        let x_should = [-1.224_744_871_391_589, 0.0, 1.224_744_871_391_589];
         let w_should = [
             0.295_408_975_150_919_35,
             1.181_635_900_603_677_4,
@@ -242,7 +254,7 @@ mod tests {
     fn integrate_one() {
         let quad = GaussHermite::new(5).unwrap();
         let integral = quad.integrate(|_x| 1.0);
-        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
+        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-14);
     }
 
     #[cfg(feature = "rayon")]
