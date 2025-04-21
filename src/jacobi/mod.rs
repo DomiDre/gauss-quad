@@ -70,10 +70,10 @@ impl GaussJacobi {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2, and/or if `alpha` and/or `beta` are smaller than or equal to -1.
-    pub fn new(deg: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
+    /// Returns an error if `degree` is smaller than 2, and/or if `alpha` and/or `beta` are smaller than or equal to -1.
+    pub fn new(degree: usize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
         match (
-            deg >= 2,
+            degree >= 2,
             (alpha.is_finite() && alpha > -1.0),
             (beta.is_finite() && beta > -1.0),
         ) {
@@ -95,17 +95,17 @@ impl GaussJacobi {
         // Since that is the only possible error cause for these quadrature rules
         // this code can not fail, so we just `unwrap` the result.
         match (alpha, beta) {
-            (0.0, 0.0) => return Ok(GaussLegendre::new(deg).unwrap().into()),
-            (-0.5, -0.5) => return Ok(GaussChebyshevFirstKind::new(deg).unwrap().into()),
-            (0.5, 0.5) => return Ok(GaussChebyshevSecondKind::new(deg).unwrap().into()),
+            (0.0, 0.0) => return Ok(GaussLegendre::new(degree).unwrap().into()),
+            (-0.5, -0.5) => return Ok(GaussChebyshevFirstKind::new(degree).unwrap().into()),
+            (0.5, 0.5) => return Ok(GaussChebyshevSecondKind::new(degree).unwrap().into()),
             _ => (),
         }
 
-        let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
+        let mut companion_matrix = DMatrixf64::from_element(degree, degree, 0.0);
 
         let mut diag = (beta - alpha) / (2.0 + beta + alpha);
         // Initialize symmetric companion matrix
-        for idx in 0..deg - 1 {
+        for idx in 0..degree - 1 {
             let idx_f64 = idx as f64;
             let idx_p1 = idx_f64 + 1.0;
             let denom_sum = 2.0 * idx_p1 + alpha + beta;
@@ -121,7 +121,7 @@ impl GaussJacobi {
             diag = (beta * beta - alpha * alpha) / (denom_sum * (denom_sum + 2.0));
         }
         unsafe {
-            *companion_matrix.get_unchecked_mut((deg - 1, deg - 1)) = diag;
+            *companion_matrix.get_unchecked_mut((degree - 1, degree - 1)) = diag;
         }
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
@@ -151,8 +151,8 @@ impl GaussJacobi {
         // TO FIX: implement correction
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees
         // for now... manual correction seems to do the trick
-        if deg % 2 == 1 {
-            node_weight_pairs[deg / 2].0 = 0.0;
+        if degree % 2 == 1 {
+            node_weight_pairs[degree / 2].0 = 0.0;
         }
 
         Ok(Self {

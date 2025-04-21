@@ -66,14 +66,14 @@ impl GaussHermite {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2.
-    pub fn new(deg: usize) -> Option<Self> {
-        if deg < 2 {
+    /// Returns an error if `degree` is smaller than 2.
+    pub fn new(degree: usize) -> Option<Self> {
+        if degree < 2 {
             return None;
         }
-        let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
+        let mut companion_matrix = DMatrixf64::from_element(degree, degree, 0.0);
         // Initialize symmetric companion matrix
-        for idx in 0..deg - 1 {
+        for idx in 0..degree - 1 {
             let idx_f64 = 1.0 + idx as f64;
             let element = (idx_f64 * 0.5).sqrt();
             unsafe {

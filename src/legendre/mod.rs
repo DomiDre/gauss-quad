@@ -78,16 +78,16 @@ impl GaussLegendre {
     /// Uses the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969), which has linear time
     /// complexity.
     ///
-    /// Returns `None` if `deg` is smaller than 2.
-    pub fn new(deg: usize) -> Option<Self> {
-        if deg < 2 {
+    /// Returns `None` if `degree` is smaller than 2.
+    pub fn new(degree: usize) -> Option<Self> {
+        if degree < 2 {
             return None;
         }
 
         Some(Self {
-            node_weight_pairs: (1..deg + 1)
+            node_weight_pairs: (1..degree + 1)
                 .rev()
-                .map(|k: usize| NodeWeightPair::new(deg, k).into_tuple())
+                .map(|k: usize| NodeWeightPair::new(degree, k).into_tuple())
                 .collect(),
         })
     }
