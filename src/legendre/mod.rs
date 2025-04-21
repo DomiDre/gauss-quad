@@ -95,19 +95,17 @@ impl GaussLegendre {
     #[cfg(feature = "rayon")]
     /// Same as [`new`](GaussLegendre::new) but runs in parallel.
     ///
-    /// # Errors
-    ///
-    /// Returns an error if `deg` is smaller than 2.
-    pub fn par_new(deg: usize) -> Result<Self, GaussLegendreError> {
-        if deg < 2 {
-            return Err(GaussLegendreError::new());
+    /// Returns `None` if `degree` is smaller than 2.
+    pub fn par_new(degree: usize) -> Option<Self> {
+        if degree < 2 {
+            return None;
         }
 
-        Ok(Self {
-            node_weight_pairs: (1..deg + 1)
+        Some(Self {
+            node_weight_pairs: (1..degree + 1)
                 .into_par_iter()
                 .rev()
-                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+                .map(|k| NodeWeightPair::new(degree, k).into_tuple())
                 .collect(),
         })
     }
@@ -150,12 +148,11 @@ impl GaussLegendre {
     /// # Example
     ///
     /// ```
-    /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+    /// # use gauss_quad::legendre::GaussLegendre;
     /// # use approx::assert_abs_diff_eq;
-    /// let glq_rule = GaussLegendre::par_new(1_000_000)?;
+    /// let glq_rule = GaussLegendre::par_new(1_000_000).unwrap();
     ///
     /// assert_abs_diff_eq!(glq_rule.par_integrate(0.0, 1.0, |x| x.ln()), -1.0, epsilon = 1e-12);
-    /// # Ok::<(), GaussLegendreError>(())
     /// ```
     pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
@@ -306,7 +303,7 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn check_legendre_error_rayon() {
-        assert!(GaussLegendre::par_new(0).is_err());
-        assert!(GaussLegendre::par_new(1).is_err());
+        assert!(GaussLegendre::par_new(0).is_none());
+        assert!(GaussLegendre::par_new(1).is_none());
     }
 }

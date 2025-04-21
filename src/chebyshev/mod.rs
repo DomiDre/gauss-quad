@@ -355,7 +355,7 @@ mod test {
     #[cfg(feature = "rayon")]
     #[test]
     fn check_par_error() {
-        assert!(GaussChebyshevFirstKind::new(0).is_err());
-        assert!(GaussChebyshevSecondKind::new(0).is_err());
+        assert!(GaussChebyshevFirstKind::new(0).is_none());
+        assert!(GaussChebyshevSecondKind::new(0).is_none());
     }
 }
