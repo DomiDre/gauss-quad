@@ -80,16 +80,16 @@ impl GaussLegendre {
     ///
     /// Returns `None` if `deg` is smaller than 2.
     pub fn new(deg: usize) -> Option<Self> {
-        if deg >= 2 {
-            Some(Self {
-                node_weight_pairs: (1..deg + 1)
-                    .rev()
-                    .map(|k: usize| NodeWeightPair::new(deg, k).into_tuple())
-                    .collect(),
-            })
-        } else {
-            None
+        if deg < 2 {
+            return None;
         }
+
+        Some(Self {
+            node_weight_pairs: (1..deg + 1)
+                .rev()
+                .map(|k: usize| NodeWeightPair::new(deg, k).into_tuple())
+                .collect(),
+        })
     }
 
     #[cfg(feature = "rayon")]

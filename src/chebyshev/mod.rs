@@ -37,18 +37,18 @@ impl GaussChebyshevFirstKind {
     ///
     /// Returns `None` if `degree` is less than 2.
     pub fn new(degree: usize) -> Option<Self> {
-        if degree >= 2 {
-            let n = degree as f64;
-
-            Some(Self {
-                node_weight_pairs: (1..degree + 1)
-                    .rev()
-                    .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
-                    .collect(),
-            })
-        } else {
-            None
+        if degree < 2 {
+            return None;
         }
+
+        let n = degree as f64;
+
+        Some(Self {
+            node_weight_pairs: (1..degree + 1)
+                .rev()
+                .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
+                .collect(),
+        })
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -146,25 +146,25 @@ impl GaussChebyshevSecondKind {
     ///
     /// Returns an error if `degree` is less than 2.
     pub fn new(degree: usize) -> Option<Self> {
-        if degree >= 2 {
-            let n = degree as f64;
-
-            Some(Self {
-                node_weight_pairs: (1..degree + 1)
-                    .rev()
-                    .map(|i| {
-                        let over_n_plus_1 = 1.0 / (n + 1.0);
-                        let sin_val = (PI * i as f64 * over_n_plus_1).sin();
-                        (
-                            (PI * i as f64 * over_n_plus_1).cos(),
-                            PI * over_n_plus_1 * sin_val * sin_val,
-                        )
-                    })
-                    .collect(),
-            })
-        } else {
-            None
+        if degree < 2 {
+            return None;
         }
+
+        let n = degree as f64;
+
+        Some(Self {
+            node_weight_pairs: (1..degree + 1)
+                .rev()
+                .map(|i| {
+                    let over_n_plus_1 = 1.0 / (n + 1.0);
+                    let sin_val = (PI * i as f64 * over_n_plus_1).sin();
+                    (
+                        (PI * i as f64 * over_n_plus_1).cos(),
+                        PI * over_n_plus_1 * sin_val * sin_val,
+                    )
+                })
+                .collect(),
+        })
     }
 
     #[cfg(feature = "rayon")]
