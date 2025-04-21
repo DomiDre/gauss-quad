@@ -109,6 +109,13 @@ impl Midpoint {
 
 __impl_node_rule! {Midpoint, MidpointIter}
 
+impl From<NonZeroU32> for Midpoint {
+    #[inline]
+    fn from(degree: NonZeroU32) -> Self {
+        Self { degree }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;

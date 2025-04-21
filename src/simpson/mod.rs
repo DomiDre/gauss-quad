@@ -136,6 +136,13 @@ impl Simpson {
 
 __impl_node_rule! {Simpson, SimpsonIter}
 
+impl From<NonZeroU32> for Simpson {
+    #[inline]
+    fn from(degree: NonZeroU32) -> Self {
+        Self { degree }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
