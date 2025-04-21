@@ -57,6 +57,17 @@ jobs:
       - name: Test all feature combinations
         run: cargo test-all-features
 
+  doc:
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -D warnings
+      RUSTDOCFLAGS: --cfg docsrs
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@nightly
+    - name: Generate documentation
+      run: cargo +nightly doc --all-features
+
   semver_checks:
     runs-on: ubuntu-latest
     steps:
