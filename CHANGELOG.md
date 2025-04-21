@@ -15,6 +15,7 @@ This document contains all changes to the crate since version 0.1.8.
 - Made the `new` functions that can only fail for a single reason return an `Option` instead of a `Result<Self, CustomError>`.
 - Made the quadrature rule structs that store a `Vec` of nodes and weights instead store a boxed slice. This makes them take up less space on the stack.
  This affects the `QuadratureRule::into_node_weight_pairs()` functions.
+ Call `.into_vec()` on the boxed slice to get it as a `Vec`.
 
 ### Other changes
 
