@@ -283,8 +283,8 @@ macro_rules! __impl_slice_iterator_newtype_traits {
             }
 
             #[inline]
-            fn last(self) -> ::core::option::Option<Self::Item> {
-                self.0.last()
+            fn last(mut self) -> ::core::option::Option<Self::Item> {
+                self.0.next_back()
             }
         }
 

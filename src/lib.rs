@@ -37,6 +37,8 @@
 //! # Ok::<(), GaussLegendreError>(())
 //! ```
 //!
+//! Select the degree, n, such that 2n-1 is the largest degree of polynomial that you want to integrate with the rule.
+//!
 //! ## Setting up a quadrature rule
 //!
 //! Using a quadrature rule takes two steps:
