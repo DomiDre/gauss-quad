@@ -19,7 +19,6 @@
 //! a specified degree and then you can use it for integration, e.g.:
 //! ```
 //! use gauss_quad::GaussLegendre;
-//! # use gauss_quad::legendre::GaussLegendreError;
 //! // This macro is used in these docs to compare floats.
 //! // The assertion succeeds if the two sides are within floating point error,
 //! // or an optional epsilon.
@@ -27,14 +26,13 @@
 //!
 //! // initialize the quadrature rule
 //! let degree = 10;
-//! let quad = GaussLegendre::new(degree)?;
+//! let quad = GaussLegendre::new(degree).unwrap();
 //!
 //! // use the rule to integrate a function
 //! let left_bound = 0.0;
 //! let right_bound = 1.0;
 //! let integral = quad.integrate(left_bound, right_bound, |x| x * x);
 //! assert_abs_diff_eq!(integral, 1.0 / 3.0);
-//! # Ok::<(), GaussLegendreError>(())
 //! ```
 //!
 //! Select the degree, n, such that 2n-1 is the largest degree of polynomial that you want to integrate with the rule.
@@ -57,7 +55,7 @@
 //! # let b = 1.0;
 //! # let c = -10.;
 //! # let d = 100.;
-//! let gauss_legendre = GaussLegendre::new(degree)?;
+//! let gauss_legendre = GaussLegendre::new(degree).unwrap();
 //! // Integrate on the domain [a, b]
 //! let x_cubed = gauss_legendre.integrate(a, b, |x| x * x * x);
 //!
@@ -69,11 +67,14 @@
 //! // no explicit domain, Gauss-Laguerre integration is done on the domain [0, ∞).
 //! let piecewise = gauss_laguerre.integrate(|x| if x > 0.0 && x < 2.0 { x } else { 0.0 });
 //!
-//! let gauss_hermite = GaussHermite::new(degree)?;
+//! let gauss_hermite = GaussHermite::new(degree).unwrap();
 //! // again, no explicit domain since Gauss-Hermite integration is done over the domain (-∞, ∞).
 //! let golden_polynomial = gauss_hermite.integrate(|x| x * x - x - 1.0);
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
+//!
+//! Rules that can fail due to multiple reasons return a `Result` type,
+//! while rules that can only fail for a single reason return an `Option` type.
 //!
 //! ## Specific quadrature rules
 //!
@@ -128,12 +129,12 @@
 //! one `f64` parameter.
 //!
 //! ```
-//! # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+//! # use gauss_quad::legendre::GaussLegendre;
 //! # use approx::assert_abs_diff_eq;
 //!
 //! // initialize the quadrature rule
 //! let degree = 2;
-//! let quad = GaussLegendre::new(degree)?;
+//! let quad = GaussLegendre::new(degree).unwrap();
 //!
 //! // use the rule to integrate a function
 //! let left_bound = 0.0;
@@ -142,22 +143,20 @@
 //! let integral = quad.integrate(left_bound, right_bound, |x| x * x);
 //!
 //! assert_abs_diff_eq!(integral, 1.0 / 3.0);
-//! # Ok::<(), GaussLegendreError>(())
 //! ```
 //!
 //! ## Double integrals
 //!
 //! It is possible to use this crate to do double and higher integrals:
 //! ```
-//! # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+//! # use gauss_quad::legendre::GaussLegendre;
 //! # use approx::assert_abs_diff_eq;
-//! let rule = GaussLegendre::new(3)?;
+//! let rule = GaussLegendre::new(3).unwrap();
 //!
 //! // integrate x^2*y over the triangle in the xy-plane where x ϵ [0, 1] and y ϵ [0, x]:
 //! let double_int = rule.integrate(0.0, 1.0, |x| rule.integrate(0.0, x, |y| x * x * y));
 //!
 //! assert_abs_diff_eq!(double_int, 0.1);
-//! # Ok::<(), GaussLegendreError>(())
 //! ```
 //! However, the time complexity of the integration then scales with the number of nodes to
 //! the power of the depth of the integral, e.g. O(n³) for triple integrals.
