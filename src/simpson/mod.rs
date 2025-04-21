@@ -58,9 +58,7 @@ pub struct Simpson {
 impl Simpson {
     /// Initialize a new Simpson rule with `degree` being the number of intervals.
     ///
-    /// # Errors
-    ///
-    /// Returns an error if given a degree of zero.
+    /// Returns `None` if given a degree of zero.
     pub const fn new(degree: u32) -> Option<Self> {
         match NonZeroU32::new(degree) {
             Some(degree) => Some(Self { degree }),
