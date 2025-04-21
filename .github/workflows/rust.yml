@@ -79,6 +79,23 @@ jobs:
           tool: cargo-semver-checks
       - name: Check for semver violations
         run: cargo semver-checks
+
+  verify_rust_version:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-msrv
+    - name: Verify MSRV without extra features
+      run: cargo msrv verify --no-default-features
+    - name: Verify MSRV with `rayon`
+      run: cargo msrv verify --no-default-features --features rayon
+    - name: Verify MSRV with `serde`
+      run: cargo msrv verify --no-default-features --features serde
+    - name: Verify MSRV with both `rayon` and `serde`
+      run: cargo msrv verify --no-default-features --features rayon,serde
     
   coverage:
     runs-on: ubuntu-latest
