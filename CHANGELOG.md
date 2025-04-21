@@ -11,9 +11,12 @@ This document contains all changes to the crate since version 0.1.8.
  This affects the Gauss-Legendre, Gauss-Hermite and Gauss-Chebyshev rules.
  The affected functions are `QuadratureRule::iter()`, `QuadratureRule::into_iter()`, `QuadratureRule::nodes()`, `QuadratureRule::weights()`, `QuadratureRule::as_node_weight_pairs()` and `QuadratureRule::into_node_weight_pairs()`.
 - Made the `Simpson` and `Midpoint` rules not allocate any memory. This removes all the functions on those types that access some view of the nodes.
-- Made the constructors of `Simpson` and `Midpoint` into `const` functions.
 - Made the `new` functions that can only fail for a single reason return an `Option` instead of a `Result<Self, CustomError>`.
 - Made the quadrature rule structs that store a `Vec` of nodes and weights instead store a boxed slice. This affects the `QuadratureRule::into_note_weight_pairs()` functions.
+
+### Other changes
+
+- Made the constructors of `Simpson` and `Midpoint` into `const` functions.
 
 ## 0.2.3
 
