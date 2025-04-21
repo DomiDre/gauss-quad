@@ -8,7 +8,7 @@
 //!    value at the midpoint.
 //!
 //! ```
-//! use gauss_quad::midpoint::{Midpoint, MidpointError};
+//! use gauss_quad::midpoint::Midpoint;
 //! use approx::assert_abs_diff_eq;
 //!
 //! use core::f64::consts::PI;
@@ -16,7 +16,7 @@
 //! let eps = 0.001;
 //!
 //! let n = 30;
-//! let quad = Midpoint::new(n)?;
+//! let quad = Midpoint::new(n).unwrap();
 //!
 //! // integrate some functions
 //! let two_thirds = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -27,7 +27,7 @@
 //!
 //! // some functions need more steps than others
 //! let m = 100;
-//! let better_quad = Midpoint::new(m)?;
+//! let better_quad = Midpoint::new(m).unwrap();
 //!
 //! let piecewise = better_quad.integrate(-5.0, 5.0, |x|
 //!     if x > 1.0 && x < 2.0 {
@@ -38,26 +38,23 @@
 //! );
 //!
 //! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
-//! # Ok::<(), MidpointError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
-use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
 use crate::__impl_node_rule;
 
 use core::num::NonZeroUsize;
-use std::backtrace::Backtrace;
 
 /// A midpoint rule.
 /// ```
-/// # use gauss_quad::midpoint::{Midpoint, MidpointError};
+/// # use gauss_quad::midpoint::Midpoint;
 /// // initialize a midpoint rule with 100 cells
-/// let quad: Midpoint = Midpoint::new(100)?;
+/// let quad: Midpoint = Midpoint::new(100).unwrap();
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the midpoint rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
-/// # Ok::<(), MidpointError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -70,13 +67,11 @@ impl Midpoint {
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
     ///
-    /// # Errors
-    ///
-    /// Returns an error if `degree` is less than 1.
-    pub fn new(degree: usize) -> Result<Self, MidpointError> {
+    /// Returns `None` if the degree is zero.
+    pub const fn new(degree: usize) -> Option<Self> {
         match NonZeroUsize::new(degree) {
-            Some(degree) => Ok(Self { degree }),
-            None => Err(MidpointError::new()),
+            Some(degree) => Some(Self { degree }),
+            None => None,
         }
     }
 
@@ -101,7 +96,7 @@ impl Midpoint {
     where
         F: Fn(f64) -> f64 + Sync,
     {
-        let rect_width = (b - a) / self.degree.get() as f64;
+        let rect_width = (b - a) / self.degree().get() as f64;
 
         let sum: f64 = self
             .iter()
@@ -114,34 +109,6 @@ impl Midpoint {
 }
 
 __impl_node_rule! {Midpoint, MidpointIter}
-
-/// The error returned by [`Midpoint::new`] if given a degree of 0.
-#[derive(Debug)]
-pub struct MidpointError(Backtrace);
-
-use core::fmt;
-impl fmt::Display for MidpointError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "the degree of the midpoint rule needs to be at least 1")
-    }
-}
-
-impl MidpointError {
-    /// Calls [`Backtrace::capture`] and wraps the result in a `MidpointError` struct.
-    fn new() -> Self {
-        Self(Backtrace::capture())
-    }
-
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
-    #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.0
-    }
-}
-
-impl std::error::Error for MidpointError {}
 
 #[cfg(test)]
 mod tests {
@@ -167,11 +134,7 @@ mod tests {
     #[test]
     fn check_midpoint_error() {
         let midpoint_rule = Midpoint::new(0);
-        assert!(midpoint_rule.is_err());
-        assert_eq!(
-            format!("{}", midpoint_rule.err().unwrap()),
-            "the degree of the midpoint rule needs to be at least 1"
-        );
+        assert!(midpoint_rule.is_none());
     }
 
     #[test]
