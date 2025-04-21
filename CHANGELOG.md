@@ -4,6 +4,8 @@ This document contains all changes to the crate since version 0.1.8.
 
 ## 0.3.0 (unreleased)
 
+### Breaking changes
+
 - Made all quadrature rules store their nodes and weights sorted in ascending order by node.
  This means that all functions that return some view of the nodes (and weights) now return them in this sorted order.
  This affects the Gauss-Legendre, Gauss-Hermite and Gauss-Chebyshev rules.
