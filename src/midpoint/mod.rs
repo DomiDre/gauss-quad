@@ -45,7 +45,7 @@ use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
 use crate::__impl_node_rule;
 
-use core::num::NonZeroUsize;
+use core::num::NonZeroU32;
 
 /// A midpoint rule.
 /// ```
@@ -59,7 +59,7 @@ use core::num::NonZeroUsize;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Midpoint {
-    degree: NonZeroUsize,
+    degree: NonZeroU32,
 }
 
 impl Midpoint {
@@ -68,8 +68,8 @@ impl Midpoint {
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
     ///
     /// Returns `None` if the degree is zero.
-    pub const fn new(degree: usize) -> Option<Self> {
-        match NonZeroUsize::new(degree) {
+    pub const fn new(degree: u32) -> Option<Self> {
+        match NonZeroU32::new(degree) {
             Some(degree) => Some(Self { degree }),
             None => None,
         }
