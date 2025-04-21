@@ -53,7 +53,7 @@ use std::backtrace::Backtrace;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussJacobi {
-    node_weight_pairs: Vec<(Node, Weight)>,
+    node_weight_pairs: Box<[(Node, Weight)]>,
     alpha: f64,
     beta: f64,
 }
@@ -131,8 +131,8 @@ impl GaussJacobi {
                 / gamma(alpha + beta + 1.0)
                 / (alpha + beta + 1.0);
 
-        // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
-        let mut node_weight_pairs: Vec<(f64, f64)> = eigen
+        // zip together the iterator over nodes with the one over weights and return as Box<[(f64, f64)]>
+        let mut node_weight_pairs: Box<[(f64, f64)]> = eigen
             .eigenvalues
             .iter()
             .copied()

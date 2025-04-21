@@ -67,7 +67,7 @@ use crate::{Node, Weight, __impl_node_weight_rule};
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
-    node_weight_pairs: Vec<(Node, Weight)>,
+    node_weight_pairs: Box<[(Node, Weight)]>,
 }
 
 impl GaussLegendre {
