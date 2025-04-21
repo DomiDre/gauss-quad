@@ -255,7 +255,7 @@ macro_rules! __impl_node_weight_rule {
 #[doc(hidden)]
 macro_rules! __impl_slice_iterator_newtype_traits {
     ($iterator:ident$(<$a:lifetime>)?, $item:ty) => {
-        impl$(<$a>)? ::core::iter::Iterator for $iterator<$($a)?> {
+        impl$(<$a>)? ::core::iter::Iterator for $iterator$(<$a>)? {
             type Item = $item;
             #[inline]
             fn next(&mut self) -> ::core::option::Option<Self::Item> {
@@ -317,17 +317,17 @@ macro_rules! __impl_slice_iterator_newtype_traits {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __impl_node_rule {
-    ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
+    ($quadrature_rule:ident, $quadrature_rule_iter:ident) => {
         // Lets the user do
         // for node in QuadratureRule::new(...) {
         //    ...
         // }
         impl ::core::iter::IntoIterator for $quadrature_rule {
             type Item = $crate::Node;
-            type IntoIter = $quadrature_rule_into_iter;
+            type IntoIter = $quadrature_rule_iter;
             #[inline]
             fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_into_iter::new(self.nodes.into_iter())
+                self.iter()
             }
         }
 
@@ -338,40 +338,25 @@ macro_rules! __impl_node_rule {
         // }
         // rule.integrate(...) // <--- still available
         impl<'a> ::core::iter::IntoIterator for &'a $quadrature_rule {
-            type IntoIter = $quadrature_rule_iter<'a>;
-            type Item = &'a $crate::Node;
+            type IntoIter = $quadrature_rule_iter;
+            type Item = $crate::Node;
             #[inline]
             fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_iter::new(self.nodes.iter())
+                self.iter()
             }
         }
 
         impl $quadrature_rule {
             /// Returns an iterator over the nodes of the rule.
             #[inline]
-            pub fn iter(&self) -> $quadrature_rule_iter<'_> {
-                $quadrature_rule_iter::new(self.nodes.iter())
-            }
-
-            /// Returns a slice of all the nodes of the rule.
-            #[inline]
-            pub fn as_nodes(&self) -> &[$crate::Node] {
-                &self.nodes
-            }
-
-            /// Converts the rule into a vector of nodes.
-            ///
-            /// This function just returns the underlying data without any computation or cloning.
-            #[inline]
-            #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_nodes(self) -> Vec<$crate::Node> {
-                self.nodes
+            pub fn iter(&self) -> $quadrature_rule_iter {
+                $quadrature_rule_iter::new((0..self.degree.get()).map(|d| d as $crate::Node))
             }
 
             /// Returns the degree of the rule.
             #[inline]
-            pub fn degree(&self) -> usize {
-                self.nodes.len()
+            pub fn degree(&self) -> ::core::num::NonZeroUsize {
+                self.degree
             }
         }
 
@@ -380,68 +365,22 @@ macro_rules! __impl_node_rule {
         /// An iterator of the nodes of the rule.
         #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_iter<'a>(::core::slice::Iter<'a, $crate::Node>);
+        pub struct $quadrature_rule_iter(
+            ::core::iter::Map<core::ops::Range<usize>, fn(usize) -> $crate::Node>,
+        );
 
-        impl<'a> $quadrature_rule_iter<'a> {
+        impl $quadrature_rule_iter {
             #[inline]
-            const fn new(iter: ::core::slice::Iter<'a, $crate::Node>) -> Self {
+            const fn new(
+                iter: ::core::iter::Map<core::ops::Range<usize>, fn(usize) -> $crate::Node>,
+            ) -> Self {
                 Self(iter)
             }
-
-            /// Views the underlying data as a subslice of the original data.
-            ///
-            /// See [`core::slice::Iter::as_slice`] for more information.
-            #[inline]
-            pub fn as_slice(&self) -> &'a [$crate::Node] {
-                self.0.as_slice()
-            }
         }
 
-        impl<'a> ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_iter<'a> {
-            #[inline]
-            fn as_ref(&self) -> &[$crate::Node] {
-                self.0.as_ref()
-            }
-        }
-
-        $crate::__impl_slice_iterator_newtype_traits! {$quadrature_rule_iter<'a>, &'a $crate::Node}
+        $crate::__impl_slice_iterator_newtype_traits! {$quadrature_rule_iter, $crate::Node}
 
         // endregion: QuadratureRuleIter
-
-        // region: QuadratureRuleIntoIter
-
-        /// An owning iterator over the nodes of the rule.
-        ///
-        /// Created by the [`IntoIterator`] trait implementation of the rule struct.
-        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
-        #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<$crate::Node>);
-
-        impl $quadrature_rule_into_iter {
-            #[inline]
-            const fn new(iter: ::std::vec::IntoIter<$crate::Node>) -> Self {
-                Self(iter)
-            }
-
-            /// Views the underlying data as a subslice of the original data.
-            ///
-            /// See [`std::vec::IntoIter::as_slice`] for more information.
-            #[inline]
-            pub fn as_slice(&self) -> &[$crate::Node] {
-                self.0.as_slice()
-            }
-        }
-
-        impl ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_into_iter {
-            #[inline]
-            fn as_ref(&self) -> &[$crate::Node] {
-                self.0.as_ref()
-            }
-        }
-
-        $crate::__impl_slice_iterator_newtype_traits! {$quadrature_rule_into_iter, $crate::Node}
-
-        // endregion: QuadratureRuleIntoIter
     };
 }
 

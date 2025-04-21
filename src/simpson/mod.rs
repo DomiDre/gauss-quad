@@ -37,8 +37,9 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
-use crate::{Node, __impl_node_rule};
+use crate::__impl_node_rule;
 
+use core::num::NonZeroUsize;
 use std::backtrace::Backtrace;
 
 /// A Simpson's rule.
@@ -55,8 +56,7 @@ use std::backtrace::Backtrace;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Simpson {
-    /// The dimensionless Simpsons nodes.
-    nodes: Vec<Node>,
+    degree: NonZeroUsize,
 }
 
 impl Simpson {
@@ -66,12 +66,9 @@ impl Simpson {
     ///
     /// Returns an error if given a degree of zero.
     pub fn new(degree: usize) -> Result<Self, SimpsonError> {
-        if degree >= 1 {
-            Ok(Self {
-                nodes: (0..degree).map(|d| d as f64).collect(),
-            })
-        } else {
-            Err(SimpsonError::new())
+        match NonZeroUsize::new(degree) {
+            Some(degree) => Ok(Self { degree }),
+            None => Err(SimpsonError::new()),
         }
     }
 
@@ -80,25 +77,23 @@ impl Simpson {
     where
         F: FnMut(f64) -> f64,
     {
-        let n = self.nodes.len() as f64;
+        let n = self.iter().count() as f64;
 
         let h = (b - a) / n;
 
         // first sum over the interval edges. Skips first index to sum 1..n-1
         let sum_over_interval_edges: f64 = self
-            .nodes
             .iter()
             .skip(1)
-            .map(|&node| integrand(a + node * h))
+            .map(|node| integrand(a + node * h))
             .sum();
 
         // sum over the midpoints f( (x_{k-1} + x_k)/2 ), as node N is not included,
         // add it in the final result
         let sum_over_midpoints: f64 = self
-            .nodes
             .iter()
             .skip(1)
-            .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+            .map(|node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
             .sum();
 
         h / 6.0
@@ -122,16 +117,16 @@ impl Simpson {
         let (sum_over_interval_edges, sum_over_midpoints): (f64, f64) = rayon::join(
             || {
                 self.nodes
-                    .par_iter()
+                    .into_par_iter()
                     .skip(1)
-                    .map(|&node| integrand(a + node * h))
+                    .map(|node| integrand(a + node * h))
                     .sum::<f64>()
             },
             || {
                 self.nodes
-                    .par_iter()
+                    .into_par_iter()
                     .skip(1)
-                    .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+                    .map(|node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
                     .sum::<f64>()
             },
         );
@@ -145,7 +140,7 @@ impl Simpson {
     }
 }
 
-__impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
+__impl_node_rule! {Simpson, SimpsonIter}
 
 /// The error returned by [`Simpson::new`] if given a degree of 0.
 #[derive(Debug)]

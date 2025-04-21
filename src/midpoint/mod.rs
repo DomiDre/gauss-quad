@@ -44,8 +44,9 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{Node, __impl_node_rule};
+use crate::__impl_node_rule;
 
+use core::num::NonZeroUsize;
 use std::backtrace::Backtrace;
 
 /// A midpoint rule.
@@ -61,8 +62,7 @@ use std::backtrace::Backtrace;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Midpoint {
-    /// The dimensionless midpoints
-    nodes: Vec<Node>,
+    degree: NonZeroUsize,
 }
 
 impl Midpoint {
@@ -74,12 +74,9 @@ impl Midpoint {
     ///
     /// Returns an error if `degree` is less than 1.
     pub fn new(degree: usize) -> Result<Self, MidpointError> {
-        if degree > 0 {
-            Ok(Self {
-                nodes: (0..degree).map(|d| d as f64).collect(),
-            })
-        } else {
-            Err(MidpointError::new())
+        match NonZeroUsize::new(degree) {
+            Some(degree) => Ok(Self { degree }),
+            None => Err(MidpointError::new()),
         }
     }
 
@@ -88,12 +85,11 @@ impl Midpoint {
     where
         F: FnMut(f64) -> f64,
     {
-        let rect_width = (b - a) / self.nodes.len() as f64;
+        let rect_width = (b - a) / self.degree().get() as f64;
 
         let sum: f64 = self
-            .nodes
             .iter()
-            .map(|&node| integrand(a + rect_width * (0.5 + node)))
+            .map(|node| integrand(a + rect_width * (0.5 + node)))
             .sum();
 
         sum * rect_width
@@ -105,19 +101,19 @@ impl Midpoint {
     where
         F: Fn(f64) -> f64 + Sync,
     {
-        let rect_width = (b - a) / self.nodes.len() as f64;
+        let rect_width = (b - a) / self.degree.get() as f64;
 
         let sum: f64 = self
-            .nodes
-            .par_iter()
-            .map(|&node| integrand(a + rect_width * (0.5 + node)))
+            .iter()
+            .into_par_iter()
+            .map(|node| integrand(a + rect_width * (0.5 + node)))
             .sum();
 
         sum * rect_width
     }
 }
 
-__impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
+__impl_node_rule! {Midpoint, MidpointIter}
 
 /// The error returned by [`Midpoint::new`] if given a degree of 0.
 #[derive(Debug)]
@@ -193,7 +189,7 @@ mod tests {
         let a = 0.0;
         let b = 1.0;
         let ans = 1.0 / 3.0;
-        let rect_width = (b - a) / rule.degree() as f64;
+        let rect_width = (b - a) / rule.degree().get() as f64;
 
         assert_abs_diff_eq!(
             ans,
