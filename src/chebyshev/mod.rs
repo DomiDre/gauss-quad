@@ -4,8 +4,7 @@
 
 use crate::{Node, Weight, __impl_node_weight_rule};
 
-use core::{f64::consts::PI, fmt};
-use std::backtrace::Backtrace;
+use core::f64::consts::PI;
 
 #[cfg(feature = "rayon")]
 use rayon::iter::{
@@ -20,13 +19,12 @@ use rayon::iter::{
 /// # Example
 ///
 /// ```
-/// # use gauss_quad::chebyshev::{GaussChebyshevFirstKind, GaussChebyshevError};
+/// # use gauss_quad::chebyshev::GaussChebyshevFirstKind;
 /// # use approx::assert_relative_eq;
 /// # use core::f64::consts::PI;
-/// let rule = GaussChebyshevFirstKind::new(2)?;
+/// let rule = GaussChebyshevFirstKind::new(2).unwrap();
 ///
 /// assert_relative_eq!(rule.integrate(0.0, 2.0, |x| x), PI);
-/// # Ok::<(), GaussChebyshevError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -37,17 +35,15 @@ pub struct GaussChebyshevFirstKind {
 impl GaussChebyshevFirstKind {
     /// Create a new `GaussChebyshevFirstKind` rule that can integrate functions of the form f(x) / sqrt(1 - x^2).
     ///
-    /// # Errors
-    ///
-    /// Returns an error if `degree` is less than 2.
-    pub fn new(degree: usize) -> Result<Self, GaussChebyshevError> {
+    /// Returns `None` if `degree` is less than 2.
+    pub fn new(degree: usize) -> Option<Self> {
         if degree < 2 {
-            return Err(GaussChebyshevError::new());
+            return None;
         }
 
         let n = degree as f64;
 
-        Ok(Self {
+        Some(Self {
             node_weight_pairs: (1..degree + 1)
                 .rev()
                 .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
@@ -65,20 +61,20 @@ impl GaussChebyshevFirstKind {
 
     #[cfg(feature = "rayon")]
     /// Same as [`new`](Self::new) but runs in parallel.
-    pub fn par_new(degree: usize) -> Result<Self, GaussChebyshevError> {
-        if degree < 2 {
-            return Err(GaussChebyshevError::new());
+    pub fn par_new(degree: usize) -> Option<Self> {
+        if degree >= 2 {
+            let n = degree as f64;
+
+            Some(Self {
+                node_weight_pairs: (1..degree + 1)
+                    .into_par_iter()
+                    .rev()
+                    .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
+                    .collect(),
+            })
+        } else {
+            None
         }
-
-        let n = degree as f64;
-
-        Ok(Self {
-            node_weight_pairs: (1..degree + 1)
-                .into_par_iter()
-                .rev()
-                .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
-                .collect(),
-        })
     }
 
     /// Returns the value of the integral of the given `integrand` in the inverval \[`a`, `b`\].
@@ -86,13 +82,12 @@ impl GaussChebyshevFirstKind {
     /// # Example
     ///
     /// ```
-    /// # use gauss_quad::chebyshev::{GaussChebyshevFirstKind, GaussChebyshevError};
+    /// # use gauss_quad::chebyshev::GaussChebyshevFirstKind;
     /// # use approx::assert_relative_eq;
     /// # use core::f64::consts::PI;
-    /// let rule = GaussChebyshevFirstKind::new(2)?;
+    /// let rule = GaussChebyshevFirstKind::new(2).unwrap();
     ///
     /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), PI / 4.0);
-    /// # Ok::<(), GaussChebyshevError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, mut integrand: F) -> f64
     where
@@ -131,13 +126,12 @@ __impl_node_weight_rule! {GaussChebyshevFirstKind, GaussChebyshevFirstKindNodes,
 /// # Example
 ///
 /// ```
-/// # use gauss_quad::chebyshev::{GaussChebyshevSecondKind, GaussChebyshevError};
+/// # use gauss_quad::chebyshev::GaussChebyshevSecondKind;
 /// # use approx::assert_relative_eq;
 /// # use core::f64::consts::PI;
-/// let rule = GaussChebyshevSecondKind::new(2)?;
+/// let rule = GaussChebyshevSecondKind::new(2).unwrap();
 ///
 /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| x * x), PI / 8.0);
-/// # Ok::<(), GaussChebyshevError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -151,14 +145,14 @@ impl GaussChebyshevSecondKind {
     /// # Errors
     ///
     /// Returns an error if `degree` is less than 2.
-    pub fn new(degree: usize) -> Result<Self, GaussChebyshevError> {
+    pub fn new(degree: usize) -> Option<Self> {
         if degree < 2 {
-            return Err(GaussChebyshevError::new());
+            return None;
         }
 
         let n = degree as f64;
 
-        Ok(Self {
+        Some(Self {
             node_weight_pairs: (1..degree + 1)
                 .rev()
                 .map(|i| {
@@ -175,27 +169,27 @@ impl GaussChebyshevSecondKind {
 
     #[cfg(feature = "rayon")]
     /// Same as [`new`](Self::new) but runs in parallel.
-    pub fn par_new(degree: usize) -> Result<Self, GaussChebyshevError> {
-        if degree < 2 {
-            return Err(GaussChebyshevError::new());
+    pub fn par_new(degree: usize) -> Option<Self> {
+        if degree >= 2 {
+            let n = degree as f64;
+
+            Some(Self {
+                node_weight_pairs: (1..degree + 1)
+                    .into_par_iter()
+                    .rev()
+                    .map(|i| {
+                        let over_n_plus_1 = 1.0 / (n + 1.0);
+                        let sin_val = (PI * i as f64 * over_n_plus_1).sin();
+                        (
+                            (PI * i as f64 * over_n_plus_1).cos(),
+                            PI * over_n_plus_1 * sin_val * sin_val,
+                        )
+                    })
+                    .collect(),
+            })
+        } else {
+            None
         }
-
-        let n = degree as f64;
-
-        Ok(Self {
-            node_weight_pairs: (1..degree + 1)
-                .into_par_iter()
-                .rev()
-                .map(|i| {
-                    let over_n_plus_1 = 1.0 / (n + 1.0);
-                    let sin_val = (PI * i as f64 * over_n_plus_1).sin();
-                    (
-                        (PI * i as f64 * over_n_plus_1).cos(),
-                        PI * over_n_plus_1 * sin_val * sin_val,
-                    )
-                })
-                .collect(),
-        })
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -211,13 +205,12 @@ impl GaussChebyshevSecondKind {
     /// # Example
     ///
     /// ```
-    /// # use gauss_quad::chebyshev::{GaussChebyshevSecondKind, GaussChebyshevError};
+    /// # use gauss_quad::chebyshev::GaussChebyshevSecondKind;
     /// # use approx::assert_relative_eq;
     /// # use core::f64::consts::PI;
-    /// let rule = GaussChebyshevSecondKind::new(2)?;
+    /// let rule = GaussChebyshevSecondKind::new(2).unwrap();
     ///
     /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), -PI / 16.0);
-    /// # Ok::<(), GaussChebyshevError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, mut integrand: F) -> f64
     where
@@ -248,31 +241,6 @@ impl GaussChebyshevSecondKind {
 
 __impl_node_weight_rule! {GaussChebyshevSecondKind, GaussChebyshevSecondKindNodes, GaussChebyshevSecondKindWeights, GaussChebyshevSecondKindIter, GaussChebyshevSecondKindIntoIter}
 
-/// The error returned when attempting to create a [`GaussChebyshevFirstKind`] or [`GaussChebyshevSecondKind`] struct with a degree less than 2.
-#[derive(Debug)]
-pub struct GaussChebyshevError(Backtrace);
-
-impl GaussChebyshevError {
-    pub(crate) fn new() -> Self {
-        Self(Backtrace::capture())
-    }
-
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.0
-    }
-}
-
-impl fmt::Display for GaussChebyshevError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "the degree must be at least 2")
-    }
-}
-
-impl std::error::Error for GaussChebyshevError {}
-
 #[cfg(test)]
 mod test {
     use approx::assert_abs_diff_eq;
@@ -283,8 +251,8 @@ mod test {
 
     #[test]
     fn check_error() {
-        assert!(GaussChebyshevFirstKind::new(1).is_err());
-        assert!(GaussChebyshevSecondKind::new(1).is_err());
+        assert!(GaussChebyshevFirstKind::new(1).is_none());
+        assert!(GaussChebyshevSecondKind::new(1).is_none());
     }
 
     #[test]
@@ -387,7 +355,7 @@ mod test {
     #[cfg(feature = "rayon")]
     #[test]
     fn check_par_error() {
-        assert!(GaussChebyshevFirstKind::new(0).is_err());
-        assert!(GaussChebyshevSecondKind::new(0).is_err());
+        assert!(GaussChebyshevFirstKind::new(0).is_none());
+        assert!(GaussChebyshevSecondKind::new(0).is_none());
     }
 }

@@ -9,15 +9,13 @@
 //! Integrate x^2 * e^(-x^2)
 //! ```
 //! use gauss_quad::hermite::GaussHermite;
-//! # use gauss_quad::hermite::GaussHermiteError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussHermite::new(10)?;
+//! let quad = GaussHermite::new(10).unwrap();
 //!
 //! let integral = quad.integrate(|x| x.powi(2));
 //!
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
-//! # Ok::<(), GaussHermiteError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
@@ -27,8 +25,6 @@ use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
 use core::f64::consts::PI;
 
-use std::backtrace::Backtrace;
-
 /// A Gauss-Hermite quadrature scheme.
 ///
 /// These rules can integrate integrands of the form e^(-x^2) * f(x) over the domain (-∞, ∞).
@@ -37,17 +33,16 @@ use std::backtrace::Backtrace;
 ///
 /// Integrate e^(-x^2) * cos(x)
 /// ```
-/// # use gauss_quad::hermite::{GaussHermite, GaussHermiteError};
+/// # use gauss_quad::hermite::GaussHermite;
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::{E, PI};
 /// // initialize a Gauss-Hermite rule with 20 nodes
-/// let quad = GaussHermite::new(20)?;
+/// let quad = GaussHermite::new(20).unwrap();
 ///
 /// // numerically integrate a function over (-∞, ∞) using the Gauss-Hermite rule
 /// let integral = quad.integrate(|x| x.cos());
 ///
 /// assert_abs_diff_eq!(integral, PI.sqrt() / E.powf(0.25), epsilon = 1e-14);
-/// # Ok::<(), GaussHermiteError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -71,14 +66,14 @@ impl GaussHermite {
     ///
     /// # Errors
     ///
-    /// Returns an error if `deg` is smaller than 2.
-    pub fn new(deg: usize) -> Result<Self, GaussHermiteError> {
-        if deg < 2 {
-            return Err(GaussHermiteError::new());
+    /// Returns an error if `degree` is smaller than 2.
+    pub fn new(degree: usize) -> Option<Self> {
+        if degree < 2 {
+            return None;
         }
-        let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
+        let mut companion_matrix = DMatrixf64::from_element(degree, degree, 0.0);
         // Initialize symmetric companion matrix
-        for idx in 0..deg - 1 {
+        for idx in 0..degree - 1 {
             let idx_f64 = 1.0 + idx as f64;
             let element = (idx_f64 * 0.5).sqrt();
             unsafe {
@@ -108,7 +103,7 @@ impl GaussHermite {
         node_weight_pairs
             .sort_unstable_by(|(node1, _), (node2, _)| node1.partial_cmp(node2).unwrap());
 
-        Ok(GaussHermite { node_weight_pairs })
+        Some(GaussHermite { node_weight_pairs })
     }
 
     /// Perform quadrature of e^(-x^2) * `integrand`(x) over the domain (-∞, ∞).
@@ -140,37 +135,6 @@ impl GaussHermite {
 }
 
 __impl_node_weight_rule! {GaussHermite, GaussHermiteNodes, GaussHermiteWeights, GaussHermiteIter, GaussHermiteIntoIter}
-
-/// The error returned by [`GaussHermite::new`] if it is given a degree of 0 or 1.
-#[derive(Debug)]
-pub struct GaussHermiteError(Backtrace);
-
-use core::fmt;
-impl fmt::Display for GaussHermiteError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "the degree of the Gauss-Hermite quadrature rule must be at least 2"
-        )
-    }
-}
-
-impl std::error::Error for GaussHermiteError {}
-
-impl GaussHermiteError {
-    /// Calls [`Backtrace::capture`] and wraps the result in a `GaussHermiteError` struct.
-    fn new() -> Self {
-        Self(Backtrace::capture())
-    }
-
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
-    #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.0
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -205,14 +169,8 @@ mod tests {
 
     #[test]
     fn check_hermite_error() {
-        let hermite_rule = GaussHermite::new(0);
-        assert!(hermite_rule.is_err());
-        assert_eq!(
-            format!("{}", hermite_rule.err().unwrap()),
-            "the degree of the Gauss-Hermite quadrature rule must be at least 2"
-        );
-
-        assert!(GaussHermite::new(1).is_err());
+        assert!(GaussHermite::new(0).is_none());
+        assert!(GaussHermite::new(1).is_none());
     }
 
     #[test]
