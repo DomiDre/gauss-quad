@@ -8,6 +8,7 @@ This document contains all changes to the crate since version 0.1.8.
  This means that all functions that return some view of the nodes (and weights) now return them in this sorted order.
  This affects the Gauss-Legendre, Gauss-Hermite and Gauss-Chebyshev rules.
  The affected functions are `QuadratureRule::iter()`, `QuadratureRule::into_iter()`, `QuadratureRule::nodes()`, `QuadratureRule::weights()`, `QuadratureRule::as_node_weight_pairs()` and `QuadratureRule::into_node_weight_pairs()`.
+- Made the `Simpson` and `Midpoint` rules not allocate any memory.
  
 ## 0.2.3
 
