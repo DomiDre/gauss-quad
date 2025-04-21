@@ -280,7 +280,7 @@ impl From<GaussLegendre> for GaussJacobi {
         // in ascending order.
         node_weight_pairs.reverse();
         Self {
-            node_weight_pairs,
+            node_weight_pairs: node_weight_pairs.into_boxed_slice(),
             alpha: 0.0,
             beta: 0.0,
         }
@@ -291,7 +291,7 @@ impl From<GaussLegendre> for GaussJacobi {
 impl From<GaussChebyshevFirstKind> for GaussJacobi {
     fn from(value: GaussChebyshevFirstKind) -> Self {
         Self {
-            node_weight_pairs: value.into_node_weight_pairs(),
+            node_weight_pairs: value.into_node_weight_pairs().into_boxed_slice(),
             alpha: -0.5,
             beta: -0.5,
         }
@@ -302,7 +302,7 @@ impl From<GaussChebyshevFirstKind> for GaussJacobi {
 impl From<GaussChebyshevSecondKind> for GaussJacobi {
     fn from(value: GaussChebyshevSecondKind) -> Self {
         Self {
-            node_weight_pairs: value.into_node_weight_pairs(),
+            node_weight_pairs: value.into_node_weight_pairs().into_boxed_slice(),
             alpha: 0.5,
             beta: 0.5,
         }

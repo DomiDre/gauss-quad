@@ -96,8 +96,8 @@ macro_rules! __impl_node_weight_rule {
             /// This function just returns the underlying vector without any computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> ::std::boxed::Box<[($crate::Node, $crate::Weight)]> {
-                self.node_weight_pairs
+            pub fn into_node_weight_pairs(self) -> ::std::vec::Vec<($crate::Node, $crate::Weight)> {
+                self.node_weight_pairs.into_vec()
             }
 
             /// Returns the degree of the quadrature rule.
