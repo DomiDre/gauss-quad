@@ -107,7 +107,8 @@ impl GaussLegendre {
                 .into_par_iter()
                 .rev()
                 .map(|k| NodeWeightPair::new(degree, k).into_tuple())
-                .collect::<Vec<_>>().into(),
+                .collect::<Vec<_>>()
+                .into(),
         })
     }
 

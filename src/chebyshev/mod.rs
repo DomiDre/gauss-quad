@@ -74,7 +74,8 @@ impl GaussChebyshevFirstKind {
                 .into_par_iter()
                 .rev()
                 .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
-                .collect::<Vec<_>>().into(),
+                .collect::<Vec<_>>()
+                .into(),
         })
     }
 
@@ -186,7 +187,8 @@ impl GaussChebyshevSecondKind {
                             PI * over_n_plus_1 * sin_val * sin_val,
                         )
                     })
-                    .collect::<Vec<_>>().into(),
+                    .collect::<Vec<_>>()
+                    .into(),
             })
         } else {
             None
