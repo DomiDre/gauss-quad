@@ -14,6 +14,13 @@ pub type Node = f64;
 /// A weight in a quadrature rule.
 pub type Weight = f64;
 
+/// The number of elements to store inline on the stack before spilling to the heap.
+///
+/// Set so that the total memory size of the inlined portion is 64 bytes,
+/// the cache line size of most modern CPUs.
+// Two 64 bit floats times 4 is 64 bytes.
+pub const NODE_WEIGHT_RULE_INLINE_SIZE: usize = 4;
+
 /// This macro implements the data access API for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Box<[(Node, Weight)]>`.
 /// It takes in the name of the quadrature rule struct as well as the names it should give the iterators
@@ -91,12 +98,21 @@ macro_rules! __impl_node_weight_rule {
                 &self.node_weight_pairs
             }
 
-            /// Converts the quadrature rule into a boxed slice of node-weight pairs.
+            /// Converts the quadrature rule into a `Vec` of node-weight pairs.
             ///
-            /// This function just returns the underlying data without any computation or cloning.
+            /// This function returns the underlying data without any computation.
+            /// This may involve a heap allocation if the size of the rule is small.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> ::std::boxed::Box<[($crate::Node, $crate::Weight)]> {
+            pub fn into_node_weight_pairs(self) -> ::std::vec::Vec<($crate::Node, $crate::Weight)> {
+                self.node_weight_pairs.into_vec()
+            }
+
+            #[allow(dead_code)]
+            /// Can be used internally to pass the `SmallVec` to another struct without cloning.
+            #[inline]
+            #[must_use = "`self` will be dropped if the result is not used"]
+            pub(crate) fn into_smallvec_of_node_weight_pairs(self) -> ::smallvec::SmallVec<[($crate::Node, $crate::Weight); $crate::data_api::NODE_WEIGHT_RULE_INLINE_SIZE]> {
                 self.node_weight_pairs
             }
 
@@ -386,6 +402,8 @@ macro_rules! __impl_node_rule {
 
 #[cfg(test)]
 mod tests {
+    use smallvec::SmallVec;
+
     use super::*;
     use core::fmt;
     use std::backtrace::Backtrace;
@@ -393,7 +411,7 @@ mod tests {
     #[derive(Debug, Clone, PartialEq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct MockQuadrature {
-        node_weight_pairs: Box<[(Node, Weight)]>,
+        node_weight_pairs: SmallVec<[(Node, Weight); NODE_WEIGHT_RULE_INLINE_SIZE]>,
     }
 
     #[derive(Debug)]

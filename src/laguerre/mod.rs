@@ -20,7 +20,9 @@
 
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+use smallvec::SmallVec;
 
+use crate::data_api::NODE_WEIGHT_RULE_INLINE_SIZE;
 use crate::gamma::gamma;
 use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
@@ -49,7 +51,7 @@ use std::backtrace::Backtrace;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLaguerre {
-    node_weight_pairs: Box<[(Node, Weight)]>,
+    node_weight_pairs: SmallVec<[(Node, Weight); NODE_WEIGHT_RULE_INLINE_SIZE]>,
     alpha: f64,
 }
 
@@ -102,7 +104,7 @@ impl GaussLaguerre {
         let scale_factor = gamma(alpha + 1.0);
 
         // zip together the iterator over nodes with the one over weights and return as Box<[(f64, f64)]>
-        let mut node_weight_pairs: Box<[(f64, f64)]> = eigen
+        let mut node_weight_pairs: SmallVec<[(f64, f64); NODE_WEIGHT_RULE_INLINE_SIZE]> = eigen
             .eigenvalues
             .into_iter()
             .copied()

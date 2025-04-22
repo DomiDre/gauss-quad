@@ -29,8 +29,9 @@ use rayon::prelude::{
 mod bogaert;
 
 use bogaert::NodeWeightPair;
+use smallvec::SmallVec;
 
-use crate::{Node, Weight, __impl_node_weight_rule};
+use crate::{Node, Weight, __impl_node_weight_rule, data_api::NODE_WEIGHT_RULE_INLINE_SIZE};
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -67,7 +68,7 @@ use crate::{Node, Weight, __impl_node_weight_rule};
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLegendre {
-    node_weight_pairs: Box<[(Node, Weight)]>,
+    node_weight_pairs: SmallVec<[(Node, Weight); NODE_WEIGHT_RULE_INLINE_SIZE]>,
 }
 
 impl GaussLegendre {

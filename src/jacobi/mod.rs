@@ -21,11 +21,12 @@
 
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+use smallvec::SmallVec;
 
 use crate::gamma::gamma;
 use crate::{
     DMatrixf64, GaussChebyshevFirstKind, GaussChebyshevSecondKind, GaussLegendre, Node, Weight,
-    __impl_node_weight_rule,
+    __impl_node_weight_rule, data_api::NODE_WEIGHT_RULE_INLINE_SIZE,
 };
 
 use std::backtrace::Backtrace;
@@ -53,7 +54,7 @@ use std::backtrace::Backtrace;
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussJacobi {
-    node_weight_pairs: Box<[(Node, Weight)]>,
+    node_weight_pairs: SmallVec<[(Node, Weight); NODE_WEIGHT_RULE_INLINE_SIZE]>,
     alpha: f64,
     beta: f64,
 }
@@ -132,7 +133,7 @@ impl GaussJacobi {
                 / (alpha + beta + 1.0);
 
         // zip together the iterator over nodes with the one over weights and return as Box<[(f64, f64)]>
-        let mut node_weight_pairs: Box<[(f64, f64)]> = eigen
+        let mut node_weight_pairs: SmallVec<[(f64, f64); NODE_WEIGHT_RULE_INLINE_SIZE]> = eigen
             .eigenvalues
             .iter()
             .copied()
@@ -276,7 +277,7 @@ impl std::error::Error for GaussJacobiError {}
 impl From<GaussLegendre> for GaussJacobi {
     fn from(value: GaussLegendre) -> Self {
         Self {
-            node_weight_pairs: value.into_node_weight_pairs(),
+            node_weight_pairs: value.into_smallvec_of_node_weight_pairs(),
             alpha: 0.0,
             beta: 0.0,
         }
@@ -287,7 +288,7 @@ impl From<GaussLegendre> for GaussJacobi {
 impl From<GaussChebyshevFirstKind> for GaussJacobi {
     fn from(value: GaussChebyshevFirstKind) -> Self {
         Self {
-            node_weight_pairs: value.into_node_weight_pairs(),
+            node_weight_pairs: value.into_smallvec_of_node_weight_pairs(),
             alpha: -0.5,
             beta: -0.5,
         }
@@ -298,7 +299,7 @@ impl From<GaussChebyshevFirstKind> for GaussJacobi {
 impl From<GaussChebyshevSecondKind> for GaussJacobi {
     fn from(value: GaussChebyshevSecondKind) -> Self {
         Self {
-            node_weight_pairs: value.into_node_weight_pairs(),
+            node_weight_pairs: value.into_smallvec_of_node_weight_pairs(),
             alpha: 0.5,
             beta: 0.5,
         }
