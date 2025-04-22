@@ -15,7 +15,7 @@ pub type Node = f64;
 pub type Weight = f64;
 
 /// This macro implements the data access API for the given quadrature rule struct that contains
-/// a field named `node_weight_pairs` of the type `Vec<(Node, Weight)>`.
+/// a field named `node_weight_pairs` of the type `Box<[(Node, Weight)]>`.
 /// It takes in the name of the quadrature rule struct as well as the names it should give the iterators
 /// over its nodes, weights, and both, as well as the iterator returned by the [`IntoIterator`] trait.
 #[doc(hidden)]
@@ -311,8 +311,8 @@ macro_rules! __impl_slice_iterator_newtype_traits {
 }
 
 /// This macro implements the data access API for rules that have only nodes and no weights.
-/// It takes in the name of the a rule struct that contans a field with the name `nodes`
-/// of the type `Vec<Node>`. As well as the names it should give the iterator over its
+/// It takes in the name of the a rule struct that contans a field with the name `degree`
+/// of the type `NonZeroU32`. As well as the names it should give the iterator over its
 /// nodes and the iterator returned by the [`IntoIterator`] trait.
 #[macro_export]
 #[doc(hidden)]
