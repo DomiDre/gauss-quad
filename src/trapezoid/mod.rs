@@ -1,3 +1,23 @@
+//! Numerical integration using the trapezoid rule.
+//!
+//! This method approximates the integral of a function by dividing the area under the curve into trapezoids
+//! and summing their areas.
+//!
+//! # Example
+//!
+//! ```
+//! use gauss_quad::Trapezoid;
+//! use approx::assert_abs_diff_eq;
+//!
+//! // initialize a trapezoid rule with 1000 grid points.
+//! let rule = Trapezoid::new(1000).unwrap();
+//!
+//! // numerically integrate a function from -1.0 to 1.0 using the rule.
+//! let integral = rule.integrate(-1.0, 1.0, |x| x * x - 1.0);
+//!
+//! assert_abs_diff_eq!(integral, -4.0 / 3.0, epsilon = 1e-5);
+//! ```
+
 #[cfg(feature = "rayon")]
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
