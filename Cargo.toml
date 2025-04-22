@@ -18,7 +18,7 @@ crate-type = ["lib", "cdylib"]
 nalgebra = {version = "0.33", default-features = false, features = ["std"]}
 serde = {version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true}
 rayon = {version = "1.10", optional = true}
-smallvec = {version = "1.15.0", default-features = false}
+smallvec = {version = "1.15.0", default-features = false, features = ["union"]}
 
 [dev-dependencies]
 approx = "0.5.1"
@@ -26,7 +26,7 @@ criterion = {version = "0.5", features = ["html_reports"]}
 
 [features]
 # Implements the `Serialize` and `Deserialize` traits from the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
-serde = ["dep:serde"]
+serde = ["dep:serde", "smallvec/serde"]
 # Enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
 rayon = ["dep:rayon"]
 
