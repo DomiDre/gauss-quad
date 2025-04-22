@@ -13,9 +13,8 @@ This document contains all changes to the crate since version 0.1.8.
  `QuadratureRule::weights()`, `QuadratureRule::as_node_weight_pairs()` and `QuadratureRule::into_node_weight_pairs()`.
 - Made the `Simpson` and `Midpoint` rules not allocate any memory. This removes all the functions on those types that access some view of the nodes.
 - Made the `new` functions that can only fail for a single reason return an `Option` instead of a `Result<Self, CustomError>`.
-- Made the quadrature rule structs that store a `Vec` of nodes and weights instead store a boxed slice. This makes them take up less space on the stack.
- This affects the `QuadratureRule::into_node_weight_pairs()` functions.
- Call `.into_vec()` on the boxed slice to get it as a `Vec`.
+- Made the quadrature rule structs that store a `Vec` of nodes and weights instead store a `SmallVec` from the `smallvec` crate. This enables them to store the nodes and weights inline on the stack if there aren't too many of them.
+ This affects the `QuadratureRule::into_node_weight_pairs()` functions, they can now allocate if the rule has a low enough degree.
 
 ### Other changes
 
