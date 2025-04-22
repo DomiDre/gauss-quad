@@ -22,7 +22,7 @@ pub type Weight = f64;
 pub const NODE_WEIGHT_RULE_INLINE_SIZE: usize = 4;
 
 /// This macro implements the data access API for the given quadrature rule struct that contains
-/// a field named `node_weight_pairs` of the type `Box<[(Node, Weight)]>`.
+/// a field named `node_weight_pairs` of the type `SmallVec<[(Node, Weight); NODE_WEIGHT_RULE_INLINE_SIZE]>`.
 /// It takes in the name of the quadrature rule struct as well as the names it should give the iterators
 /// over its nodes, weights, and both, as well as the iterator returned by the [`IntoIterator`] trait.
 #[doc(hidden)]

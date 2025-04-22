@@ -87,7 +87,7 @@ impl GaussHermite {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        // zip together the iterator over nodes with the one over weights and collect into a Box<[(f64, f64)]>
+        // zip together the iterator over nodes with the one over weights and collect
         let mut node_weight_pairs: SmallVec<[(Node, Weight); NODE_WEIGHT_RULE_INLINE_SIZE]> = eigen
             .eigenvalues
             .iter()

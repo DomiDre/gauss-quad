@@ -132,7 +132,7 @@ impl GaussJacobi {
                 / gamma(alpha + beta + 1.0)
                 / (alpha + beta + 1.0);
 
-        // zip together the iterator over nodes with the one over weights and return as Box<[(f64, f64)]>
+        // zip together the iterator over nodes with the one over weights and collect
         let mut node_weight_pairs: SmallVec<[(f64, f64); NODE_WEIGHT_RULE_INLINE_SIZE]> = eigen
             .eigenvalues
             .iter()
