@@ -186,7 +186,7 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn check_par_sorted_order() {
-        for deg in (2..100).step_by(10) {
+        for deg in (2..200).step_by(10) {
             let rule = GaussLegendre::par_new(deg).unwrap();
             assert!(rule.as_node_weight_pairs().is_sorted());
         }
