@@ -6,18 +6,17 @@
 //!
 //! # Example
 //!
-//! Integrate x^2 * e^(-x^2)
+//! Integrate x^2 * e^(-x^2):
+//!
 //! ```
 //! use gauss_quad::hermite::GaussHermite;
-//! # use gauss_quad::hermite::GaussHermiteError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussHermite::new(10)?;
+//! let quad = GaussHermite::new(10.try_into().unwrap());
 //!
 //! let integral = quad.integrate(|x| x.powi(2));
 //!
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
-//! # Ok::<(), GaussHermiteError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
@@ -33,19 +32,19 @@ use core::{f64::consts::PI, num::NonZeroUsize};
 ///
 /// # Example
 ///
-/// Integrate e^(-x^2) * cos(x)
+/// Integrate e^(-x^2) * cos(x):
+///
 /// ```
-/// # use gauss_quad::hermite::{GaussHermite, GaussHermiteError};
+/// # use gauss_quad::hermite::GaussHermite;
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::{E, PI};
 /// // initialize a Gauss-Hermite rule with 20 nodes
-/// let quad = GaussHermite::new(20)?;
+/// let quad = GaussHermite::new(20.try_into().unwrap());
 ///
 /// // numerically integrate a function over (-∞, ∞) using the Gauss-Hermite rule
 /// let integral = quad.integrate(|x| x.cos());
 ///
 /// assert_abs_diff_eq!(integral, PI.sqrt() / E.powf(0.25), epsilon = 1e-14);
-/// # Ok::<(), GaussHermiteError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

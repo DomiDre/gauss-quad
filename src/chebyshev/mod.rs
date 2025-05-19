@@ -17,13 +17,12 @@ use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterato
 /// # Example
 ///
 /// ```
-/// # use gauss_quad::chebyshev::{GaussChebyshevFirstKind, GaussChebyshevError};
+/// # use gauss_quad::chebyshev::GaussChebyshevFirstKind;
 /// # use approx::assert_relative_eq;
 /// # use core::f64::consts::PI;
-/// let rule = GaussChebyshevFirstKind::new(2)?;
+/// let rule = GaussChebyshevFirstKind::new(2.try_into().unwrap());
 ///
 /// assert_relative_eq!(rule.integrate(0.0, 2.0, |x| x), PI);
-/// # Ok::<(), GaussChebyshevError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -69,13 +68,12 @@ impl GaussChebyshevFirstKind {
     /// # Example
     ///
     /// ```
-    /// # use gauss_quad::chebyshev::{GaussChebyshevFirstKind, GaussChebyshevError};
+    /// # use gauss_quad::chebyshev::GaussChebyshevFirstKind;
     /// # use approx::assert_relative_eq;
     /// # use core::f64::consts::PI;
-    /// let rule = GaussChebyshevFirstKind::new(2)?;
+    /// let rule = GaussChebyshevFirstKind::new(2.try_into().unwrap());
     ///
     /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), PI / 4.0);
-    /// # Ok::<(), GaussChebyshevError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
@@ -114,13 +112,12 @@ __impl_node_weight_rule! {GaussChebyshevFirstKind, GaussChebyshevFirstKindNodes,
 /// # Example
 ///
 /// ```
-/// # use gauss_quad::chebyshev::{GaussChebyshevSecondKind, GaussChebyshevError};
+/// # use gauss_quad::chebyshev::GaussChebyshevSecondKind;
 /// # use approx::assert_relative_eq;
 /// # use core::f64::consts::PI;
-/// let rule = GaussChebyshevSecondKind::new(2)?;
+/// let rule = GaussChebyshevSecondKind::new(2.try_into().unwrap());
 ///
 /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| x * x), PI / 8.0);
-/// # Ok::<(), GaussChebyshevError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -180,13 +177,12 @@ impl GaussChebyshevSecondKind {
     /// # Example
     ///
     /// ```
-    /// # use gauss_quad::chebyshev::{GaussChebyshevSecondKind, GaussChebyshevError};
+    /// # use gauss_quad::chebyshev::GaussChebyshevSecondKind;
     /// # use approx::assert_relative_eq;
     /// # use core::f64::consts::PI;
-    /// let rule = GaussChebyshevSecondKind::new(2)?;
+    /// let rule = GaussChebyshevSecondKind::new(2.try_into().unwrap());
     ///
     /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), -PI / 16.0);
-    /// # Ok::<(), GaussChebyshevError>(())
     /// ```
     pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where

@@ -8,15 +8,14 @@
 //!    value at the midpoint.
 //!
 //! ```
-//! use gauss_quad::midpoint::{Midpoint, MidpointError};
+//! use gauss_quad::midpoint::Midpoint;
 //! use approx::assert_abs_diff_eq;
 //!
 //! use core::f64::consts::PI;
 //!
 //! let eps = 0.001;
 //!
-//! let n = 30;
-//! let quad = Midpoint::new(n)?;
+//! let quad = Midpoint::new(30.try_into().unwrap());
 //!
 //! // integrate some functions
 //! let two_thirds = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -26,8 +25,7 @@
 //! assert_abs_diff_eq!(estimate_sin, 0.0, epsilon = eps);
 //!
 //! // some functions need more steps than others
-//! let m = 100;
-//! let better_quad = Midpoint::new(m)?;
+//! let better_quad = Midpoint::new(100.try_into().unwrap());
 //!
 //! let piecewise = better_quad.integrate(-5.0, 5.0, |x|
 //!     if x > 1.0 && x < 2.0 {
@@ -38,7 +36,6 @@
 //! );
 //!
 //! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
-//! # Ok::<(), MidpointError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
@@ -50,13 +47,12 @@ use core::num::NonZeroUsize;
 
 /// A midpoint rule.
 /// ```
-/// # use gauss_quad::midpoint::{Midpoint, MidpointError};
+/// # use gauss_quad::midpoint::Midpoint;
 /// // initialize a midpoint rule with 100 cells
-/// let quad: Midpoint = Midpoint::new(100)?;
+/// let quad: Midpoint = Midpoint::new(100.try_into().unwrap());
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the midpoint rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
-/// # Ok::<(), MidpointError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

@@ -15,15 +15,13 @@
 //!
 //! ```
 //! use gauss_quad::simpson::Simpson;
-//! # use gauss_quad::simpson::SimpsonError;
 //! use approx::assert_abs_diff_eq;
 //!
 //! use core::f64::consts::PI;
 //!
 //! let eps = 0.001;
 //!
-//! let n = 10;
-//! let quad = Simpson::new(n)?;
+//! let quad = Simpson::new(10.try_into().unwrap());
 //!
 //! // integrate some functions
 //! let integrate_euler = quad.integrate(0.0, 1.0, |x| x.exp());
@@ -31,7 +29,6 @@
 //!
 //! let integrate_sin = quad.integrate(-PI, PI, |x| x.sin());
 //! assert_abs_diff_eq!(integrate_sin, 0.0, epsilon = eps);
-//! # Ok::<(), SimpsonError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
@@ -44,13 +41,12 @@ use core::num::NonZeroUsize;
 /// A Simpson's rule.
 ///
 /// ```
-/// # use gauss_quad::simpson::{Simpson, SimpsonError};
+/// # use gauss_quad::simpson::Simpson;
 /// // initialize a Simpson rule with 100 subintervals
-/// let quad: Simpson = Simpson::new(100)?;
+/// let quad: Simpson = Simpson::new(100.try_into().unwrap());
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the Simpson rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
-/// # Ok::<(), SimpsonError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

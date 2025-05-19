@@ -5,17 +5,16 @@
 //! with the weighing function w(x, `alpha`) = x^`alpha` * e^(-x) over the domain `[0, ∞)`.
 //!
 //! # Examples
+//!
 //! ```
 //! use gauss_quad::laguerre::GaussLaguerre;
-//! # use gauss_quad::laguerre::GaussLaguerreError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussLaguerre::new(10, 1.0)?;
+//! let quad = GaussLaguerre::new(10.try_into().unwrap(), 1.0).unwrap();
 //!
 //! let integral = quad.integrate(|x| x.powi(2));
 //!
 //! assert_abs_diff_eq!(integral, 6.0, epsilon = 1e-14);
-//! # Ok::<(), GaussLaguerreError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
@@ -33,18 +32,18 @@ use core::num::NonZeroUsize;
 /// # Example
 ///
 /// Compute the factorial of 5:
+///
 /// ```
-/// # use gauss_quad::laguerre::{GaussLaguerre, GaussLaguerreError};
+/// # use gauss_quad::laguerre::GaussLaguerre;
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Laguerre rule with 4 nodes
-/// let quad = GaussLaguerre::new(4, 0.0)?;
+/// let quad = GaussLaguerre::new(4.try_into().unwrap(), 0.0).unwrap();
 ///
 /// // numerically evaluate the integral x^5*e^(-x),
 /// // which is a definition of the gamma function of six
 /// let fact_5 = quad.integrate(|x| x.powi(5));
 ///
 /// assert_abs_diff_eq!(fact_5, 1.0 * 2.0 * 3.0 * 4.0 * 5.0, epsilon = 1e-12);
-/// # Ok::<(), GaussLaguerreError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

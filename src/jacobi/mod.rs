@@ -10,7 +10,7 @@
 //! # use gauss_quad::jacobi::GaussJacobiError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussJacobi::new(10, 0.0, -1.0 / 3.0)?;
+//! let quad = GaussJacobi::new(10.try_into().unwrap(), 0.0, -1.0 / 3.0)?;
 //!
 //! // numerically integrate sin(x) / (1 + x)^(1/3), a function with a singularity at x = -1.
 //! let integral = quad.integrate(-1.0, 1.0, |x| x.sin());
@@ -44,7 +44,7 @@ use std::backtrace::Backtrace;
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::E;
 /// // initialize the quadrature rule.
-/// let quad = GaussJacobi::new(10, -0.5, 0.0)?;
+/// let quad = GaussJacobi::new(10.try_into().unwrap(), -0.5, 0.0)?;
 ///
 /// let integral = quad.integrate(0.0, 2.0, |x| (-x).exp());
 ///
