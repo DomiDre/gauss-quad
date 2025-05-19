@@ -5,6 +5,7 @@ use gauss_quad::GaussJacobi;
 fn benches(c: &mut Criterion) {
     let mut group = c.benchmark_group("jacobi");
     for deg in [3, 10, 40, 200, 1_000] {
+        let deg = deg.try_into().unwrap();
         let rule = GaussJacobi::new(deg, -0.25, -1.0 / 3.0).unwrap();
         group.bench_function(&format!("constructor, degree {deg}"), |b| {
             b.iter(|| black_box(GaussJacobi::new(deg, -0.25, -0.25).unwrap()))

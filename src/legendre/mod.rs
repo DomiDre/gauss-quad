@@ -32,7 +32,7 @@ use bogaert::NodeWeightPair;
 
 use crate::{Node, Weight, __impl_node_weight_rule};
 
-use std::backtrace::Backtrace;
+use core::num::NonZeroUsize;
 
 /// A Gauss-Legendre quadrature scheme.
 ///
@@ -82,16 +82,12 @@ impl GaussLegendre {
     /// # Errors
     ///
     /// Returns an error if `deg` is 0.
-    pub fn new(deg: usize) -> Result<Self, GaussLegendreError> {
-        if deg == 0 {
-            return Err(GaussLegendreError::new());
-        }
-
-        Ok(Self {
-            node_weight_pairs: (1..deg + 1)
-                .map(|k: usize| NodeWeightPair::new(deg, k).into_tuple())
+    pub fn new(deg: NonZeroUsize) -> Self {
+        Self {
+            node_weight_pairs: (1..deg.get() + 1)
+                .map(|k: usize| NodeWeightPair::new(deg.get(), k).into_tuple())
                 .collect(),
-        })
+        }
     }
 
     #[cfg(feature = "rayon")]
@@ -100,17 +96,13 @@ impl GaussLegendre {
     /// # Errors
     ///
     /// Returns an error if `deg` is 0.
-    pub fn par_new(deg: usize) -> Result<Self, GaussLegendreError> {
-        if deg == 0 {
-            return Err(GaussLegendreError::new());
-        }
-
-        Ok(Self {
+    pub fn par_new(deg: NonZeroUsize) -> Self {
+        Self {
             node_weight_pairs: (1..deg + 1)
                 .into_par_iter()
                 .map(|k| NodeWeightPair::new(deg, k).into_tuple())
                 .collect(),
-        })
+        }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -175,37 +167,6 @@ impl GaussLegendre {
 
 __impl_node_weight_rule! {GaussLegendre, GaussLegendreNodes, GaussLegendreWeights, GaussLegendreIter, GaussLegendreIntoIter}
 
-/// The error returned by [`GaussLegendre::new`] if it's given a degree of 0.
-#[derive(Debug)]
-pub struct GaussLegendreError(Backtrace);
-
-use core::fmt;
-impl fmt::Display for GaussLegendreError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "the degree of the Gauss-Legendre quadrature rule must be at least 1"
-        )
-    }
-}
-
-impl GaussLegendreError {
-    /// Calls [`Backtrace::capture`] and wraps the result in a `GaussLegendreError` struct.
-    fn new() -> Self {
-        Self(Backtrace::capture())
-    }
-
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
-    #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.0
-    }
-}
-
-impl std::error::Error for GaussLegendreError {}
-
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
@@ -214,14 +175,16 @@ mod tests {
 
     #[test]
     fn check_degree_1() {
-        let rule = GaussLegendre::new(1).unwrap();
+        let rule = GaussLegendre::new(1.try_into().unwrap());
         assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), 0.5);
         assert_abs_diff_eq!(rule.integrate(-1.0, 2.0, |x| 2.0 * x), 3.0, epsilon = 1e-15);
     }
 
     #[test]
     fn check_degree_3() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3).unwrap().into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(3.try_into().unwrap())
+            .into_iter()
+            .unzip();
 
         let x_should = [0.7745966692414834, 0.0000000000000000, -0.7745966692414834];
         let w_should = [0.5555555555555556, 0.8888888888888888, 0.5555555555555556];
@@ -236,7 +199,9 @@ mod tests {
     #[test]
     fn check_degree_128() {
         // A Legendre quadrature rule with degree > 100 to test calculation with non tabulated values
-        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(128).unwrap().into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussLegendre::new(128.try_into().unwrap())
+            .into_iter()
+            .unzip();
 
         // comparison values copied from http://www.holoborodko.com/pavel/numerical-methods/numerical-integration/#gauss_quadrature_abscissas_table
         #[rustfmt::skip]
@@ -256,21 +221,11 @@ mod tests {
     }
 
     #[test]
-    fn check_legendre_error() {
-        let legendre_rule = GaussLegendre::new(0);
-        assert!(legendre_rule.is_err());
-        assert_eq!(
-            format!("{}", legendre_rule.err().unwrap()),
-            "the degree of the Gauss-Legendre quadrature rule must be at least 1"
-        );
-    }
-
-    #[test]
     fn check_derives() {
-        let quad = GaussLegendre::new(10).unwrap();
+        let quad = GaussLegendre::new(10.try_into().unwrap());
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussLegendre::new(3).unwrap();
+        let other_quad = GaussLegendre::new(3.try_into().unwrap());
         assert_ne!(quad, other_quad);
     }
 
@@ -278,7 +233,7 @@ mod tests {
     fn check_iterators() {
         // check int(x^2, -1, 1) with various iterators
 
-        let rule = GaussLegendre::new(3).unwrap();
+        let rule = GaussLegendre::new(3.try_into().unwrap());
 
         assert_abs_diff_eq!(
             2.0 / 3.0,
@@ -300,14 +255,14 @@ mod tests {
 
     #[test]
     fn integrate_linear() {
-        let quad = GaussLegendre::new(5).unwrap();
+        let quad = GaussLegendre::new(5.try_into().unwrap());
         let integral = quad.integrate(0.0, 1.0, |x| x);
         assert_abs_diff_eq!(integral, 0.5, epsilon = 1e-15);
     }
 
     #[test]
     fn integrate_parabola() {
-        let quad = GaussLegendre::new(5).unwrap();
+        let quad = GaussLegendre::new(5.try_into().unwrap());
         let integral = quad.integrate(0.0, 3.0, |x| x.powi(2));
         assert_abs_diff_eq!(integral, 9.0, epsilon = 1e-13);
     }
@@ -315,7 +270,7 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_integrate_linear() {
-        let quad = GaussLegendre::par_new(5).unwrap();
+        let quad = GaussLegendre::par_new(5.try_into().unwrap());
         let integral = quad.par_integrate(0.0, 1.0, |x| x);
         assert_abs_diff_eq!(integral, 0.5, epsilon = 1e-15);
     }
@@ -323,15 +278,8 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_integrate_parabola() {
-        let quad = GaussLegendre::par_new(5).unwrap();
+        let quad = GaussLegendre::par_new(5.try_into().unwrap());
         let integral = quad.par_integrate(0.0, 3.0, |x| x.powi(2));
         assert_abs_diff_eq!(integral, 9.0, epsilon = 1e-13);
-    }
-
-    #[cfg(feature = "rayon")]
-    #[test]
-    fn check_legendre_error_rayon() {
-        assert!(GaussLegendre::par_new(0).is_err());
-        assert!(GaussLegendre::par_new(1).is_err());
     }
 }

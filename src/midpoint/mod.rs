@@ -46,7 +46,7 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{Node, __impl_node_rule};
 
-use std::backtrace::Backtrace;
+use core::num::NonZeroUsize;
 
 /// A midpoint rule.
 /// ```
@@ -69,17 +69,9 @@ impl Midpoint {
     /// Initialize a new midpoint rule with `degree` number of cells. The nodes are evenly spaced.
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if `degree` is less than 1.
-    pub fn new(degree: usize) -> Result<Self, MidpointError> {
-        if degree > 0 {
-            Ok(Self {
-                nodes: (0..degree).map(|d| d as f64).collect(),
-            })
-        } else {
-            Err(MidpointError::new())
+    pub fn new(degree: NonZeroUsize) -> Self {
+        Self {
+            nodes: (0..degree.get()).map(|d| d as f64).collect(),
         }
     }
 
@@ -119,34 +111,6 @@ impl Midpoint {
 
 __impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
 
-/// The error returned by [`Midpoint::new`] if given a degree of 0.
-#[derive(Debug)]
-pub struct MidpointError(Backtrace);
-
-use core::fmt;
-impl fmt::Display for MidpointError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "the degree of the midpoint rule needs to be at least 1")
-    }
-}
-
-impl MidpointError {
-    /// Calls [`Backtrace::capture`] and wraps the result in a `MidpointError` struct.
-    fn new() -> Self {
-        Self(Backtrace::capture())
-    }
-
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
-    #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.0
-    }
-}
-
-impl std::error::Error for MidpointError {}
-
 #[cfg(test)]
 mod tests {
     use approx::assert_abs_diff_eq;
@@ -155,7 +119,7 @@ mod tests {
 
     #[test]
     fn check_midpoint_integration() {
-        let quad = Midpoint::new(100).unwrap();
+        let quad = Midpoint::new(100.try_into().unwrap());
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
@@ -163,33 +127,23 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_check_midpoint_integration() {
-        let quad = Midpoint::new(100).unwrap();
+        let quad = Midpoint::new(100.try_into().unwrap());
         let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
-    fn check_midpoint_error() {
-        let midpoint_rule = Midpoint::new(0);
-        assert!(midpoint_rule.is_err());
-        assert_eq!(
-            format!("{}", midpoint_rule.err().unwrap()),
-            "the degree of the midpoint rule needs to be at least 1"
-        );
-    }
-
-    #[test]
     fn check_derives() {
-        let quad = Midpoint::new(10).unwrap();
+        let quad = Midpoint::new(10.try_into().unwrap());
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Midpoint::new(3).unwrap();
+        let other_quad = Midpoint::new(3.try_into().unwrap());
         assert_ne!(quad, other_quad);
     }
 
     #[test]
     fn check_iterators() {
-        let rule = Midpoint::new(100).unwrap();
+        let rule = Midpoint::new(100.try_into().unwrap());
         let a = 0.0;
         let b = 1.0;
         let ans = 1.0 / 3.0;
