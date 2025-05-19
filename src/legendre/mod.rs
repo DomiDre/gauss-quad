@@ -75,10 +75,6 @@ impl GaussLegendre {
     ///
     /// Uses the [algorithm by Ignace Bogaert](https://doi.org/10.1137/140954969), which has linear time
     /// complexity.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if `deg` is 0.
     pub fn new(deg: NonZeroUsize) -> Self {
         Self {
             node_weight_pairs: (1..deg.get() + 1)
@@ -89,15 +85,11 @@ impl GaussLegendre {
 
     #[cfg(feature = "rayon")]
     /// Same as [`new`](GaussLegendre::new) but runs in parallel.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if `deg` is 0.
     pub fn par_new(deg: NonZeroUsize) -> Self {
         Self {
-            node_weight_pairs: (1..deg + 1)
+            node_weight_pairs: (1..deg.get() + 1)
                 .into_par_iter()
-                .map(|k| NodeWeightPair::new(deg, k).into_tuple())
+                .map(|k| NodeWeightPair::new(deg.get(), k).into_tuple())
                 .collect(),
         }
     }
@@ -141,12 +133,11 @@ impl GaussLegendre {
     /// # Example
     ///
     /// ```
-    /// # use gauss_quad::legendre::{GaussLegendre, GaussLegendreError};
+    /// # use gauss_quad::legendre::GaussLegendre;
     /// # use approx::assert_abs_diff_eq;
-    /// let glq_rule = GaussLegendre::par_new(1_000_000)?;
+    /// let glq_rule = GaussLegendre::par_new(1_000_000.try_into().unwrap());
     ///
     /// assert_abs_diff_eq!(glq_rule.par_integrate(0.0, 1.0, |x| x.ln()), -1.0, epsilon = 1e-12);
-    /// # Ok::<(), GaussLegendreError>(())
     /// ```
     pub fn par_integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
     where
