@@ -9,10 +9,160 @@
 // the caller of the macro doesn't have to import anything into the module in order for the macro to compile,
 // and makes it compile even if the user has made custom types whose names shadow types used by the macro.
 
+use core::{fmt, num::ParseFloatError, str::FromStr};
+
 /// A node in a quadrature rule.
 pub type Node = f64;
 /// A weight in a quadrature rule.
 pub type Weight = f64;
+
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+/// A wrapper around a [`f64`] value that ensures the value is greater than -1.0.
+pub struct FiniteAboveNegOneF64(f64);
+
+impl fmt::Display for FiniteAboveNegOneF64 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl fmt::LowerExp for FiniteAboveNegOneF64 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:e}", self.0)
+    }
+}
+
+impl FiniteAboveNegOneF64 {
+    /// Creates a new `FiniteAboveNegOneF64` if the value is greater than -1.0.
+    #[inline]
+    pub const fn new(value: f64) -> Option<Self> {
+        if value > -1.0 && value.is_finite() {
+            Some(Self(value))
+        } else {
+            None
+        }
+    }
+
+    /// Creates a new `FiniteAboveNegOneF64` without checking the value.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the value is finite and greater than -1.0.
+    pub const unsafe fn new_unchecked(value: f64) -> Self {
+        debug_assert!(value > -1.0, "value must be greater than -1.0");
+        Self(value)
+    }
+
+    /// Returns the inner `f64` value of the `FiniteAboveNegOneF64`.
+    #[inline]
+    pub const fn get(&self) -> f64 {
+        self.0
+    }
+
+    #[inline]
+    pub fn checked_add(self, rhs: f64) -> Option<Self> {
+        Self::new(self.0 + rhs)
+    }
+
+    #[inline]
+    pub fn checked_sub(self, rhs: f64) -> Option<Self> {
+        Self::new(self.0 - rhs)
+    }
+
+    #[inline]
+    pub fn checked_mul(self, rhs: f64) -> Option<Self> {
+        Self::new(self.0 * rhs)
+    }
+
+    #[inline]
+    pub fn checked_div(self, rhs: f64) -> Option<Self> {
+        Self::new(self.0 / rhs)
+    }
+
+    #[inline]
+    pub fn checked_powi(self, exp: i32) -> Option<Self> {
+        Self::new(self.0.powi(exp))
+    }
+
+    #[inline]
+    pub fn checked_powf(self, exp: f64) -> Option<Self> {
+        Self::new(self.0.powf(exp))
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+/// The error that that is returned when trying to convert a [`f64`] value that is less than or equal to -1.0
+/// into an [`FiniteAboveNegOneF64`] with the [`TryFrom`] trait.
+pub struct InfNegOneOrLessError;
+
+impl fmt::Display for InfNegOneOrLessError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "attempted to convert a value that is less than or equal to -1.0 to an `FiniteAboveNegOneF64`"
+        )
+    }
+}
+
+impl core::error::Error for InfNegOneOrLessError {}
+
+impl TryFrom<f64> for FiniteAboveNegOneF64 {
+    type Error = InfNegOneOrLessError;
+
+    /// Tries to convert a `f64` into an `FiniteAboveNegOneF64`.
+    ///
+    /// Returns an error if the value is less than or equal to -1.0.
+    #[inline]
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        FiniteAboveNegOneF64::new(value).ok_or(InfNegOneOrLessError)
+    }
+}
+
+impl From<FiniteAboveNegOneF64> for f64 {
+    #[inline]
+    fn from(value: FiniteAboveNegOneF64) -> Self {
+        value.0
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// An error that can occur when parsing a `&str` into an [`FiniteAboveNegOneF64`].
+pub enum ParseFiniteAboveNegOneF64Error {
+    ParseError(ParseFloatError),
+    TooSmall(InfNegOneOrLessError),
+}
+
+impl fmt::Display for ParseFiniteAboveNegOneF64Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ParseFiniteAboveNegOneF64Error::ParseError(e) => write!(f, "{}", e),
+            ParseFiniteAboveNegOneF64Error::TooSmall(e) => write!(f, "{}", e),
+        }
+    }
+}
+
+impl core::error::Error for ParseFiniteAboveNegOneF64Error {
+    fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
+        match self {
+            ParseFiniteAboveNegOneF64Error::ParseError(e) => Some(e),
+            ParseFiniteAboveNegOneF64Error::TooSmall(e) => Some(e),
+        }
+    }
+}
+
+impl FromStr for FiniteAboveNegOneF64 {
+    type Err = ParseFiniteAboveNegOneF64Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.parse::<f64>() {
+            Ok(value) => value
+                .try_into()
+                .map_err(ParseFiniteAboveNegOneF64Error::TooSmall),
+            Err(e) => Err(ParseFiniteAboveNegOneF64Error::ParseError(e)),
+        }
+    }
+}
 
 /// This macro implements the data access API for the given quadrature rule struct that contains
 /// a field named `node_weight_pairs` of the type `Vec<(Node, Weight)>`.

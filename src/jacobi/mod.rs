@@ -24,12 +24,11 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::gamma::gamma;
 use crate::{
-    DMatrixf64, GaussChebyshevFirstKind, GaussChebyshevSecondKind, GaussLegendre, Node, Weight,
-    __impl_node_weight_rule,
+    DMatrixf64, FiniteAboveNegOneF64, GaussChebyshevFirstKind, GaussChebyshevSecondKind,
+    GaussLegendre, Node, Weight, __impl_node_weight_rule,
 };
 
 use core::num::NonZeroUsize;
-use std::backtrace::Backtrace;
 
 /// A Gauss-Jacobi quadrature scheme.
 ///
@@ -55,8 +54,8 @@ use std::backtrace::Backtrace;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussJacobi {
     node_weight_pairs: Vec<(Node, Weight)>,
-    alpha: f64,
-    beta: f64,
+    alpha: FiniteAboveNegOneF64,
+    beta: FiniteAboveNegOneF64,
 }
 
 impl GaussJacobi {
@@ -72,41 +71,33 @@ impl GaussJacobi {
     /// # Errors
     ///
     /// Returns an error if `alpha` and/or `beta` are smaller than or equal to -1.
-    pub fn new(deg: NonZeroUsize, alpha: f64, beta: f64) -> Result<Self, GaussJacobiError> {
-        match (
-            (alpha.is_finite() && alpha > -1.0),
-            (beta.is_finite() && beta > -1.0),
-        ) {
-            (true, true) => Ok(()),
-            (false, true) => Err(GaussJacobiErrorReason::Alpha),
-            (true, false) => Err(GaussJacobiErrorReason::Beta),
-            (false, false) => Err(GaussJacobiErrorReason::AlphaBeta),
-        }
-        .map_err(GaussJacobiError::new)?;
-
+    pub fn new(deg: NonZeroUsize, alpha: FiniteAboveNegOneF64, beta: FiniteAboveNegOneF64) -> Self {
         // Delegate the computation of nodes and weights when they have special values
         // that are equivalent to other rules that have faster implementations.
         //
         // UNWRAP: We have already verified that the degree is 1 or larger above.
         // Since that is the only possible error cause for these quadrature rules
         // this code can not fail, so we just `unwrap` the result.
-        match (alpha, beta) {
-            (0.0, 0.0) => return Ok(GaussLegendre::new(deg).into()),
-            (-0.5, -0.5) => return Ok(GaussChebyshevFirstKind::new(deg).into()),
-            (0.5, 0.5) => return Ok(GaussChebyshevSecondKind::new(deg).into()),
+        match (alpha.get(), beta.get()) {
+            (0.0, 0.0) => return GaussLegendre::new(deg).into(),
+            (-0.5, -0.5) => return GaussChebyshevFirstKind::new(deg).into(),
+            (0.5, 0.5) => return GaussChebyshevSecondKind::new(deg).into(),
             _ => (),
         }
 
         let mut companion_matrix = DMatrixf64::from_element(deg.get(), deg.get(), 0.0);
 
-        let mut diag = (beta - alpha) / (2.0 + beta + alpha);
+        let mut diag = (beta.get() - alpha.get()) / (2.0 + beta.get() + alpha.get());
         // Initialize symmetric companion matrix
         for idx in 0..deg.get() - 1 {
             let idx_f64 = idx as f64;
             let idx_p1 = idx_f64 + 1.0;
-            let denom_sum = 2.0 * idx_p1 + alpha + beta;
+            let denom_sum = 2.0 * idx_p1 + alpha.get() + beta.get();
             let off_diag = 2.0 / denom_sum
-                * (idx_p1 * (idx_p1 + alpha) * (idx_p1 + beta) * (idx_p1 + alpha + beta)
+                * (idx_p1
+                    * (idx_p1 + alpha.get())
+                    * (idx_p1 + beta.get())
+                    * (idx_p1 + alpha.get() + beta.get())
                     / ((denom_sum + 1.0) * (denom_sum - 1.0)))
                     .sqrt();
             unsafe {
@@ -114,7 +105,8 @@ impl GaussJacobi {
                 *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;
                 *companion_matrix.get_unchecked_mut((idx + 1, idx)) = off_diag;
             }
-            diag = (beta * beta - alpha * alpha) / (denom_sum * (denom_sum + 2.0));
+            diag = (beta.get() * beta.get() - alpha.get() * alpha.get())
+                / (denom_sum * (denom_sum + 2.0));
         }
         unsafe {
             *companion_matrix.get_unchecked_mut((deg.get() - 1, deg.get() - 1)) = diag;
@@ -122,10 +114,11 @@ impl GaussJacobi {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        let scale_factor =
-            (2.0f64).powf(alpha + beta + 1.0) * gamma(alpha + 1.0) * gamma(beta + 1.0)
-                / gamma(alpha + beta + 1.0)
-                / (alpha + beta + 1.0);
+        let scale_factor = (2.0f64).powf(alpha.get() + beta.get() + 1.0)
+            * gamma(alpha.get() + 1.0)
+            * gamma(beta.get() + 1.0)
+            / gamma(alpha.get() + beta.get() + 1.0)
+            / (alpha.get() + beta.get() + 1.0);
 
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
         let mut node_weight_pairs: Vec<(f64, f64)> = eigen
@@ -150,11 +143,11 @@ impl GaussJacobi {
             node_weight_pairs[deg.get() / 2].0 = 0.0;
         }
 
-        Ok(Self {
+        Self {
             node_weight_pairs,
             alpha,
             beta,
-        })
+        }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -196,69 +189,24 @@ impl GaussJacobi {
 
     /// Returns the value of the `alpha` parameter.
     #[inline]
-    pub const fn alpha(&self) -> f64 {
+    pub const fn alpha(&self) -> FiniteAboveNegOneF64 {
         self.alpha
     }
 
     /// Returns the value of the `beta` parameter.
     #[inline]
-    pub const fn beta(&self) -> f64 {
+    pub const fn beta(&self) -> FiniteAboveNegOneF64 {
         self.beta
     }
 }
 
 __impl_node_weight_rule! {GaussJacobi, GaussJacobiNodes, GaussJacobiWeights, GaussJacobiIter, GaussJacobiIntoIter}
 
-/// The error returned by [`GaussJacobi::new`] if given a degree, `deg`, of 0
-/// and/or an `alpha` and/or `beta` less than or equal to -1.
-#[derive(Debug)]
-pub struct GaussJacobiError {
-    reason: GaussJacobiErrorReason,
-    backtrace: Backtrace,
-}
-
-impl GaussJacobiError {
-    /// Captures a backtrace and creates a new GaussJacobiError with the given reason.
-    #[inline]
-    pub(crate) fn new(reason: GaussJacobiErrorReason) -> Self {
-        Self {
-            reason,
-            backtrace: Backtrace::capture(),
-        }
-    }
-
-    /// Returns the reason for the error.
-    #[inline]
-    pub fn reason(&self) -> GaussJacobiErrorReason {
-        self.reason
-    }
-
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
-    #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.backtrace
-    }
-}
-
-use core::fmt;
-impl fmt::Display for GaussJacobiError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        const EXPONENT_LIMIT: &str = "must be finite and larger than -1.0";
-        match self.reason() {
-            GaussJacobiErrorReason::Alpha => write!(f, "alpha {EXPONENT_LIMIT}"),
-            GaussJacobiErrorReason::Beta => write!(f, "beta {EXPONENT_LIMIT}"),
-            GaussJacobiErrorReason::AlphaBeta => write!(f, "alpha and beta {EXPONENT_LIMIT}"),
-        }
-    }
-}
-
-impl std::error::Error for GaussJacobiError {}
-
 /// Gauss-Legendre quadrature is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.
 impl From<GaussLegendre> for GaussJacobi {
     fn from(value: GaussLegendre) -> Self {
+        const ZERO: FiniteAboveNegOneF64 = FiniteAboveNegOneF64::new(0.0).unwrap();
+
         let mut node_weight_pairs = value.into_node_weight_pairs();
         // Gauss-Legendre nodes are generated in reverse sorted order.
         // This corrects for that since Gauss-Jacobi nodes are currently always sorted
@@ -266,8 +214,8 @@ impl From<GaussLegendre> for GaussJacobi {
         node_weight_pairs.reverse();
         Self {
             node_weight_pairs,
-            alpha: 0.0,
-            beta: 0.0,
+            alpha: ZERO,
+            beta: ZERO,
         }
     }
 }
@@ -275,10 +223,12 @@ impl From<GaussLegendre> for GaussJacobi {
 /// Gauss-Chebyshev quadrature of the first kind is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = -0.5.
 impl From<GaussChebyshevFirstKind> for GaussJacobi {
     fn from(value: GaussChebyshevFirstKind) -> Self {
+        const NEG_HALF: FiniteAboveNegOneF64 = FiniteAboveNegOneF64::new(-0.5).unwrap();
+
         Self {
             node_weight_pairs: value.into_node_weight_pairs(),
-            alpha: -0.5,
-            beta: -0.5,
+            alpha: NEG_HALF,
+            beta: NEG_HALF,
         }
     }
 }
@@ -286,37 +236,13 @@ impl From<GaussChebyshevFirstKind> for GaussJacobi {
 /// Gauss-Chebyshev quadrature of the second kind is equivalent to Gauss-Jacobi quadrature with `alpha` = `beta` = 0.5.
 impl From<GaussChebyshevSecondKind> for GaussJacobi {
     fn from(value: GaussChebyshevSecondKind) -> Self {
+        const HALF: FiniteAboveNegOneF64 = FiniteAboveNegOneF64::new(0.5).unwrap();
+
         Self {
             node_weight_pairs: value.into_node_weight_pairs(),
-            alpha: 0.5,
-            beta: 0.5,
+            alpha: HALF,
+            beta: HALF,
         }
-    }
-}
-
-/// The reason for the `GaussJacobiError`, returned by the [`GaussJacobiError::reason`] function.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum GaussJacobiErrorReason {
-    /// The `alpha` exponent was less than or equal to -1.
-    Alpha,
-    /// The `beta` exponent was less than or equal to -1.
-    Beta,
-    /// Both the `alpha` and `beta` exponents were less than or equal to -1.
-    AlphaBeta,
-}
-
-impl GaussJacobiErrorReason {
-    /// Returns true if the given `alpha` exponent was bad.
-    #[inline]
-    pub fn was_bad_alpha(&self) -> bool {
-        matches!(self, Self::Alpha | Self::AlphaBeta)
-    }
-
-    /// Returns true if the given `beta` exponent was bad.
-    #[inline]
-    pub fn was_bad_beta(&self) -> bool {
-        matches!(self, Self::Beta | Self::AlphaBeta)
     }
 }
 
@@ -332,19 +258,23 @@ mod tests {
     fn check_degree_1() {
         let deg = NonZeroUsize::new(1).unwrap();
 
-        let rule = GaussJacobi::new(deg, 0.0, 0.0).unwrap();
+        let rule = GaussJacobi::new(deg, 0.0.try_into().unwrap(), 0.0.try_into().unwrap());
 
         assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), 0.5);
 
-        let rule = GaussJacobi::new(deg, -0.5, -0.5).unwrap();
+        let rule = GaussJacobi::new(deg, (-0.5).try_into().unwrap(), (-0.5).try_into().unwrap());
 
         assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 4.0);
 
-        let rule = GaussJacobi::new(deg, 0.5, 0.5).unwrap();
+        let rule = GaussJacobi::new(deg, 0.5.try_into().unwrap(), 0.5.try_into().unwrap());
 
         assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 8.0);
 
-        let rule = GaussJacobi::new(deg, -1.0 / 2.0, 1.0 / 2.0).unwrap();
+        let rule = GaussJacobi::new(
+            deg,
+            (-1.0 / 2.0).try_into().unwrap(),
+            (1.0 / 2.0).try_into().unwrap(),
+        );
 
         // Calculated with Wolfram Mathematica
         assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), PI / 2.0);
@@ -355,12 +285,12 @@ mod tests {
     #[test]
     fn sanity_check_chebyshev_delegation() {
         const DEG: NonZeroUsize = NonZeroUsize::new(200).unwrap();
-        let jrule = GaussJacobi::new(DEG, -0.5, -0.5).unwrap();
+        let jrule = GaussJacobi::new(DEG, (-0.5).try_into().unwrap(), (-0.5).try_into().unwrap());
         let crule1 = GaussChebyshevFirstKind::new(DEG);
 
         assert_eq!(jrule.as_node_weight_pairs(), crule1.as_node_weight_pairs());
 
-        let jrule = GaussJacobi::new(DEG, 0.5, 0.5).unwrap();
+        let jrule = GaussJacobi::new(DEG, 0.5.try_into().unwrap(), 0.5.try_into().unwrap());
         let crule2 = GaussChebyshevSecondKind::new(DEG);
 
         assert_eq!(jrule.as_node_weight_pairs(), crule2.as_node_weight_pairs())
@@ -369,7 +299,7 @@ mod tests {
     #[test]
     fn sanity_check_legendre_delegation() {
         const DEG: NonZeroUsize = NonZeroUsize::new(200).unwrap();
-        let jrule = GaussJacobi::new(DEG, 0.0, 0.0).unwrap();
+        let jrule = GaussJacobi::new(DEG, 0.0.try_into().unwrap(), 0.0.try_into().unwrap());
         let lrule = GaussLegendre::new(DEG);
 
         assert_eq!(
@@ -379,16 +309,14 @@ mod tests {
     }
 
     #[test]
-    fn check_alpha_beta_bounds() {
-        assert!(GaussJacobi::new(10.try_into().unwrap(), -1.0, -1.0).is_err());
-    }
-
-    #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5.try_into().unwrap(), 0.0, 0.0)
-            .unwrap()
-            .into_iter()
-            .unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(
+            5.try_into().unwrap(),
+            0.0.try_into().unwrap(),
+            0.0.try_into().unwrap(),
+        )
+        .into_iter()
+        .unzip();
         let x_should = [
             -0.906_179_845_938_664,
             -0.538_469_310_105_683_1,
@@ -413,10 +341,13 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_1_beta_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(2.try_into().unwrap(), 1.0, 0.0)
-            .unwrap()
-            .into_iter()
-            .unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(
+            2.try_into().unwrap(),
+            1.0.try_into().unwrap(),
+            0.0.try_into().unwrap(),
+        )
+        .into_iter()
+        .unzip();
         let x_should = [-0.689_897_948_556_635_7, 0.289_897_948_556_635_64];
         let w_should = [1.272_165_526_975_908_7, 0.727_834_473_024_091_3];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -429,10 +360,13 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_1_beta_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5.try_into().unwrap(), 1.0, 0.0)
-            .unwrap()
-            .into_iter()
-            .unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(
+            5.try_into().unwrap(),
+            1.0.try_into().unwrap(),
+            0.0.try_into().unwrap(),
+        )
+        .into_iter()
+        .unzip();
         let x_should = [
             -0.920_380_285_897_062_6,
             -0.603_973_164_252_783_7,
@@ -457,10 +391,13 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_0_beta_1() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(5.try_into().unwrap(), 0.0, 1.0)
-            .unwrap()
-            .into_iter()
-            .unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(
+            5.try_into().unwrap(),
+            0.0.try_into().unwrap(),
+            1.0.try_into().unwrap(),
+        )
+        .into_iter()
+        .unzip();
         let x_should = [
             -0.802_929_828_402_347_2,
             -0.390_928_546_707_272_2,
@@ -485,10 +422,13 @@ mod tests {
 
     #[test]
     fn golub_welsch_50_alpha_42_beta_23() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(50.try_into().unwrap(), 42.0, 23.0)
-            .unwrap()
-            .into_iter()
-            .unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(
+            50.try_into().unwrap(),
+            42.0.try_into().unwrap(),
+            23.0.try_into().unwrap(),
+        )
+        .into_iter()
+        .unzip();
         let x_should = [
             -0.936_528_233_152_541_2,
             -0.914_340_864_546_088_5,
@@ -604,126 +544,20 @@ mod tests {
     #[test]
     fn check_derives() {
         const DEG: NonZeroUsize = NonZeroUsize::new(10).unwrap();
-        let quad = GaussJacobi::new(DEG, 0.0, 1.0).unwrap();
+        let quad = GaussJacobi::new(DEG, 0.0.try_into().unwrap(), 1.0.try_into().unwrap());
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussJacobi::new(DEG, 1.0, 0.0).unwrap();
+        let other_quad = GaussJacobi::new(DEG, 1.0.try_into().unwrap(), 0.0.try_into().unwrap());
         assert_ne!(quad, other_quad);
     }
 
     #[test]
-    fn check_jacobi_error() {
-        const DEG1: NonZeroUsize = NonZeroUsize::new(1).unwrap();
-        const DEG3: NonZeroUsize = NonZeroUsize::new(3).unwrap();
-        let jacobi_rule = GaussJacobi::new(DEG3, -2.0, 1.0);
-        assert!(jacobi_rule
-            .as_ref()
-            .is_err_and(|x| x.reason() == GaussJacobiErrorReason::Alpha));
-        assert_eq!(
-            format!("{}", jacobi_rule.err().unwrap()),
-            "alpha must be finite and larger than -1.0"
-        );
-
-        let jacobi_rule = GaussJacobi::new(DEG3, 1.0, -2.0);
-        assert!(jacobi_rule
-            .as_ref()
-            .is_err_and(|x| x.reason() == GaussJacobiErrorReason::Beta));
-        assert_eq!(
-            format!("{}", jacobi_rule.err().unwrap()),
-            "beta must be finite and larger than -1.0"
-        );
-
-        let jacobi_rule = GaussJacobi::new(DEG3, -2.0, -2.0);
-        assert!(jacobi_rule
-            .as_ref()
-            .is_err_and(|x| x.reason() == GaussJacobiErrorReason::AlphaBeta));
-        assert_eq!(
-            format!("{}", jacobi_rule.err().unwrap()),
-            "alpha and beta must be finite and larger than -1.0"
-        );
-
-        assert_eq!(
-            GaussJacobi::new(DEG3, -2.0, 1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Alpha)
-        );
-
-        assert_eq!(
-            GaussJacobi::new(DEG3, -1.0, 1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Alpha)
-        );
-
-        assert_eq!(
-            GaussJacobi::new(DEG3, 1.0, -2.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Beta)
-        );
-
-        assert_eq!(
-            GaussJacobi::new(DEG3, -1.0, -1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::AlphaBeta)
-        );
-
-        assert_eq!(
-            GaussJacobi::new(1.try_into().unwrap(), -1.0, 0.5).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Alpha)
-        );
-
-        assert_eq!(
-            GaussJacobi::new(DEG3, -2.0, -2.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::AlphaBeta)
-        );
-        assert_eq!(
-            GaussJacobi::new(DEG3, -1.0, -2.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::AlphaBeta)
-        );
-
-        assert_eq!(
-            GaussJacobi::new(DEG3, -2.0, -1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::AlphaBeta)
-        );
-        assert_eq!(
-            GaussJacobi::new(DEG3, -1.0, -1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::AlphaBeta)
-        );
-
-        assert_eq!(
-            GaussJacobi::new(DEG1, -1.0, 0.5).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Alpha)
-        );
-        assert_eq!(
-            GaussJacobi::new(DEG1, -2.0, 0.5).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Alpha)
-        );
-
-        assert_eq!(
-            GaussJacobi::new(DEG1, 0.5, -1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Beta)
-        );
-        assert_eq!(
-            GaussJacobi::new(DEG1, 0.5, -2.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::Beta)
-        );
-
-        assert_eq!(
-            GaussJacobi::new(DEG1, -1.0, -1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::AlphaBeta)
-        );
-        assert_eq!(
-            GaussJacobi::new(DEG1, -2.0, -2.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::AlphaBeta)
-        );
-        assert_eq!(
-            GaussJacobi::new(DEG1, -1.0, -2.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::AlphaBeta)
-        );
-        assert_eq!(
-            GaussJacobi::new(DEG1, -2.0, -1.0).map_err(|e| e.reason()),
-            Err(GaussJacobiErrorReason::AlphaBeta)
-        );
-    }
-
-    #[test]
     fn check_iterators() {
-        let rule = GaussJacobi::new(2.try_into().unwrap(), -0.25, -0.5).unwrap();
+        let rule = GaussJacobi::new(
+            2.try_into().unwrap(),
+            (-0.25).try_into().unwrap(),
+            (-0.5).try_into().unwrap(),
+        );
         // Answer taken from Wolfram Alpha <https://www.wolframalpha.com/input?i2d=true&i=Integrate%5BDivide%5BPower%5Bx%2C2%5D%2CPower%5B%5C%2840%291-x%5C%2841%29%2CDivide%5B1%2C4%5D%5DPower%5B%5C%2840%291%2Bx%5C%2841%29%2CDivide%5B1%2C2%5D%5D%5D%2C%7Bx%2C-1%2C1%7D%5D>
         let ans = 1.3298477657906902;
 
@@ -750,7 +584,11 @@ mod tests {
 
     #[test]
     fn check_some_integrals() {
-        let rule = GaussJacobi::new(10.try_into().unwrap(), -0.5, -0.25).unwrap();
+        let rule = GaussJacobi::new(
+            10.try_into().unwrap(),
+            (-0.5).try_into().unwrap(),
+            (-0.25).try_into().unwrap(),
+        );
 
         assert_abs_diff_eq!(
             rule.integrate(-1.0, 1.0, |x| x * x),
@@ -768,7 +606,11 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_check_some_integrals() {
-        let rule = GaussJacobi::new(10.try_into().unwrap(), -0.5, -0.25).unwrap();
+        let rule = GaussJacobi::new(
+            10.try_into().unwrap(),
+            (-0.5).try_into().unwrap(),
+            (-0.25).try_into().unwrap(),
+        );
 
         assert_abs_diff_eq!(
             rule.par_integrate(-1.0, 1.0, |x| x * x),

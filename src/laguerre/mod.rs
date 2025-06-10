@@ -21,7 +21,7 @@
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::gamma::gamma;
-use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
+use crate::{DMatrixf64, FiniteAboveNegOneF64, Node, Weight, __impl_node_weight_rule};
 
 use core::num::NonZeroUsize;
 
@@ -49,7 +49,7 @@ use core::num::NonZeroUsize;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLaguerre {
     node_weight_pairs: Vec<(Node, Weight)>,
-    alpha: f64,
+    alpha: FiniteAboveNegOneF64,
 }
 
 impl GaussLaguerre {
@@ -67,18 +67,14 @@ impl GaussLaguerre {
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
     ///
     /// Returns `None` if `alpha` is smaller than -1.
-    pub fn new(deg: NonZeroUsize, alpha: f64) -> Option<Self> {
-        if !(alpha.is_finite() && alpha > -1.0) {
-            return None;
-        }
-
+    pub fn new(deg: NonZeroUsize, alpha: FiniteAboveNegOneF64) -> Self {
         let mut companion_matrix = DMatrixf64::from_element(deg.get(), deg.get(), 0.0);
 
-        let mut diag = alpha + 1.0;
+        let mut diag = alpha.get() + 1.0;
         // Initialize symmetric companion matrix
         for idx in 0..deg.get() - 1 {
             let idx_f64 = 1.0 + idx as f64;
-            let off_diag = (idx_f64 * (idx_f64 + alpha)).sqrt();
+            let off_diag = (idx_f64 * (idx_f64 + alpha.get())).sqrt();
             unsafe {
                 *companion_matrix.get_unchecked_mut((idx, idx)) = diag;
                 *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;
@@ -92,7 +88,7 @@ impl GaussLaguerre {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        let scale_factor = gamma(alpha + 1.0);
+        let scale_factor = gamma(alpha.get() + 1.0);
 
         // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
         let mut node_weight_pairs: Vec<(f64, f64)> = eigen
@@ -107,10 +103,10 @@ impl GaussLaguerre {
             .collect();
         node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
-        Some(GaussLaguerre {
+        GaussLaguerre {
             node_weight_pairs,
             alpha,
-        })
+        }
     }
 
     /// Perform quadrature of  
@@ -144,7 +140,7 @@ impl GaussLaguerre {
 
     /// Returns the value of the `alpha` parameter of the rule.
     #[inline]
-    pub const fn alpha(&self) -> f64 {
+    pub const fn alpha(&self) -> FiniteAboveNegOneF64 {
         self.alpha
     }
 }
@@ -159,7 +155,7 @@ mod tests {
 
     #[test]
     fn check_degree_1() {
-        let rule = GaussLaguerre::new(1.try_into().unwrap(), 0.0).unwrap();
+        let rule = GaussLaguerre::new(1.try_into().unwrap(), 0.0.try_into().unwrap());
 
         for constant in (0..100).step_by(10).map(f64::from) {
             assert_abs_diff_eq!(rule.integrate(|x| constant * x), constant, epsilon = 1e-13);
@@ -168,10 +164,10 @@ mod tests {
 
     #[test]
     fn golub_welsch_2_alpha_5() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(2.try_into().unwrap(), 5.0)
-            .unwrap()
-            .into_iter()
-            .unzip();
+        let (x, w): (Vec<_>, Vec<_>) =
+            GaussLaguerre::new(2.try_into().unwrap(), 5.0.try_into().unwrap())
+                .into_iter()
+                .unzip();
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
         let w_should = [82.677_868_380_553_63, 37.322_131_619_446_37];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -184,10 +180,10 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3.try_into().unwrap(), 0.0)
-            .unwrap()
-            .into_iter()
-            .unzip();
+        let (x, w): (Vec<_>, Vec<_>) =
+            GaussLaguerre::new(3.try_into().unwrap(), 0.0.try_into().unwrap())
+                .into_iter()
+                .unzip();
         let x_should = [
             0.415_774_556_783_479_1,
             2.294_280_360_279_042,
@@ -208,10 +204,10 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_1_5() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3.try_into().unwrap(), 1.5)
-            .unwrap()
-            .into_iter()
-            .unzip();
+        let (x, w): (Vec<_>, Vec<_>) =
+            GaussLaguerre::new(3.try_into().unwrap(), 1.5.try_into().unwrap())
+                .into_iter()
+                .unzip();
         let x_should = [
             1.220_402_317_558_883_8,
             3.808_880_721_467_068,
@@ -232,10 +228,10 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_negative() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(5.try_into().unwrap(), -0.9)
-            .unwrap()
-            .into_iter()
-            .unzip();
+        let (x, w): (Vec<_>, Vec<_>) =
+            GaussLaguerre::new(5.try_into().unwrap(), (-0.9).try_into().unwrap())
+                .into_iter()
+                .unzip();
         let x_should = [
             0.020_777_151_319_288_104,
             0.808_997_536_134_602_1,
@@ -259,23 +255,17 @@ mod tests {
     }
 
     #[test]
-    fn check_laguerre_error() {
-        assert!(GaussLaguerre::new(5.try_into().unwrap(), -1.0).is_none());
-        assert!(GaussLaguerre::new(5.try_into().unwrap(), -2.0).is_none());
-    }
-
-    #[test]
     fn check_derives() {
-        let quad = GaussLaguerre::new(10.try_into().unwrap(), 1.0).unwrap();
+        let quad = GaussLaguerre::new(10.try_into().unwrap(), 1.0.try_into().unwrap());
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussLaguerre::new(10.try_into().unwrap(), 2.0).unwrap();
+        let other_quad = GaussLaguerre::new(10.try_into().unwrap(), 2.0.try_into().unwrap());
         assert_ne!(quad, other_quad);
     }
 
     #[test]
     fn check_iterators() {
-        let rule = GaussLaguerre::new(3.try_into().unwrap(), 0.5).unwrap();
+        let rule = GaussLaguerre::new(3.try_into().unwrap(), 0.5.try_into().unwrap());
 
         let ans = 15.0 / 8.0 * core::f64::consts::PI.sqrt();
 
@@ -302,7 +292,7 @@ mod tests {
 
     #[test]
     fn check_some_integrals() {
-        let rule = GaussLaguerre::new(10.try_into().unwrap(), -0.5).unwrap();
+        let rule = GaussLaguerre::new(10.try_into().unwrap(), (-0.5).try_into().unwrap());
 
         assert_abs_diff_eq!(
             rule.integrate(|x| x * x),
@@ -320,7 +310,7 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_check_some_integrals() {
-        let rule = GaussLaguerre::new(10, -0.5).unwrap();
+        let rule = GaussLaguerre::new(10.try_into().unwrap(), (-0.5).try_into().unwrap());
 
         assert_abs_diff_eq!(
             rule.par_integrate(|x| x * x),

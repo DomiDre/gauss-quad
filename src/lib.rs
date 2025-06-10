@@ -181,7 +181,9 @@ pub mod simpson;
 #[doc(inline)]
 pub use chebyshev::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
 #[doc(inline)]
-pub use data_api::{Node, Weight};
+pub use data_api::{
+    FiniteAboveNegOneF64, InfNegOneOrLessError, Node, ParseFiniteAboveNegOneF64Error, Weight,
+};
 #[doc(inline)]
 pub use hermite::GaussHermite;
 #[doc(inline)]
