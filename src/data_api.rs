@@ -33,6 +33,12 @@ impl fmt::LowerExp for FiniteAboveNegOneF64 {
     }
 }
 
+impl fmt::UpperExp for FiniteAboveNegOneF64 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:E}", self.0)
+    }
+}
+
 impl FiniteAboveNegOneF64 {
     /// Creates a new `FiniteAboveNegOneF64` if the value is greater than -1.0.
     #[inline]
