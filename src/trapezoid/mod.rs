@@ -121,7 +121,7 @@ mod test {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_test_integration() {
-        let quad = Trapezoid::new(1000).unwrap();
+        let quad = Trapezoid::new(1000.try_into().unwrap());
         let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.000001);
     }
