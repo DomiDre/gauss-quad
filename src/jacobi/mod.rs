@@ -331,6 +331,17 @@ mod tests {
     }
 
     #[test]
+    fn sanity_check_parameter_access() {
+        const DEG: NonZeroUsize = NonZeroUsize::new(200).unwrap();
+        let alpha = FiniteAboveNegOneF64::new(-0.5).unwrap();
+        let beta = FiniteAboveNegOneF64::new(0.5).unwrap();
+        let rule = GaussJacobi::new(DEG, alpha, beta);
+
+        assert_eq!(rule.alpha(), alpha);
+        assert_eq!(rule.beta(), beta);
+    }
+
+    #[test]
     fn golub_welsch_5_alpha_0_beta_0() {
         let (x, w): (Vec<_>, Vec<_>) = GaussJacobi::new(
             5.try_into().unwrap(),
