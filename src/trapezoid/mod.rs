@@ -10,7 +10,7 @@
 //! use approx::assert_abs_diff_eq;
 //!
 //! // initialize a trapezoid rule with 1000 grid points.
-//! let rule = Trapezoid::new(1000).unwrap();
+//! let rule = Trapezoid::new(1000.try_into().unwrap());
 //!
 //! // numerically integrate a function from -1.0 to 1.0 using the rule.
 //! let integral = rule.integrate(-1.0, 1.0, |x| x * x - 1.0);
@@ -36,7 +36,7 @@ use crate::__impl_node_rule;
 /// # use approx::assert_abs_diff_eq;
 ///
 /// // initialize a trapezoid rule with 1000 grid points.
-/// let rule = Trapezoid::new(1000).unwrap();
+/// let rule = Trapezoid::new(1000.try_into().unwrap());
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the rule.
 /// let integral = rule.integrate(-1.0, 1.0, |x| x * x - 1.0);
@@ -51,13 +51,8 @@ pub struct Trapezoid {
 
 impl Trapezoid {
     /// Create a new instance of the Trapezoid rule with the given degree.
-    ///
-    /// Returns `None` if the degree is zero.
-    pub const fn new(degree: u32) -> Option<Self> {
-        match NonZeroU32::new(degree) {
-            Some(degree) => Some(Self { degree }),
-            None => None,
-        }
+    pub const fn new(degree: NonZeroU32) -> Self {
+        Self { degree }
     }
 
     /// Integrate a function using the trapezoidal rule.
@@ -68,7 +63,7 @@ impl Trapezoid {
     /// use gauss_quad::Trapezoid;
     /// # use approx::assert_abs_diff_eq;
     ///
-    /// let rule = Trapezoid::new(1000).unwrap();
+    /// let rule = Trapezoid::new(1000.try_into().unwrap());
     ///
     /// assert_abs_diff_eq!(rule.integrate(1.0, 2.0, |x| x * x), 7.0 / 3.0, epsilon = 1e-6);
     /// ```
@@ -118,7 +113,7 @@ mod test {
 
     #[test]
     fn test_integration() {
-        let quad = Trapezoid::new(1000).unwrap();
+        let quad = Trapezoid::new(1000.try_into().unwrap());
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.000001);
     }
@@ -132,13 +127,8 @@ mod test {
     }
 
     #[test]
-    fn check_failure() {
-        assert!(Trapezoid::new(0).is_none());
-    }
-
-    #[test]
     fn verify_from_equivalence() {
-        let new = Trapezoid::new(100).unwrap();
+        let new = Trapezoid::new(100.try_into().unwrap());
         let from = Trapezoid::from(NonZeroU32::new(100).unwrap());
         assert_eq!(new, from);
     }
