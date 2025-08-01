@@ -10,7 +10,7 @@
 //! use gauss_quad::laguerre::GaussLaguerre;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussLaguerre::new(10.try_into().unwrap(), 1.0).unwrap();
+//! let quad = GaussLaguerre::new(10.try_into().unwrap(), 1.0.try_into().unwrap());
 //!
 //! let integral = quad.integrate(|x| x.powi(2));
 //!
@@ -37,7 +37,7 @@ use core::num::NonZeroUsize;
 /// # use gauss_quad::laguerre::GaussLaguerre;
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Laguerre rule with 4 nodes
-/// let quad = GaussLaguerre::new(4.try_into().unwrap(), 0.0).unwrap();
+/// let quad = GaussLaguerre::new(4.try_into().unwrap(), 0.0.try_into().unwrap());
 ///
 /// // numerically evaluate the integral x^5*e^(-x),
 /// // which is a definition of the gamma function of six
