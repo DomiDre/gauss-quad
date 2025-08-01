@@ -13,13 +13,13 @@ exclude = ["CHANGELOG.md", ".gitignore"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nalgebra = {version = "0.33", default-features = false, features = ["std"]}
-serde = {version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true}
-rayon = {version = "1.10", optional = true}
+nalgebra = { version = "0.33", default-features = false, features = ["std"] }
+serde = { version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true }
+rayon = { version = "1.10", optional = true }
 
 [dev-dependencies]
 approx = "0.5.1"
-criterion = {version = "0.5", features = ["html_reports"]}
+criterion = { version = "0.7", features = ["html_reports"] }
 
 [features]
 # Implements the `Serialize` and `Deserialize` traits from the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
