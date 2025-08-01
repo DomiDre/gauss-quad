@@ -65,11 +65,11 @@
 //! let double_x = gauss_jacobi.integrate(c, d, |x| 2.0 * x);
 //!
 //! let gauss_laguerre = GaussLaguerre::new(degree, alpha);
-//! // no explicit domain, Gauss-Laguerre integration is done on the domain [0, ∞).
+//! // No explicit domain, Gauss-Laguerre integration is done on the domain [0, ∞).
 //! let piecewise = gauss_laguerre.integrate(|x| if x > 0.0 && x < 2.0 { x } else { 0.0 });
 //!
 //! let gauss_hermite = GaussHermite::new(degree);
-//! // again, no explicit domain since Gauss-Hermite integration is done over the domain (-∞, ∞).
+//! // Again, no explicit domain since Gauss-Hermite integration is done over the domain (-∞, ∞).
 //! let golden_polynomial = gauss_hermite.integrate(|x| x * x - x - 1.0);
 //! ```
 //!
