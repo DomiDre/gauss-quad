@@ -203,7 +203,7 @@ pub mod trapezoid;
 pub use chebyshev::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
 #[doc(inline)]
 pub use data_api::{
-    FiniteAboveNegOneF64, InfNegNanOneOrLessError, Node, ParseFiniteAboveNegOneF64Error, Weight,
+    FiniteAboveNegOneF64, InfNanNegOneOrLessError, Node, ParseFiniteAboveNegOneF64Error, Weight,
 };
 #[doc(inline)]
 pub use hermite::GaussHermite;
