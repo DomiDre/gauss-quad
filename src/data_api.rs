@@ -671,7 +671,7 @@ mod tests {
         unsafe {
             assert_eq!(FiniteAboveNegOneF64::new_unchecked(0.0).get(), 0.0);
             assert_eq!(FiniteAboveNegOneF64::new_unchecked(-0.5).get(), -0.5);
-            }
+        }
     }
 
     #[test]
