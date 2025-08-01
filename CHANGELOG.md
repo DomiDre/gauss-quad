@@ -11,9 +11,14 @@ This document contains all changes to the crate since version 0.1.8.
  This affects the Gauss-Legendre, Gauss-Hermite and Gauss-Chebyshev rules.
  The affected functions are `QuadratureRule::iter()`, `QuadratureRule::into_iter()`, `QuadratureRule::nodes()`,
  `QuadratureRule::weights()`, `QuadratureRule::as_node_weight_pairs()` and `QuadratureRule::into_node_weight_pairs()`.
-- Made the `Simpson` and `Midpoint` rules not allocate any memory. This removes all the functions on those types that access some view of the nodes.
-- Made the `new` functions that can only fail for a single reason return an `Option` instead of a `Result<Self, CustomError>`.
-- Made the quadrature rule structs that store a `Vec` of nodes and weights instead store a boxed slice. This makes them take up less space on the stack.
+- Made the `Simpson` and `Midpoint` rules not allocate any memory.
+ This removes all the functions on those types that access some view of the nodes.
+- Made the different rules capable of working also at a degree of 1.
+ As a result their constructors take a `NonZeroUsize` for a degree.
+- Made the constructors take types that ensure that the inputs uphold the correct invariants.
+ As a result all constructors just return the rule itself, no `Result` or `Option`.
+- Made the quadrature rule structs that store a `Vec` of nodes and weights instead store a boxed slice.
+ This makes them take up less space on the stack.
  This affects the `QuadratureRule::into_node_weight_pairs()` functions.
  Call `.into_vec()` on the boxed slice to get it as a `Vec`.
 
