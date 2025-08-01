@@ -95,6 +95,11 @@ impl Trapezoid {
             .sum();
         (edge_points + sum) * delta_x
     }
+
+    /// Sets the degree of the trapezoid rule to a new value.
+    pub fn change_degree(&mut self, new_degree: NonZeroU32) {
+        self.degree = new_degree;
+    }
 }
 
 __impl_node_rule! {Trapezoid, TrapezoidIter}

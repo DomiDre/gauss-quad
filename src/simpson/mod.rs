@@ -124,6 +124,11 @@ impl Simpson {
                 + integrand(a)
                 + integrand(b))
     }
+
+    /// Sets the degree of the Simpson rule to a new value.
+    pub fn change_degree(&mut self, new_degree: NonZeroU32) {
+        self.degree = new_degree;
+    }
 }
 
 __impl_node_rule! {Simpson, SimpsonIter}

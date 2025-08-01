@@ -98,6 +98,11 @@ impl Midpoint {
 
         sum * rect_width
     }
+
+    /// Sets the degree of the midpoint rule to a new value.
+    pub fn change_degree(&mut self, new_degree: NonZeroU32) {
+        self.degree = new_degree;
+    }
 }
 
 __impl_node_rule! {Midpoint, MidpointIter}
