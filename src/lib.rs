@@ -78,7 +78,7 @@
 //! let golden_polynomial = gauss_hermite.integrate(|x| x * x - x - 1.0);
 //! ```
 //!
-//! ## Quadrature rules with extra parameters
+//! ## Different rules have different requirements
 //!
 //! Quadrature rules are only defined for a certain set of input values.
 //! They take parameters of types that guarantee valid input.
