@@ -126,7 +126,7 @@ impl Simpson {
     }
 
     /// Sets the degree of the Simpson rule to a new value.
-    pub fn set_degree(&mut self, new_degree: NonZeroU32) {
+    pub fn change_degree(&mut self, new_degree: NonZeroU32) {
         self.degree = new_degree;
     }
 }
@@ -176,9 +176,9 @@ mod tests {
     }
 
     #[test]
-    fn test_set_degree() {
+    fn test_change_degree() {
         let mut quad = Simpson::new(1000.try_into().unwrap());
-        quad.set_degree(2000.try_into().unwrap());
+        quad.change_degree(2000.try_into().unwrap());
         assert_eq!(quad.degree(), 2000.try_into().unwrap());
     }
 }
