@@ -116,7 +116,7 @@
 //! let alpha = FiniteAboveNegOneF64::new(0.5).unwrap();
 //! let quad = GaussLaguerre::new(degree, alpha);
 //!
-//! // Use the rule to integrate a function
+//! // Use the rule to integrate a function, note the lack of domain bounds
 //! let integral = quad.integrate(|x| x * x);
 //!
 //! assert_abs_diff_eq!(integral, 15.0 * PI.sqrt() / 8.0, epsilon = 1e-14);
