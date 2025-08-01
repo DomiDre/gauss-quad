@@ -6,17 +6,15 @@
 //!
 //! # Example
 //! ```
-//! use gauss_quad::jacobi::GaussJacobi;
-//! # use gauss_quad::jacobi::GaussJacobiError;
+//! use gauss_quad::GaussJacobi;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussJacobi::new(10.try_into().unwrap(), 0.0, -1.0 / 3.0)?;
+//! let quad = GaussJacobi::new(10.try_into().unwrap(), 0.0.try_into().unwrap(), (-1.0 / 3.0).try_into().unwrap());
 //!
 //! // numerically integrate sin(x) / (1 + x)^(1/3), a function with a singularity at x = -1.
 //! let integral = quad.integrate(-1.0, 1.0, |x| x.sin());
 //!
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
-//! # Ok::<(), GaussJacobiError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
@@ -39,16 +37,15 @@ use core::num::NonZeroUsize;
 ///
 /// # Examples
 /// ```
-/// # use gauss_quad::jacobi::{GaussJacobi, GaussJacobiError};
+/// # use gauss_quad::GaussJacobi;
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::E;
 /// // initialize the quadrature rule.
-/// let quad = GaussJacobi::new(10.try_into().unwrap(), -0.5, 0.0)?;
+/// let quad = GaussJacobi::new(10.try_into().unwrap(), (-0.5).try_into().unwrap(), 0.0.try_into().unwrap());
 ///
 /// let integral = quad.integrate(0.0, 2.0, |x| (-x).exp());
 ///
 /// assert_abs_diff_eq!(integral, 0.9050798148074449, epsilon = 1e-14);
-/// # Ok::<(), GaussJacobiError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -83,6 +80,17 @@ impl GaussJacobi {
             (-0.5, -0.5) => return GaussChebyshevFirstKind::new(deg).into(),
             (0.5, 0.5) => return GaussChebyshevSecondKind::new(deg).into(),
             _ => (),
+        }
+
+        if deg.get() == 1 {
+            // Special case for degree 1, since the nodes and weights are known.
+            let node = (beta.get() - alpha.get())/(alpha.get() + beta.get() + 2.0);
+            let weight = f64::powf(2.0, alpha.get() + beta.get() + 1.0)*gamma(alpha.get() + 1.0)*gamma(beta.get() + 1.0)/gamma(alpha.get() + beta.get() + 2.0);
+            return Self {
+                node_weight_pairs: vec![(node, weight)],
+                alpha,
+                beta,
+            };
         }
 
         let mut companion_matrix = DMatrixf64::from_element(deg.get(), deg.get(), 0.0);
@@ -277,9 +285,7 @@ mod tests {
         );
 
         // Calculated with Wolfram Mathematica
-        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), PI / 2.0);
-
-        todo!("Add more tests of other intervals");
+        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), PI / 2.0, epsilon = 1e-14);
     }
 
     #[test]
