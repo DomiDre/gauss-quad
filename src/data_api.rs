@@ -546,8 +546,8 @@ macro_rules! __impl_node_rule {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use core::{f64, fmt};
-    use std::backtrace::Backtrace;
+    use core::f64;
+    use core::num::NonZeroUsize;
 
     #[derive(Debug, Clone, PartialEq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -555,32 +555,11 @@ mod tests {
         node_weight_pairs: Box<[(Node, Weight)]>,
     }
 
-    #[derive(Debug)]
-    pub struct MockQuadratureError(Backtrace);
-
-    impl MockQuadratureError {
-        pub fn backtrace(&self) -> &Backtrace {
-            &self.0
-        }
-    }
-
-    impl fmt::Display for MockQuadratureError {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            write!(f, "wrong! bad! T_T")
-        }
-    }
-
-    impl std::error::Error for MockQuadratureError {}
-
     impl MockQuadrature {
-        pub fn new(deg: usize) -> Result<Self, MockQuadratureError> {
-            if deg < 1 {
-                return Err(MockQuadratureError(Backtrace::capture()));
+        pub fn new(deg: NonZeroUsize) -> Self {
+            Self {
+                node_weight_pairs: (0..deg.get()).map(|d| (d as f64, 1.0)).collect(),
             }
-
-            Ok(Self {
-                node_weight_pairs: (0..deg).map(|d| (d as f64, 1.0)).collect(),
-            })
         }
 
         pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
@@ -601,7 +580,7 @@ mod tests {
 
     #[test]
     fn test_macro_implementation() {
-        let quad = MockQuadrature::new(5).unwrap();
+        let quad = MockQuadrature::new(5.try_into().unwrap());
         assert_eq!(quad.integrate(0.0, 1.0, |x| x), 0.5);
 
         // Test iterator implementations
@@ -688,16 +667,30 @@ mod tests {
     fn test_from_str() {
         assert_eq!(FiniteAboveNegOneF64::from_str("0.0").unwrap().get(), 0.0);
         assert_eq!(FiniteAboveNegOneF64::from_str("-0.5").unwrap().get(), -0.5);
-        assert!(FiniteAboveNegOneF64::from_str("-1.0").is_err());
-        assert!(FiniteAboveNegOneF64::from_str("NAN").is_err());
-        assert!(FiniteAboveNegOneF64::from_str("INF").is_err());
-        assert!(FiniteAboveNegOneF64::from_str("-INF").is_err());
-
-        let err = FiniteAboveNegOneF64::from_str("invalid");
-        matches!(err, Err(ParseFiniteAboveNegOneF64Error::ParseError(_)));
-
-        let err = FiniteAboveNegOneF64::from_str("-1.0");
-        matches!(err, Err(ParseFiniteAboveNegOneF64Error::TooSmall(_)));
+        assert_eq!(
+            FiniteAboveNegOneF64::from_str("-1.0"),
+            Err(ParseFiniteAboveNegOneF64Error::TooSmall(
+                InfNanNegOneOrLessError
+            ))
+        );
+        assert_eq!(
+            FiniteAboveNegOneF64::from_str("NAN"),
+            Err(ParseFiniteAboveNegOneF64Error::TooSmall(
+                InfNanNegOneOrLessError
+            ))
+        );
+        assert_eq!(
+            FiniteAboveNegOneF64::from_str("INF"),
+            Err(ParseFiniteAboveNegOneF64Error::TooSmall(
+                InfNanNegOneOrLessError
+            ))
+        );
+        assert_eq!(
+            FiniteAboveNegOneF64::from_str("-INF"),
+            Err(ParseFiniteAboveNegOneF64Error::TooSmall(
+                InfNanNegOneOrLessError
+            ))
+        );
     }
 
     #[test]
