@@ -142,8 +142,8 @@ pub enum ParseFiniteAboveNegOneF64Error {
 impl fmt::Display for ParseFiniteAboveNegOneF64Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseFiniteAboveNegOneF64Error::ParseError(e) => write!(f, "{}", e),
-            ParseFiniteAboveNegOneF64Error::TooSmall(e) => write!(f, "{}", e),
+            ParseFiniteAboveNegOneF64Error::ParseError(e) => write!(f, "{e}"),
+            ParseFiniteAboveNegOneF64Error::TooSmall(e) => write!(f, "{e}"),
         }
     }
 }
