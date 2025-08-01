@@ -173,6 +173,13 @@ mod tests {
     }
 
     #[test]
+    fn sanity_check_alpha_accessor() {
+        let alpha = FiniteAboveNegOneF64::new(1.0).unwrap();
+        let rule = GaussLaguerre::new(10.try_into().unwrap(), alpha);
+        assert_eq!(rule.alpha(), alpha);
+    }
+
+    #[test]
     fn golub_welsch_2_alpha_5() {
         let (x, w): (Vec<_>, Vec<_>) =
             GaussLaguerre::new(2.try_into().unwrap(), 5.0.try_into().unwrap())
