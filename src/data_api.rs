@@ -692,6 +692,12 @@ mod tests {
         assert!(FiniteAboveNegOneF64::from_str("NAN").is_err());
         assert!(FiniteAboveNegOneF64::from_str("INF").is_err());
         assert!(FiniteAboveNegOneF64::from_str("-INF").is_err());
+
+        let err = FiniteAboveNegOneF64::from_str("invalid");
+        matches!(err, Err(ParseFiniteAboveNegOneF64Error::ParseError(_)));
+
+        let err = FiniteAboveNegOneF64::from_str("-1.0");
+        matches!(err, Err(ParseFiniteAboveNegOneF64Error::TooSmall(_)));
     }
 
     #[test]
