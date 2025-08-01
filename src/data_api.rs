@@ -667,6 +667,11 @@ mod tests {
         assert!(FiniteAboveNegOneF64::new(f64::NAN).is_none());
         assert!(FiniteAboveNegOneF64::new(f64::INFINITY).is_none());
         assert!(FiniteAboveNegOneF64::new(f64::NEG_INFINITY).is_none());
+
+        unsafe {
+            assert_eq!(FiniteAboveNegOneF64::new_unchecked(0.0).get(), 0.0);
+            assert_eq!(FiniteAboveNegOneF64::new_unchecked(-0.5).get(), -0.5);
+            }
     }
 
     #[test]
