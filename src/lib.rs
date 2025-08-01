@@ -26,12 +26,13 @@
 //! // The assertion succeeds if the two sides are within floating point error,
 //! // or an optional epsilon.
 //! use approx::assert_abs_diff_eq;
+//! use core::num::NonZeroUsize;
 //!
 //! // initialize the quadrature rule
-//! let degree = core::num::NonZeroUsize::new(10).unwrap();
+//! let degree = NonZeroUsize::new(10).unwrap();
 //! let quad = GaussLegendre::new(degree);
-//!
-//! // use the rule to integrate a function
+//! 
+//! // Use the rule to integrate a function
 //! let left_bound = 0.0;
 //! let right_bound = 1.0;
 //! let integral = quad.integrate(left_bound, right_bound, |x| x * x);
@@ -47,6 +48,7 @@
 //! First, rules must be initialized using some specific input parameters.
 //!
 //! Then, you can integrate functions using those rules:
+//!
 //! ```
 //! # use gauss_quad::*;
 //! # let degree = core::num::NonZeroUsize::new(5).unwrap();
@@ -84,8 +86,9 @@
 //!
 //! ```
 //! use gauss_quad::{GaussJacobi, FiniteAboveNegOneF64};
+//! use core::num::NonZeroUsize;
 //!
-//! let degree = core::num::NonZeroUsize::new(10).unwrap();
+//! let degree = NonZeroUsize::new(10).unwrap();
 //! let alpha = FiniteAboveNegOneF64::new(0.1).unwrap();
 //!
 //! // Trying to create a `beta` below -1.0 results in `None`.
@@ -104,12 +107,13 @@
 //! # use gauss_quad::{GaussLaguerre, FiniteAboveNegOneF64};
 //! # use approx::assert_abs_diff_eq;
 //! # use core::f64::consts::PI;
-//! // initialize the quadrature rule
-//! let degree = core::num::NonZeroUsize::new(2).unwrap();
+//! # use core::num::NonZeroUsize;
+//! // Initialize the quadrature rule
+//! let degree = NonZeroUsize::new(2).unwrap();
 //! let alpha = FiniteAboveNegOneF64::new(0.5).unwrap();
 //! let quad = GaussLaguerre::new(degree, alpha);
 //!
-//! // use the rule to integrate a function
+//! // Use the rule to integrate a function
 //! let integral = quad.integrate(|x| x * x);
 //!
 //! assert_abs_diff_eq!(integral, 15.0 * PI.sqrt() / 8.0, epsilon = 1e-14);
