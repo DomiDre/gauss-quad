@@ -546,7 +546,7 @@ macro_rules! __impl_node_rule {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use core::fmt;
+    use core::{f64, fmt};
     use std::backtrace::Backtrace;
 
     #[derive(Debug, Clone, PartialEq)]
@@ -657,5 +657,50 @@ mod tests {
         let quad_ref = quad_iter.as_ref();
         assert_eq!(quad_ref.len(), 5);
         assert_eq!(quad_ref[2].0, 2.0);
+    }
+
+    #[test]
+    fn test_new_finite_above_neg_one_f64() {
+        assert!(FiniteAboveNegOneF64::new(0.0).is_some());
+        assert!(FiniteAboveNegOneF64::new(-0.5).is_some());
+        assert!(FiniteAboveNegOneF64::new(-1.0).is_none());
+        assert!(FiniteAboveNegOneF64::new(f64::NAN).is_none());
+        assert!(FiniteAboveNegOneF64::new(f64::INFINITY).is_none());
+        assert!(FiniteAboveNegOneF64::new(f64::NEG_INFINITY).is_none());
+    }
+
+    #[test]
+    fn test_try_from_f64() {
+        assert!(FiniteAboveNegOneF64::try_from(0.0).is_ok());
+        assert!(FiniteAboveNegOneF64::try_from(-0.5).is_ok());
+        assert!(FiniteAboveNegOneF64::try_from(-1.0).is_err());
+        assert!(FiniteAboveNegOneF64::try_from(f64::NAN).is_err());
+        assert!(FiniteAboveNegOneF64::try_from(f64::INFINITY).is_err());
+        assert!(FiniteAboveNegOneF64::try_from(f64::NEG_INFINITY).is_err());
+    }
+
+    #[test]
+    fn test_from_str() {
+        assert_eq!(FiniteAboveNegOneF64::from_str("0.0").unwrap().get(), 0.0);
+        assert_eq!(FiniteAboveNegOneF64::from_str("-0.5").unwrap().get(), -0.5);
+        assert!(FiniteAboveNegOneF64::from_str("-1.0").is_err());
+        assert!(FiniteAboveNegOneF64::from_str("NAN").is_err());
+        assert!(FiniteAboveNegOneF64::from_str("INF").is_err());
+        assert!(FiniteAboveNegOneF64::from_str("-INF").is_err());
+    }
+
+    #[test]
+    fn test_finite_above_neg_one_f64_arithmetic() {
+        let value = FiniteAboveNegOneF64::new(0.5).unwrap();
+        assert_eq!(value.checked_add(0.5).unwrap().get(), 1.0);
+        assert!(value.checked_add(f64::INFINITY).is_none());
+        assert!(value.checked_sub(2.0).is_none());
+        assert!(value.checked_add(f64::NAN).is_none());
+        assert_eq!(value.checked_mul(2.0).unwrap().get(), 1.0);
+        assert!(value.checked_div(0.0).is_none());
+        assert!(value.checked_powi(2).is_some());
+        assert!(value.checked_powf(2.0).is_some());
+        assert!(value.checked_div(0.0).is_none());
+        assert!(value.checked_div(f64::NAN).is_none());
     }
 }
