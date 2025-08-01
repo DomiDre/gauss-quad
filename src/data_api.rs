@@ -139,14 +139,14 @@ impl From<FiniteAboveNegOneF64> for f64 {
 /// An error that can occur when parsing a `&str` into an [`FiniteAboveNegOneF64`].
 pub enum ParseFiniteAboveNegOneF64Error {
     ParseError(ParseFloatError),
-    TooSmall(InfNanNegOneOrLessError),
+    InvalidValue(InfNanNegOneOrLessError),
 }
 
 impl fmt::Display for ParseFiniteAboveNegOneF64Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ParseFiniteAboveNegOneF64Error::ParseError(e) => write!(f, "{e}"),
-            ParseFiniteAboveNegOneF64Error::TooSmall(e) => write!(f, "{e}"),
+            ParseFiniteAboveNegOneF64Error::InvalidValue(e) => write!(f, "{e}"),
         }
     }
 }
@@ -155,7 +155,7 @@ impl core::error::Error for ParseFiniteAboveNegOneF64Error {
     fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
         match self {
             ParseFiniteAboveNegOneF64Error::ParseError(e) => Some(e),
-            ParseFiniteAboveNegOneF64Error::TooSmall(e) => Some(e),
+            ParseFiniteAboveNegOneF64Error::InvalidValue(e) => Some(e),
         }
     }
 }
@@ -167,7 +167,7 @@ impl FromStr for FiniteAboveNegOneF64 {
         match s.parse::<f64>() {
             Ok(value) => value
                 .try_into()
-                .map_err(ParseFiniteAboveNegOneF64Error::TooSmall),
+                .map_err(ParseFiniteAboveNegOneF64Error::InvalidValue),
             Err(e) => Err(ParseFiniteAboveNegOneF64Error::ParseError(e)),
         }
     }
@@ -669,25 +669,25 @@ mod tests {
         assert_eq!(FiniteAboveNegOneF64::from_str("-0.5").unwrap().get(), -0.5);
         assert_eq!(
             FiniteAboveNegOneF64::from_str("-1.0"),
-            Err(ParseFiniteAboveNegOneF64Error::TooSmall(
+            Err(ParseFiniteAboveNegOneF64Error::InvalidValue(
                 InfNanNegOneOrLessError
             ))
         );
         assert_eq!(
             FiniteAboveNegOneF64::from_str("NAN"),
-            Err(ParseFiniteAboveNegOneF64Error::TooSmall(
+            Err(ParseFiniteAboveNegOneF64Error::InvalidValue(
                 InfNanNegOneOrLessError
             ))
         );
         assert_eq!(
             FiniteAboveNegOneF64::from_str("INF"),
-            Err(ParseFiniteAboveNegOneF64Error::TooSmall(
+            Err(ParseFiniteAboveNegOneF64Error::InvalidValue(
                 InfNanNegOneOrLessError
             ))
         );
         assert_eq!(
             FiniteAboveNegOneF64::from_str("-INF"),
-            Err(ParseFiniteAboveNegOneF64Error::TooSmall(
+            Err(ParseFiniteAboveNegOneF64Error::InvalidValue(
                 InfNanNegOneOrLessError
             ))
         );
