@@ -40,7 +40,7 @@ impl fmt::UpperExp for FiniteAboveNegOneF64 {
 }
 
 impl FiniteAboveNegOneF64 {
-    /// Creates a new `FiniteAboveNegOneF64` if the value is greater than -1.0.
+    /// Creates a new `FiniteAboveNegOneF64` if the value is greater than -1.0, finite and not [`NAN`](f64::NAN).
     #[inline]
     pub const fn new(value: f64) -> Option<Self> {
         if value > -1.0 && value.is_finite() {
