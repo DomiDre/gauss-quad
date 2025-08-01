@@ -21,8 +21,7 @@
 //!
 //! let eps = 0.001;
 //!
-//! let n = 10;
-//! let quad = Simpson::new(n).unwrap();
+//! let quad = Simpson::new(10.try_into().unwrap());
 //!
 //! // integrate some functions
 //! let integrate_euler = quad.integrate(0.0, 1.0, |x| x.exp());
@@ -44,7 +43,7 @@ use core::num::NonZeroU32;
 /// ```
 /// # use gauss_quad::simpson::Simpson;
 /// // initialize a Simpson rule with 100 subintervals
-/// let quad: Simpson = Simpson::new(100).unwrap();
+/// let quad: Simpson = Simpson::new(100.try_into().unwrap());
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the Simpson rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -57,13 +56,8 @@ pub struct Simpson {
 
 impl Simpson {
     /// Initialize a new Simpson rule with `degree` being the number of intervals.
-    ///
-    /// Returns `None` if given a degree of zero.
-    pub const fn new(degree: u32) -> Option<Self> {
-        match NonZeroU32::new(degree) {
-            Some(degree) => Some(Self { degree }),
-            None => None,
-        }
+    pub const fn new(degree: NonZeroU32) -> Self {
+        Self { degree }
     }
 
     /// Integrate over the domain [a, b].
@@ -147,7 +141,7 @@ mod tests {
 
     #[test]
     fn check_simpson_integration() {
-        let quad = Simpson::new(2).unwrap();
+        let quad = Simpson::new(2.try_into().unwrap());
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
@@ -155,29 +149,23 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_check_simpson_integration() {
-        let quad = Simpson::new(2).unwrap();
+        let quad = Simpson::new(2.try_into().unwrap());
         let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
-    fn check_simpson_error() {
-        let simpson_rule = Simpson::new(0);
-        assert!(simpson_rule.is_none());
-    }
-
-    #[test]
     fn check_derives() {
-        let quad = Simpson::new(10).unwrap();
+        let quad = Simpson::new(10.try_into().unwrap());
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Simpson::new(3).unwrap();
+        let other_quad = Simpson::new(3.try_into().unwrap());
         assert_ne!(quad, other_quad);
     }
 
     #[test]
     fn verify_from_equivalence() {
-        let new = Simpson::new(100).unwrap();
+        let new = Simpson::new(100.try_into().unwrap());
         let from = Simpson::from(NonZeroU32::new(100).unwrap());
         assert_eq!(new, from);
     }

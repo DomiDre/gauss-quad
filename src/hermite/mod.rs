@@ -6,12 +6,13 @@
 //!
 //! # Example
 //!
-//! Integrate x^2 * e^(-x^2)
+//! Integrate x^2 * e^(-x^2):
+//!
 //! ```
 //! use gauss_quad::hermite::GaussHermite;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussHermite::new(10).unwrap();
+//! let quad = GaussHermite::new(10.try_into().unwrap());
 //!
 //! let integral = quad.integrate(|x| x.powi(2));
 //!
@@ -23,7 +24,7 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
 
-use core::f64::consts::PI;
+use core::{f64::consts::PI, num::NonZeroUsize};
 
 /// A Gauss-Hermite quadrature scheme.
 ///
@@ -31,13 +32,14 @@ use core::f64::consts::PI;
 ///
 /// # Example
 ///
-/// Integrate e^(-x^2) * cos(x)
+/// Integrate e^(-x^2) * cos(x):
+///
 /// ```
 /// # use gauss_quad::hermite::GaussHermite;
 /// # use approx::assert_abs_diff_eq;
 /// # use core::f64::consts::{E, PI};
 /// // initialize a Gauss-Hermite rule with 20 nodes
-/// let quad = GaussHermite::new(20).unwrap();
+/// let quad = GaussHermite::new(20.try_into().unwrap());
 ///
 /// // numerically integrate a function over (-∞, ∞) using the Gauss-Hermite rule
 /// let integral = quad.integrate(|x| x.cos());
@@ -63,17 +65,10 @@ impl GaussHermite {
     /// 0 on the diagonal & sqrt(n/2) on the off-diagonal
     /// root & weight finding are equivalent to eigenvalue problem
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if `degree` is smaller than 2.
-    pub fn new(degree: usize) -> Option<Self> {
-        if degree < 2 {
-            return None;
-        }
-        let mut companion_matrix = DMatrixf64::from_element(degree, degree, 0.0);
+    pub fn new(deg: NonZeroUsize) -> Self {
+        let mut companion_matrix = DMatrixf64::from_element(deg.get(), deg.get(), 0.0);
         // Initialize symmetric companion matrix
-        for idx in 0..degree - 1 {
+        for idx in 0..deg.get() - 1 {
             let idx_f64 = 1.0 + idx as f64;
             let element = (idx_f64 * 0.5).sqrt();
             unsafe {
@@ -103,7 +98,7 @@ impl GaussHermite {
         node_weight_pairs
             .sort_unstable_by(|(node1, _), (node2, _)| node1.partial_cmp(node2).unwrap());
 
-        Some(GaussHermite { node_weight_pairs })
+        GaussHermite { node_weight_pairs }
     }
 
     /// Perform quadrature of e^(-x^2) * `integrand`(x) over the domain (-∞, ∞).
@@ -145,14 +140,23 @@ mod tests {
     #[test]
     fn check_sorted() {
         for deg in (2..100).step_by(10) {
-            let rule = GaussHermite::new(deg).unwrap();
+            let rule = GaussHermite::new(deg.try_into().unwrap());
             assert!(rule.as_node_weight_pairs().is_sorted());
         }
     }
 
     #[test]
+    fn check_degree_1() {
+        let rule = GaussHermite::new(1.try_into().unwrap());
+        assert_eq!(rule.as_node_weight_pairs(), &[(0.0, PI.sqrt())]);
+        for constant in (1..100).step_by(10) {
+            assert_abs_diff_eq!(rule.integrate(|x| f64::from(constant) * x), 0.0);
+        }
+    }
+
+    #[test]
     fn golub_welsch_3() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3).unwrap().into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3.try_into().unwrap()).into_iter().unzip();
         let x_should = [-1.224_744_871_391_589, 0.0, 1.224_744_871_391_589];
         let w_should = [
             0.295_408_975_150_919_35,
@@ -168,23 +172,17 @@ mod tests {
     }
 
     #[test]
-    fn check_hermite_error() {
-        assert!(GaussHermite::new(0).is_none());
-        assert!(GaussHermite::new(1).is_none());
-    }
-
-    #[test]
     fn check_derives() {
-        let quad = GaussHermite::new(10).unwrap();
+        let quad = GaussHermite::new(10.try_into().unwrap());
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussHermite::new(3).unwrap();
+        let other_quad = GaussHermite::new(3.try_into().unwrap());
         assert_ne!(quad, other_quad);
     }
 
     #[test]
     fn check_iterators() {
-        let rule = GaussHermite::new(3).unwrap();
+        let rule = GaussHermite::new(3.try_into().unwrap());
         let ans = core::f64::consts::PI.sqrt() / 2.0;
 
         assert_abs_diff_eq!(
@@ -210,7 +208,7 @@ mod tests {
 
     #[test]
     fn integrate_one() {
-        let quad = GaussHermite::new(5).unwrap();
+        let quad = GaussHermite::new(5.try_into().unwrap());
         let integral = quad.integrate(|_x| 1.0);
         assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-14);
     }
@@ -218,7 +216,7 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_integrate_one() {
-        let quad = GaussHermite::new(5).unwrap();
+        let quad = GaussHermite::new(5.try_into().unwrap());
         let integral = quad.par_integrate(|_x| 1.0);
         assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
     }

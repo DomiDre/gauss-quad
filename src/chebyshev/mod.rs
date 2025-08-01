@@ -4,7 +4,7 @@
 
 use crate::{Node, Weight, __impl_node_weight_rule};
 
-use core::f64::consts::PI;
+use core::{f64::consts::PI, num::NonZeroUsize};
 
 #[cfg(feature = "rayon")]
 use rayon::iter::{
@@ -22,7 +22,7 @@ use rayon::iter::{
 /// # use gauss_quad::chebyshev::GaussChebyshevFirstKind;
 /// # use approx::assert_relative_eq;
 /// # use core::f64::consts::PI;
-/// let rule = GaussChebyshevFirstKind::new(2).unwrap();
+/// let rule = GaussChebyshevFirstKind::new(2.try_into().unwrap());
 ///
 /// assert_relative_eq!(rule.integrate(0.0, 2.0, |x| x), PI);
 /// ```
@@ -34,21 +34,15 @@ pub struct GaussChebyshevFirstKind {
 
 impl GaussChebyshevFirstKind {
     /// Create a new `GaussChebyshevFirstKind` rule that can integrate functions of the form f(x) / sqrt(1 - x^2).
-    ///
-    /// Returns `None` if `degree` is less than 2.
-    pub fn new(degree: usize) -> Option<Self> {
-        if degree < 2 {
-            return None;
-        }
+    pub fn new(degree: NonZeroUsize) -> Self {
+        let n = degree.get() as f64;
 
-        let n = degree as f64;
-
-        Some(Self {
-            node_weight_pairs: (1..degree + 1)
+        Self {
+            node_weight_pairs: (1..degree.get() + 1)
                 .rev()
                 .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
                 .collect(),
-        })
+        }
     }
 
     fn argument_transformation(x: f64, a: f64, b: f64) -> f64 {
@@ -61,20 +55,16 @@ impl GaussChebyshevFirstKind {
 
     #[cfg(feature = "rayon")]
     /// Same as [`new`](Self::new) but runs in parallel.
-    pub fn par_new(degree: usize) -> Option<Self> {
-        if degree < 2 {
-            return None;
-        }
+    pub fn par_new(degree: NonZeroUsize) -> Self {
+        let n = degree.get() as f64;
 
-        let n = degree as f64;
-
-        Some(Self {
-            node_weight_pairs: (1..degree + 1)
-                .into_par_iter()
+        Self {
+            node_weight_pairs: (1..degree.get() + 1)
                 .rev()
+                .into_par_iter()
                 .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
                 .collect(),
-        })
+        }
     }
 
     /// Returns the value of the integral of the given `integrand` in the inverval \[`a`, `b`\].
@@ -85,7 +75,7 @@ impl GaussChebyshevFirstKind {
     /// # use gauss_quad::chebyshev::GaussChebyshevFirstKind;
     /// # use approx::assert_relative_eq;
     /// # use core::f64::consts::PI;
-    /// let rule = GaussChebyshevFirstKind::new(2).unwrap();
+    /// let rule = GaussChebyshevFirstKind::new(2.try_into().unwrap());
     ///
     /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), PI / 4.0);
     /// ```
@@ -129,7 +119,7 @@ __impl_node_weight_rule! {GaussChebyshevFirstKind, GaussChebyshevFirstKindNodes,
 /// # use gauss_quad::chebyshev::GaussChebyshevSecondKind;
 /// # use approx::assert_relative_eq;
 /// # use core::f64::consts::PI;
-/// let rule = GaussChebyshevSecondKind::new(2).unwrap();
+/// let rule = GaussChebyshevSecondKind::new(2.try_into().unwrap());
 ///
 /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| x * x), PI / 8.0);
 /// ```
@@ -141,19 +131,11 @@ pub struct GaussChebyshevSecondKind {
 
 impl GaussChebyshevSecondKind {
     /// Create a new `GaussChebyshev` rule that can integrate functions of the form f(x) * sqrt(1 - x^2).
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if `degree` is less than 2.
-    pub fn new(degree: usize) -> Option<Self> {
-        if degree < 2 {
-            return None;
-        }
+    pub fn new(degree: NonZeroUsize) -> Self {
+        let n = degree.get() as f64;
 
-        let n = degree as f64;
-
-        Some(Self {
-            node_weight_pairs: (1..degree + 1)
+        Self {
+            node_weight_pairs: (1..degree.get() + 1)
                 .rev()
                 .map(|i| {
                     let over_n_plus_1 = 1.0 / (n + 1.0);
@@ -164,31 +146,27 @@ impl GaussChebyshevSecondKind {
                     )
                 })
                 .collect(),
-        })
+        }
     }
 
     #[cfg(feature = "rayon")]
     /// Same as [`new`](Self::new) but runs in parallel.
-    pub fn par_new(degree: usize) -> Option<Self> {
-        if degree >= 2 {
-            let n = degree as f64;
+    pub fn par_new(degree: NonZeroUsize) -> Self {
+        let n = degree.get() as f64;
 
-            Some(Self {
-                node_weight_pairs: (1..degree + 1)
-                    .into_par_iter()
-                    .rev()
-                    .map(|i| {
-                        let over_n_plus_1 = 1.0 / (n + 1.0);
-                        let sin_val = (PI * i as f64 * over_n_plus_1).sin();
-                        (
-                            (PI * i as f64 * over_n_plus_1).cos(),
-                            PI * over_n_plus_1 * sin_val * sin_val,
-                        )
-                    })
-                    .collect(),
-            })
-        } else {
-            None
+        Self {
+            node_weight_pairs: (1..degree.get() + 1)
+                .rev()
+                .into_par_iter()
+                .map(|i| {
+                    let over_n_plus_1 = 1.0 / (n + 1.0);
+                    let sin_val = (PI * i as f64 * over_n_plus_1).sin();
+                    (
+                        (PI * i as f64 * over_n_plus_1).cos(),
+                        PI * over_n_plus_1 * sin_val * sin_val,
+                    )
+                })
+                .collect(),
         }
     }
 
@@ -208,7 +186,7 @@ impl GaussChebyshevSecondKind {
     /// # use gauss_quad::chebyshev::GaussChebyshevSecondKind;
     /// # use approx::assert_relative_eq;
     /// # use core::f64::consts::PI;
-    /// let rule = GaussChebyshevSecondKind::new(2).unwrap();
+    /// let rule = GaussChebyshevSecondKind::new(2.try_into().unwrap());
     ///
     /// assert_relative_eq!(rule.integrate(-1.0, 1.0, |x| 1.5 * x * x - 0.5), -PI / 16.0);
     /// ```
@@ -247,20 +225,14 @@ mod test {
 
     use super::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
 
-    use core::f64::consts::PI;
-
-    #[test]
-    fn check_error() {
-        assert!(GaussChebyshevFirstKind::new(1).is_none());
-        assert!(GaussChebyshevSecondKind::new(1).is_none());
-    }
+    use core::{f64::consts::PI, num::NonZeroUsize};
 
     #[test]
     fn check_sorted() {
         for deg in (2..100).step_by(10) {
-            let rule1 = GaussChebyshevFirstKind::new(deg).unwrap();
+            let rule1 = GaussChebyshevFirstKind::new(deg.try_into().unwrap());
             assert!(rule1.as_node_weight_pairs().is_sorted());
-            let rule2 = GaussChebyshevSecondKind::new(deg).unwrap();
+            let rule2 = GaussChebyshevSecondKind::new(deg.try_into().unwrap());
             assert!(rule2.as_node_weight_pairs().is_sorted());
         }
     }
@@ -277,6 +249,31 @@ mod test {
     }
 
     #[test]
+    fn check_degree_1() {
+        let rule = GaussChebyshevFirstKind::new(1.try_into().unwrap());
+
+        assert_abs_diff_eq!(*rule.nodes().next().unwrap(), 0.0);
+        assert_abs_diff_eq!(*rule.weights().next().unwrap(), PI);
+
+        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), 0.0);
+
+        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x + 1.0), PI);
+
+        // Calculated with wolfram alpha
+        assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 4.0);
+
+        let rule = GaussChebyshevSecondKind::new(1.try_into().unwrap());
+
+        assert_abs_diff_eq!(*rule.nodes().next().unwrap(), 0.0);
+        assert_abs_diff_eq!(*rule.weights().next().unwrap(), PI / 2.0);
+
+        assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x), 0.0);
+
+        // Calculated with wolfram alpha
+        assert_abs_diff_eq!(rule.integrate(0.0, 1.0, |x| x), PI / 8.0);
+    }
+
+    #[test]
     fn check_chebyshev_1st_deg_5() {
         // Source: https://mathworld.wolfram.com/Chebyshev-GaussQuadrature.html
         let ans = [
@@ -287,7 +284,7 @@ mod test {
             (0.5 * (0.5 * (5.0 + f64::sqrt(5.0))).sqrt(), PI / 5.0),
         ];
 
-        let rule = GaussChebyshevFirstKind::new(5).unwrap();
+        let rule = GaussChebyshevFirstKind::new(5.try_into().unwrap());
 
         for ((x, w), (x_should, w_should)) in rule.into_iter().zip(ans.into_iter()) {
             assert_abs_diff_eq!(x, x_should);
@@ -300,9 +297,9 @@ mod test {
         // I couldn't find lists of nodes and weights to compare to. So this function computes
         // them itself with formulas from Wikipedia.
 
-        let deg = 5;
-        let rule = GaussChebyshevSecondKind::new(deg).unwrap();
-        let deg = deg as f64;
+        let deg = NonZeroUsize::new(5).unwrap();
+        let rule = GaussChebyshevSecondKind::new(deg);
+        let deg = deg.get() as f64;
 
         for (i, (x, w)) in rule.into_iter().enumerate() {
             // Source: https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature
@@ -317,15 +314,16 @@ mod test {
 
     #[test]
     fn check_integral_of_line() {
-        let rule = GaussChebyshevFirstKind::new(2).unwrap();
+        let rule = GaussChebyshevFirstKind::new(2.try_into().unwrap());
 
         assert_abs_diff_eq!(rule.integrate(0.0, 2.0, |x| x), PI);
     }
 
     #[test]
     fn check_integral_of_legendre_2() {
-        let rule1 = GaussChebyshevFirstKind::new(2).unwrap();
-        let rule2 = GaussChebyshevSecondKind::new(2).unwrap();
+        let deg = NonZeroUsize::new(2).unwrap();
+        let rule1 = GaussChebyshevFirstKind::new(deg);
+        let rule2 = GaussChebyshevSecondKind::new(deg);
 
         fn legendre_2(x: f64) -> f64 {
             1.5 * x * x - 0.5
@@ -337,7 +335,7 @@ mod test {
 
     #[test]
     fn check_integral_of_parabola() {
-        let rule = GaussChebyshevSecondKind::new(2).unwrap();
+        let rule = GaussChebyshevSecondKind::new(2.try_into().unwrap());
 
         assert_abs_diff_eq!(rule.integrate(-1.0, 1.0, |x| x * x), PI / 8.0);
     }
@@ -345,17 +343,10 @@ mod test {
     #[cfg(feature = "rayon")]
     #[test]
     fn test_par_integrate() {
-        let rule1 = GaussChebyshevFirstKind::par_new(2).unwrap();
-        let rule2 = GaussChebyshevSecondKind::par_new(2).unwrap();
+        let rule1 = GaussChebyshevFirstKind::par_new(2.try_into().unwrap());
+        let rule2 = GaussChebyshevSecondKind::par_new(2.try_into().unwrap());
 
         assert_abs_diff_eq!(rule1.par_integrate(0.0, 2.0, |x| x), PI);
         assert_abs_diff_eq!(rule2.par_integrate(-1.0, 1.0, |x| x * x), PI / 8.0);
-    }
-
-    #[cfg(feature = "rayon")]
-    #[test]
-    fn check_par_error() {
-        assert!(GaussChebyshevFirstKind::new(0).is_none());
-        assert!(GaussChebyshevSecondKind::new(0).is_none());
     }
 }

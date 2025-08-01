@@ -15,8 +15,7 @@
 //!
 //! let eps = 0.001;
 //!
-//! let n = 30;
-//! let quad = Midpoint::new(n).unwrap();
+//! let quad = Midpoint::new(30.try_into().unwrap());
 //!
 //! // integrate some functions
 //! let two_thirds = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -26,8 +25,7 @@
 //! assert_abs_diff_eq!(estimate_sin, 0.0, epsilon = eps);
 //!
 //! // some functions need more steps than others
-//! let m = 100;
-//! let better_quad = Midpoint::new(m).unwrap();
+//! let better_quad = Midpoint::new(100.try_into().unwrap());
 //!
 //! let piecewise = better_quad.integrate(-5.0, 5.0, |x|
 //!     if x > 1.0 && x < 2.0 {
@@ -51,7 +49,7 @@ use core::num::NonZeroU32;
 /// ```
 /// # use gauss_quad::midpoint::Midpoint;
 /// // initialize a midpoint rule with 100 cells
-/// let quad: Midpoint = Midpoint::new(100).unwrap();
+/// let quad: Midpoint = Midpoint::new(100.try_into().unwrap());
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the midpoint rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -66,13 +64,8 @@ impl Midpoint {
     /// Initialize a new midpoint rule with `degree` number of cells. The nodes are evenly spaced.
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
-    ///
-    /// Returns `None` if the degree is zero.
-    pub const fn new(degree: u32) -> Option<Self> {
-        match NonZeroU32::new(degree) {
-            Some(degree) => Some(Self { degree }),
-            None => None,
-        }
+    pub const fn new(degree: NonZeroU32) -> Self {
+        Self { degree }
     }
 
     /// Integrate over the domain [a, b].
@@ -124,7 +117,7 @@ mod tests {
 
     #[test]
     fn check_midpoint_integration() {
-        let quad = Midpoint::new(100).unwrap();
+        let quad = Midpoint::new(100.try_into().unwrap());
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
@@ -132,29 +125,23 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_check_midpoint_integration() {
-        let quad = Midpoint::new(100).unwrap();
+        let quad = Midpoint::new(100.try_into().unwrap());
         let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
-    fn check_midpoint_error() {
-        let midpoint_rule = Midpoint::new(0);
-        assert!(midpoint_rule.is_none());
-    }
-
-    #[test]
     fn check_derives() {
-        let quad = Midpoint::new(10).unwrap();
+        let quad = Midpoint::new(10.try_into().unwrap());
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Midpoint::new(3).unwrap();
+        let other_quad = Midpoint::new(3.try_into().unwrap());
         assert_ne!(quad, other_quad);
     }
 
     #[test]
     fn check_iterators() {
-        let rule = Midpoint::new(100).unwrap();
+        let rule = Midpoint::new(100.try_into().unwrap());
         let a = 0.0;
         let b = 1.0;
         let ans = 1.0 / 3.0;
@@ -181,7 +168,7 @@ mod tests {
 
     #[test]
     fn verify_from_equivalence() {
-        let new = Midpoint::new(100).unwrap();
+        let new = Midpoint::new(100.try_into().unwrap());
         let from = Midpoint::from(NonZeroU32::new(100).unwrap());
         assert_eq!(new, from);
     }
