@@ -84,8 +84,11 @@ impl GaussJacobi {
 
         if deg.get() == 1 {
             // Special case for degree 1, since the nodes and weights are known.
-            let node = (beta.get() - alpha.get())/(alpha.get() + beta.get() + 2.0);
-            let weight = f64::powf(2.0, alpha.get() + beta.get() + 1.0)*gamma(alpha.get() + 1.0)*gamma(beta.get() + 1.0)/gamma(alpha.get() + beta.get() + 2.0);
+            let node = (beta.get() - alpha.get()) / (alpha.get() + beta.get() + 2.0);
+            let weight = f64::powf(2.0, alpha.get() + beta.get() + 1.0)
+                * gamma(alpha.get() + 1.0)
+                * gamma(beta.get() + 1.0)
+                / gamma(alpha.get() + beta.get() + 2.0);
             return Self {
                 node_weight_pairs: vec![(node, weight)],
                 alpha,
