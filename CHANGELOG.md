@@ -26,6 +26,7 @@ This document contains all changes to the crate since version 0.1.8.
 
 - Made the constructors of `Simpson` and `Midpoint` into `const` functions.
 - Added the trapezoidal rule.
+- Update dependencies.
 
 ## 0.2.3
 
