@@ -115,7 +115,6 @@
 //! assert_abs_diff_eq!(integral, 15.0 * PI.sqrt() / 8.0, epsilon = 1e-14);
 //! ```
 //!
-//!
 //! Make sure to read the specific quadrature rule's documentation before using it.
 //!
 //! ## Passing functions to quadrature rules
