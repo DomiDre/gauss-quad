@@ -106,7 +106,7 @@ impl fmt::Display for InfNegOneOrLessError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "attempted to convert a value that is less than or equal to -1.0 to an `FiniteAboveNegOneF64`"
+            "attempted to convert a value that is infinite, NAN, or less than or equal to -1.0 to an `FiniteAboveNegOneF64`"
         )
     }
 }
