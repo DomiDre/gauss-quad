@@ -703,4 +703,18 @@ mod tests {
         assert!(value.checked_div(0.0).is_none());
         assert!(value.checked_div(f64::NAN).is_none());
     }
+
+    #[test]
+    fn test_from_impl() {
+        let value = FiniteAboveNegOneF64::new(0.5).unwrap();
+        let f64_value: f64 = value.into();
+        assert_eq!(f64_value, 0.5);
+
+        let value_from_f64: Result<FiniteAboveNegOneF64, _> = 0.5f64.try_into();
+        assert!(value_from_f64.is_ok());
+        assert_eq!(value_from_f64.unwrap().get(), 0.5);
+
+        let value_from_invalid: Result<FiniteAboveNegOneF64, _> = (-1.0f64).try_into();
+        assert!(value_from_invalid.is_err());
+    }
 }
