@@ -137,4 +137,11 @@ mod test {
         let from = Trapezoid::from(NonZeroU32::new(100).unwrap());
         assert_eq!(new, from);
     }
+
+    #[test]
+    fn test_change_degree() {
+        let mut quad = Trapezoid::new(1000.try_into().unwrap());
+        quad.change_degree(2000.try_into().unwrap());
+        assert_eq!(quad.degree(), 2000.try_into().unwrap());
+    }
 }
