@@ -67,9 +67,9 @@ impl Trapezoid {
     ///
     /// assert_abs_diff_eq!(rule.integrate(1.0, 2.0, |x| x * x), 7.0 / 3.0, epsilon = 1e-6);
     /// ```
-    pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
+    pub fn integrate<F>(&self, a: f64, b: f64, mut integrand: F) -> f64
     where
-        F: Fn(f64) -> f64,
+        F: FnMut(f64) -> f64,
     {
         let degree = self.degree.get();
         let delta_x = (b - a) / f64::from(degree);
