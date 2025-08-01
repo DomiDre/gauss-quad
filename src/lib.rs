@@ -83,9 +83,9 @@
 //! Quadrature rules are only defined for a certain set of input values.
 //! They take parameters of types that guarantee valid input.
 //!
-//! [`GaussJacobi`] for example, requires alpha and beta parameters larger than -1.0.
-//! These are of type [`FiniteAboveNegOneF64`], which can only be created
-//! from finite non-NAN values above -1.0:
+//! [`GaussJacobi`] for example, requires two parameters named "alpha" and "beta",
+//! and they must be larger than -1.0. Therefore they are of type [`FiniteAboveNegOneF64`],
+//! which can only be created from finite non-NAN values above -1.0:
 //!
 //! ```
 //! use gauss_quad::{GaussJacobi, FiniteAboveNegOneF64};
