@@ -31,7 +31,7 @@
 //! // initialize the quadrature rule
 //! let degree = NonZeroUsize::new(10).unwrap();
 //! let quad = GaussLegendre::new(degree);
-//! 
+//!
 //! // Use the rule to integrate a function
 //! let left_bound = 0.0;
 //! let right_bound = 1.0;
@@ -129,23 +129,33 @@
 //! ```
 //! # use gauss_quad::legendre::GaussLegendre;
 //! # use approx::assert_abs_diff_eq;
+//! # use core::num::NonZeroUsize;
 //!
-//! // initialize the quadrature rule
-//! let degree = core::num::NonZeroUsize::new(2).unwrap();
+//! // Initialize the quadrature rule
+//! let degree = NonZeroUsize::new(2).unwrap();
 //! let quad = GaussLegendre::new(degree);
 //!
-//! // use the rule to integrate a function
+//! // Use the rule to integrate a closure
 //! let left_bound = 0.0;
 //! let right_bound = 1.0;
 //!
 //! let integral = quad.integrate(left_bound, right_bound, |x| x * x);
 //!
 //! assert_abs_diff_eq!(integral, 1.0 / 3.0);
+//!
+//! // You can also pass a function pointer
+//! fn x_cubed(x: f64) -> f64 {
+//!    x * x * x
+//! }
+//!
+//! let integral_x_cubed = quad.integrate(left_bound, right_bound, x_cubed);
+//! assert_abs_diff_eq!(integral_x_cubed, 1.0 / 4.0);
 //! ```
 //!
 //! ## Double integrals
 //!
 //! It is possible to use this crate to do double and higher integrals:
+//!
 //! ```
 //! # use gauss_quad::legendre::GaussLegendre;
 //! # use approx::assert_abs_diff_eq;
@@ -156,6 +166,7 @@
 //!
 //! assert_abs_diff_eq!(double_int, 0.1);
 //! ```
+//!
 //! However, the time complexity of the integration then scales with the number of nodes to
 //! the power of the depth of the integral, e.g. O(n³) for triple integrals.
 //!
