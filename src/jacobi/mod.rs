@@ -20,7 +20,7 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::gamma::gamma;
+use puruspe::{gamma::gamma, beta::euler_beta};
 use crate::{
     DMatrixf64, FiniteAboveNegOneF64, GaussChebyshevFirstKind, GaussChebyshevSecondKind,
     GaussLegendre, Node, Weight, __impl_node_weight_rule,
@@ -82,9 +82,7 @@ impl GaussJacobi {
             // Special case for degree 1, since the nodes and weights are known.
             let node = (beta.get() - alpha.get()) / (alpha.get() + beta.get() + 2.0);
             let weight = f64::powf(2.0, alpha.get() + beta.get() + 1.0)
-                * gamma(alpha.get() + 1.0)
-                * gamma(beta.get() + 1.0)
-                / gamma(alpha.get() + beta.get() + 2.0);
+                * euler_beta(alpha.get(), beta.get());
             return Self {
                 node_weight_pairs: [(node, weight)].into(),
                 alpha,
