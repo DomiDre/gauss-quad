@@ -20,7 +20,7 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::gamma::gamma;
+use puruspe::gamma::gamma;
 use crate::{DMatrixf64, FiniteAboveNegOneF64, Node, Weight, __impl_node_weight_rule};
 
 use core::num::NonZeroUsize;
