@@ -22,18 +22,21 @@ pub type Weight = f64;
 pub struct FiniteAboveNegOneF64(f64);
 
 impl fmt::Display for FiniteAboveNegOneF64 {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
 impl fmt::LowerExp for FiniteAboveNegOneF64 {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:e}", self.0)
     }
 }
 
 impl fmt::UpperExp for FiniteAboveNegOneF64 {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:E}", self.0)
     }
