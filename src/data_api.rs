@@ -55,6 +55,7 @@ impl FiniteAboveNegOneF64 {
     /// # Safety
     ///
     /// The caller must ensure that the value is finite and greater than -1.0 as well as not [`NAN`](f64::NAN).
+    #[inline]
     pub const unsafe fn new_unchecked(value: f64) -> Self {
         debug_assert!(
             Self::new(value).is_some(),
