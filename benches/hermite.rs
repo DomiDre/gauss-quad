@@ -5,9 +5,10 @@ use gauss_quad::GaussHermite;
 fn benches(c: &mut Criterion) {
     let mut group = c.benchmark_group("hermite");
     for deg in [3, 10, 40, 200, 1_000] {
-        let rule = GaussHermite::new(deg).unwrap();
+        let deg = deg.try_into().unwrap();
+        let rule = GaussHermite::new(deg);
         group.bench_function(&format!("constructor, degree {deg}"), |b| {
-            b.iter(|| black_box(GaussHermite::new(deg).unwrap()))
+            b.iter(|| black_box(GaussHermite::new(deg)))
         });
         group.bench_function(&format!("cheap integrand, degree {deg}"), |b| {
             b.iter(|| black_box(rule.integrate(|x| x * x - x - 1.0)))

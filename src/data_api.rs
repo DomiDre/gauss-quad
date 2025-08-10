@@ -9,13 +9,176 @@
 // the caller of the macro doesn't have to import anything into the module in order for the macro to compile,
 // and makes it compile even if the user has made custom types whose names shadow types used by the macro.
 
+use core::{fmt, num::ParseFloatError, str::FromStr};
+
 /// A node in a quadrature rule.
 pub type Node = f64;
 /// A weight in a quadrature rule.
 pub type Weight = f64;
 
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+/// A wrapper around a [`f64`] value that ensures the value is greater than -1.0.
+pub struct FiniteAboveNegOneF64(f64);
+
+impl fmt::Display for FiniteAboveNegOneF64 {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl fmt::LowerExp for FiniteAboveNegOneF64 {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:e}", self.0)
+    }
+}
+
+impl fmt::UpperExp for FiniteAboveNegOneF64 {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:E}", self.0)
+    }
+}
+
+impl FiniteAboveNegOneF64 {
+    /// Creates a new `FiniteAboveNegOneF64` if the value is greater than -1.0, finite and not [`NAN`](f64::NAN).
+    #[inline]
+    pub const fn new(value: f64) -> Option<Self> {
+        if value > -1.0 && value.is_finite() {
+            Some(Self(value))
+        } else {
+            None
+        }
+    }
+
+    /// Creates a new `FiniteAboveNegOneF64` without checking the value.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the value is finite and greater than -1.0 as well as not [`NAN`](f64::NAN).
+    #[inline]
+    pub const unsafe fn new_unchecked(value: f64) -> Self {
+        debug_assert!(
+            Self::new(value).is_some(),
+            "value must be greater than -1.0 and finite and not NAN"
+        );
+        Self(value)
+    }
+
+    /// Returns the inner `f64` value of the `FiniteAboveNegOneF64`.
+    #[inline]
+    pub const fn get(&self) -> f64 {
+        self.0
+    }
+
+    #[inline]
+    pub fn checked_add(self, rhs: f64) -> Option<Self> {
+        Self::new(self.0 + rhs)
+    }
+
+    #[inline]
+    pub fn checked_sub(self, rhs: f64) -> Option<Self> {
+        Self::new(self.0 - rhs)
+    }
+
+    #[inline]
+    pub fn checked_mul(self, rhs: f64) -> Option<Self> {
+        Self::new(self.0 * rhs)
+    }
+
+    #[inline]
+    pub fn checked_div(self, rhs: f64) -> Option<Self> {
+        Self::new(self.0 / rhs)
+    }
+
+    #[inline]
+    pub fn checked_powi(self, exp: i32) -> Option<Self> {
+        Self::new(self.0.powi(exp))
+    }
+
+    #[inline]
+    pub fn checked_powf(self, exp: f64) -> Option<Self> {
+        Self::new(self.0.powf(exp))
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+/// The error that that is returned when trying to convert a [`f64`] value that is less than or equal to -1.0
+/// into an [`FiniteAboveNegOneF64`] with the [`TryFrom`] trait.
+pub struct InfNanNegOneOrLessError;
+
+impl fmt::Display for InfNanNegOneOrLessError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "attempted to convert a value that is infinite, NAN, or less than or equal to -1.0 to a `FiniteAboveNegOneF64`"
+        )
+    }
+}
+
+impl core::error::Error for InfNanNegOneOrLessError {}
+
+impl TryFrom<f64> for FiniteAboveNegOneF64 {
+    type Error = InfNanNegOneOrLessError;
+
+    /// Tries to convert a `f64` into an `FiniteAboveNegOneF64`.
+    ///
+    /// Returns an error if the value is less than or equal to -1.0.
+    #[inline]
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        FiniteAboveNegOneF64::new(value).ok_or(InfNanNegOneOrLessError)
+    }
+}
+
+impl From<FiniteAboveNegOneF64> for f64 {
+    #[inline]
+    fn from(value: FiniteAboveNegOneF64) -> Self {
+        value.0
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// An error that can occur when parsing a `&str` into an [`FiniteAboveNegOneF64`].
+pub enum ParseFiniteAboveNegOneF64Error {
+    ParseError(ParseFloatError),
+    InvalidValue(InfNanNegOneOrLessError),
+}
+
+impl fmt::Display for ParseFiniteAboveNegOneF64Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ParseFiniteAboveNegOneF64Error::ParseError(e) => write!(f, "{e}"),
+            ParseFiniteAboveNegOneF64Error::InvalidValue(e) => write!(f, "{e}"),
+        }
+    }
+}
+
+impl core::error::Error for ParseFiniteAboveNegOneF64Error {
+    fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
+        match self {
+            ParseFiniteAboveNegOneF64Error::ParseError(e) => Some(e),
+            ParseFiniteAboveNegOneF64Error::InvalidValue(e) => Some(e),
+        }
+    }
+}
+
+impl FromStr for FiniteAboveNegOneF64 {
+    type Err = ParseFiniteAboveNegOneF64Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.parse::<f64>() {
+            Ok(value) => value
+                .try_into()
+                .map_err(ParseFiniteAboveNegOneF64Error::InvalidValue),
+            Err(e) => Err(ParseFiniteAboveNegOneF64Error::ParseError(e)),
+        }
+    }
+}
+
 /// This macro implements the data access API for the given quadrature rule struct that contains
-/// a field named `node_weight_pairs` of the type `Vec<(Node, Weight)>`.
+/// a field named `node_weight_pairs` of the type `Box<[(Node, Weight)]>`.
 /// It takes in the name of the quadrature rule struct as well as the names it should give the iterators
 /// over its nodes, weights, and both, as well as the iterator returned by the [`IntoIterator`] trait.
 #[doc(hidden)]
@@ -47,7 +210,7 @@ macro_rules! __impl_node_weight_rule {
             type Item = ($crate::Node, $crate::Weight);
             #[inline]
             fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_into_iter::new(self.node_weight_pairs.into_iter())
+                $quadrature_rule_into_iter::new(self.node_weight_pairs.into_vec().into_iter())
             }
         }
 
@@ -91,12 +254,12 @@ macro_rules! __impl_node_weight_rule {
                 &self.node_weight_pairs
             }
 
-            /// Converts the quadrature rule into a vector of node-weight pairs.
+            /// Converts the quadrature rule into a boxed slice of node-weight pairs.
             ///
-            /// This function just returns the underlying vector without any computation or cloning.
+            /// This function just returns the underlying data without any computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> ::std::vec::Vec<($crate::Node, $crate::Weight)> {
+            pub fn into_node_weight_pairs(self) -> ::std::boxed::Box<[($crate::Node, $crate::Weight)]> {
                 self.node_weight_pairs
             }
 
@@ -255,7 +418,7 @@ macro_rules! __impl_node_weight_rule {
 #[doc(hidden)]
 macro_rules! __impl_slice_iterator_newtype_traits {
     ($iterator:ident$(<$a:lifetime>)?, $item:ty) => {
-        impl$(<$a>)? ::core::iter::Iterator for $iterator<$($a)?> {
+        impl$(<$a>)? ::core::iter::Iterator for $iterator$(<$a>)? {
             type Item = $item;
             #[inline]
             fn next(&mut self) -> ::core::option::Option<Self::Item> {
@@ -311,23 +474,23 @@ macro_rules! __impl_slice_iterator_newtype_traits {
 }
 
 /// This macro implements the data access API for rules that have only nodes and no weights.
-/// It takes in the name of the a rule struct that contans a field with the name `nodes`
-/// of the type `Vec<Node>`. As well as the names it should give the iterator over its
+/// It takes in the name of the a rule struct that contans a field with the name `degree`
+/// of the type `NonZeroU32`. As well as the names it should give the iterator over its
 /// nodes and the iterator returned by the [`IntoIterator`] trait.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __impl_node_rule {
-    ($quadrature_rule:ident, $quadrature_rule_iter:ident, $quadrature_rule_into_iter:ident) => {
+    ($quadrature_rule:ident, $quadrature_rule_iter:ident) => {
         // Lets the user do
         // for node in QuadratureRule::new(...) {
         //    ...
         // }
         impl ::core::iter::IntoIterator for $quadrature_rule {
             type Item = $crate::Node;
-            type IntoIter = $quadrature_rule_into_iter;
+            type IntoIter = $quadrature_rule_iter;
             #[inline]
             fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_into_iter::new(self.nodes.into_iter())
+                self.iter()
             }
         }
 
@@ -338,40 +501,25 @@ macro_rules! __impl_node_rule {
         // }
         // rule.integrate(...) // <--- still available
         impl<'a> ::core::iter::IntoIterator for &'a $quadrature_rule {
-            type IntoIter = $quadrature_rule_iter<'a>;
-            type Item = &'a $crate::Node;
+            type IntoIter = $quadrature_rule_iter;
+            type Item = $crate::Node;
             #[inline]
             fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_iter::new(self.nodes.iter())
+                self.iter()
             }
         }
 
         impl $quadrature_rule {
             /// Returns an iterator over the nodes of the rule.
             #[inline]
-            pub fn iter(&self) -> $quadrature_rule_iter<'_> {
-                $quadrature_rule_iter::new(self.nodes.iter())
-            }
-
-            /// Returns a slice of all the nodes of the rule.
-            #[inline]
-            pub fn as_nodes(&self) -> &[$crate::Node] {
-                &self.nodes
-            }
-
-            /// Converts the rule into a vector of nodes.
-            ///
-            /// This function just returns the underlying data without any computation or cloning.
-            #[inline]
-            #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_nodes(self) -> Vec<$crate::Node> {
-                self.nodes
+            pub fn iter(&self) -> $quadrature_rule_iter {
+                $quadrature_rule_iter::new((0..self.degree.get()).map(|d| d as $crate::Node))
             }
 
             /// Returns the degree of the rule.
             #[inline]
-            pub fn degree(&self) -> usize {
-                self.nodes.len()
+            pub fn degree(&self) -> ::core::num::NonZeroU32 {
+                self.degree
             }
         }
 
@@ -380,109 +528,42 @@ macro_rules! __impl_node_rule {
         /// An iterator of the nodes of the rule.
         #[derive(Debug, Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_iter<'a>(::core::slice::Iter<'a, $crate::Node>);
+        pub struct $quadrature_rule_iter(
+            ::core::iter::Map<core::ops::Range<u32>, fn(u32) -> $crate::Node>,
+        );
 
-        impl<'a> $quadrature_rule_iter<'a> {
+        impl $quadrature_rule_iter {
             #[inline]
-            const fn new(iter: ::core::slice::Iter<'a, $crate::Node>) -> Self {
+            const fn new(
+                iter: ::core::iter::Map<core::ops::Range<u32>, fn(u32) -> $crate::Node>,
+            ) -> Self {
                 Self(iter)
             }
-
-            /// Views the underlying data as a subslice of the original data.
-            ///
-            /// See [`core::slice::Iter::as_slice`] for more information.
-            #[inline]
-            pub fn as_slice(&self) -> &'a [$crate::Node] {
-                self.0.as_slice()
-            }
         }
 
-        impl<'a> ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_iter<'a> {
-            #[inline]
-            fn as_ref(&self) -> &[$crate::Node] {
-                self.0.as_ref()
-            }
-        }
-
-        $crate::__impl_slice_iterator_newtype_traits! {$quadrature_rule_iter<'a>, &'a $crate::Node}
+        $crate::__impl_slice_iterator_newtype_traits! {$quadrature_rule_iter, $crate::Node}
 
         // endregion: QuadratureRuleIter
-
-        // region: QuadratureRuleIntoIter
-
-        /// An owning iterator over the nodes of the rule.
-        ///
-        /// Created by the [`IntoIterator`] trait implementation of the rule struct.
-        #[derive(::core::fmt::Debug, ::core::clone::Clone)]
-        #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<$crate::Node>);
-
-        impl $quadrature_rule_into_iter {
-            #[inline]
-            const fn new(iter: ::std::vec::IntoIter<$crate::Node>) -> Self {
-                Self(iter)
-            }
-
-            /// Views the underlying data as a subslice of the original data.
-            ///
-            /// See [`std::vec::IntoIter::as_slice`] for more information.
-            #[inline]
-            pub fn as_slice(&self) -> &[$crate::Node] {
-                self.0.as_slice()
-            }
-        }
-
-        impl ::core::convert::AsRef<[$crate::Node]> for $quadrature_rule_into_iter {
-            #[inline]
-            fn as_ref(&self) -> &[$crate::Node] {
-                self.0.as_ref()
-            }
-        }
-
-        $crate::__impl_slice_iterator_newtype_traits! {$quadrature_rule_into_iter, $crate::Node}
-
-        // endregion: QuadratureRuleIntoIter
     };
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use core::fmt;
-    use std::backtrace::Backtrace;
+    use core::f64;
+    use core::num::NonZeroUsize;
 
     #[derive(Debug, Clone, PartialEq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct MockQuadrature {
-        node_weight_pairs: Vec<(Node, Weight)>,
+        node_weight_pairs: Box<[(Node, Weight)]>,
     }
-
-    #[derive(Debug)]
-    pub struct MockQuadratureError(Backtrace);
-
-    impl MockQuadratureError {
-        pub fn backtrace(&self) -> &Backtrace {
-            &self.0
-        }
-    }
-
-    impl fmt::Display for MockQuadratureError {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            write!(f, "wrong! bad! T_T")
-        }
-    }
-
-    impl std::error::Error for MockQuadratureError {}
 
     impl MockQuadrature {
-        pub fn new(deg: usize) -> Result<Self, MockQuadratureError> {
-            if deg < 1 {
-                return Err(MockQuadratureError(Backtrace::capture()));
+        pub fn new(deg: NonZeroUsize) -> Self {
+            Self {
+                node_weight_pairs: (0..deg.get()).map(|d| (d as f64, 1.0)).collect(),
             }
-
-            Ok(Self {
-                node_weight_pairs: (0..deg).map(|d| (d as f64, 1.0)).collect(),
-            })
         }
 
         pub fn integrate<F>(&self, a: f64, b: f64, integrand: F) -> f64
@@ -503,7 +584,7 @@ mod tests {
 
     #[test]
     fn test_macro_implementation() {
-        let quad = MockQuadrature::new(5).unwrap();
+        let quad = MockQuadrature::new(5.try_into().unwrap());
         assert_eq!(quad.integrate(0.0, 1.0, |x| x), 0.5);
 
         // Test iterator implementations
@@ -559,5 +640,89 @@ mod tests {
         let quad_ref = quad_iter.as_ref();
         assert_eq!(quad_ref.len(), 5);
         assert_eq!(quad_ref[2].0, 2.0);
+    }
+
+    #[test]
+    fn test_new_finite_above_neg_one_f64() {
+        assert!(FiniteAboveNegOneF64::new(0.0).is_some());
+        assert!(FiniteAboveNegOneF64::new(-0.5).is_some());
+        assert!(FiniteAboveNegOneF64::new(-1.0).is_none());
+        assert!(FiniteAboveNegOneF64::new(f64::NAN).is_none());
+        assert!(FiniteAboveNegOneF64::new(f64::INFINITY).is_none());
+        assert!(FiniteAboveNegOneF64::new(f64::NEG_INFINITY).is_none());
+
+        unsafe {
+            assert_eq!(FiniteAboveNegOneF64::new_unchecked(0.0).get(), 0.0);
+            assert_eq!(FiniteAboveNegOneF64::new_unchecked(-0.5).get(), -0.5);
+        }
+    }
+
+    #[test]
+    fn test_try_from_f64() {
+        assert!(FiniteAboveNegOneF64::try_from(0.0).is_ok());
+        assert!(FiniteAboveNegOneF64::try_from(-0.5).is_ok());
+        assert!(FiniteAboveNegOneF64::try_from(-1.0).is_err());
+        assert!(FiniteAboveNegOneF64::try_from(f64::NAN).is_err());
+        assert!(FiniteAboveNegOneF64::try_from(f64::INFINITY).is_err());
+        assert!(FiniteAboveNegOneF64::try_from(f64::NEG_INFINITY).is_err());
+    }
+
+    #[test]
+    fn test_from_str() {
+        assert_eq!(FiniteAboveNegOneF64::from_str("0.0").unwrap().get(), 0.0);
+        assert_eq!(FiniteAboveNegOneF64::from_str("-0.5").unwrap().get(), -0.5);
+        assert_eq!(
+            FiniteAboveNegOneF64::from_str("-1.0"),
+            Err(ParseFiniteAboveNegOneF64Error::InvalidValue(
+                InfNanNegOneOrLessError
+            ))
+        );
+        assert_eq!(
+            FiniteAboveNegOneF64::from_str("NAN"),
+            Err(ParseFiniteAboveNegOneF64Error::InvalidValue(
+                InfNanNegOneOrLessError
+            ))
+        );
+        assert_eq!(
+            FiniteAboveNegOneF64::from_str("INF"),
+            Err(ParseFiniteAboveNegOneF64Error::InvalidValue(
+                InfNanNegOneOrLessError
+            ))
+        );
+        assert_eq!(
+            FiniteAboveNegOneF64::from_str("-INF"),
+            Err(ParseFiniteAboveNegOneF64Error::InvalidValue(
+                InfNanNegOneOrLessError
+            ))
+        );
+    }
+
+    #[test]
+    fn test_finite_above_neg_one_f64_arithmetic() {
+        let value = FiniteAboveNegOneF64::new(0.5).unwrap();
+        assert_eq!(value.checked_add(0.5).unwrap().get(), 1.0);
+        assert!(value.checked_add(f64::INFINITY).is_none());
+        assert!(value.checked_sub(2.0).is_none());
+        assert!(value.checked_add(f64::NAN).is_none());
+        assert_eq!(value.checked_mul(2.0).unwrap().get(), 1.0);
+        assert!(value.checked_div(0.0).is_none());
+        assert!(value.checked_powi(2).is_some());
+        assert!(value.checked_powf(2.0).is_some());
+        assert!(value.checked_div(0.0).is_none());
+        assert!(value.checked_div(f64::NAN).is_none());
+    }
+
+    #[test]
+    fn test_from_impl() {
+        let value = FiniteAboveNegOneF64::new(0.5).unwrap();
+        let f64_value: f64 = value.into();
+        assert_eq!(f64_value, 0.5);
+
+        let value_from_f64: Result<FiniteAboveNegOneF64, _> = 0.5f64.try_into();
+        assert!(value_from_f64.is_ok());
+        assert_eq!(value_from_f64.unwrap().get(), 0.5);
+
+        let value_from_invalid: Result<FiniteAboveNegOneF64, _> = (-1.0f64).try_into();
+        assert!(value_from_invalid.is_err());
     }
 }

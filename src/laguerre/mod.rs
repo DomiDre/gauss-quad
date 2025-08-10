@@ -5,26 +5,25 @@
 //! with the weighing function w(x, `alpha`) = x^`alpha` * e^(-x) over the domain `[0, ∞)`.
 //!
 //! # Examples
+//!
 //! ```
 //! use gauss_quad::laguerre::GaussLaguerre;
-//! # use gauss_quad::laguerre::GaussLaguerreError;
 //! use approx::assert_abs_diff_eq;
 //!
-//! let quad = GaussLaguerre::new(10, 1.0)?;
+//! let quad = GaussLaguerre::new(10.try_into().unwrap(), 1.0.try_into().unwrap());
 //!
 //! let integral = quad.integrate(|x| x.powi(2));
 //!
 //! assert_abs_diff_eq!(integral, 6.0, epsilon = 1e-14);
-//! # Ok::<(), GaussLaguerreError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::gamma::gamma;
-use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
+use crate::{DMatrixf64, FiniteAboveNegOneF64, Node, Weight, __impl_node_weight_rule};
 
-use std::backtrace::Backtrace;
+use core::num::NonZeroUsize;
 
 /// A Gauss-Laguerre quadrature scheme.
 ///
@@ -33,24 +32,24 @@ use std::backtrace::Backtrace;
 /// # Example
 ///
 /// Compute the factorial of 5:
+///
 /// ```
-/// # use gauss_quad::laguerre::{GaussLaguerre, GaussLaguerreError};
+/// # use gauss_quad::laguerre::GaussLaguerre;
 /// # use approx::assert_abs_diff_eq;
 /// // initialize a Gauss-Laguerre rule with 4 nodes
-/// let quad = GaussLaguerre::new(4, 0.0)?;
+/// let quad = GaussLaguerre::new(4.try_into().unwrap(), 0.0.try_into().unwrap());
 ///
 /// // numerically evaluate the integral x^5*e^(-x),
 /// // which is a definition of the gamma function of six
 /// let fact_5 = quad.integrate(|x| x.powi(5));
 ///
 /// assert_abs_diff_eq!(fact_5, 1.0 * 2.0 * 3.0 * 4.0 * 5.0, epsilon = 1e-12);
-/// # Ok::<(), GaussLaguerreError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GaussLaguerre {
-    node_weight_pairs: Vec<(Node, Weight)>,
-    alpha: f64,
+    node_weight_pairs: Box<[(Node, Weight)]>,
+    alpha: FiniteAboveNegOneF64,
 }
 
 impl GaussLaguerre {
@@ -66,26 +65,14 @@ impl GaussLaguerre {
     /// (2n+1) on the diagonal & -(n+1) on the off-diagonal (n = row number).
     /// Root & weight finding are equivalent to eigenvalue problem.
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if `deg` is smaller than 2, or if `alpha` is smaller than -1.
-    pub fn new(deg: usize, alpha: f64) -> Result<Self, GaussLaguerreError> {
-        match (deg >= 2, (alpha.is_finite() && alpha > -1.0)) {
-            (true, true) => Ok(()),
-            (false, true) => Err(GaussLaguerreErrorReason::Degree),
-            (true, false) => Err(GaussLaguerreErrorReason::Alpha),
-            (false, false) => Err(GaussLaguerreErrorReason::DegreeAlpha),
-        }
-        .map_err(GaussLaguerreError::new)?;
+    pub fn new(degree: NonZeroUsize, alpha: FiniteAboveNegOneF64) -> Self {
+        let mut companion_matrix = DMatrixf64::from_element(degree.get(), degree.get(), 0.0);
 
-        let mut companion_matrix = DMatrixf64::from_element(deg, deg, 0.0);
-
-        let mut diag = alpha + 1.0;
+        let mut diag = alpha.get() + 1.0;
         // Initialize symmetric companion matrix
-        for idx in 0..deg - 1 {
+        for idx in 0..degree.get() - 1 {
             let idx_f64 = 1.0 + idx as f64;
-            let off_diag = (idx_f64 * (idx_f64 + alpha)).sqrt();
+            let off_diag = (idx_f64 * (idx_f64 + alpha.get())).sqrt();
             unsafe {
                 *companion_matrix.get_unchecked_mut((idx, idx)) = diag;
                 *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;
@@ -94,15 +81,15 @@ impl GaussLaguerre {
             diag += 2.0;
         }
         unsafe {
-            *companion_matrix.get_unchecked_mut((deg - 1, deg - 1)) = diag;
+            *companion_matrix.get_unchecked_mut((degree.get() - 1, degree.get() - 1)) = diag;
         }
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        let scale_factor = gamma(alpha + 1.0);
+        let scale_factor = gamma(alpha.get() + 1.0);
 
-        // zip together the iterator over nodes with the one over weights and return as Vec<(f64, f64)>
-        let mut node_weight_pairs: Vec<(f64, f64)> = eigen
+        // zip together the iterator over nodes with the one over weights and return as Box<[(f64, f64)]>
+        let mut node_weight_pairs: Box<[(f64, f64)]> = eigen
             .eigenvalues
             .into_iter()
             .copied()
@@ -112,12 +99,14 @@ impl GaussLaguerre {
                     .copied(),
             )
             .collect();
-        node_weight_pairs.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
-        Ok(GaussLaguerre {
+        node_weight_pairs
+            .sort_unstable_by(|(node1, _), (node2, _)| node1.partial_cmp(node2).unwrap());
+
+        GaussLaguerre {
             node_weight_pairs,
             alpha,
-        })
+        }
     }
 
     /// Perform quadrature of  
@@ -151,85 +140,12 @@ impl GaussLaguerre {
 
     /// Returns the value of the `alpha` parameter of the rule.
     #[inline]
-    pub const fn alpha(&self) -> f64 {
+    pub const fn alpha(&self) -> FiniteAboveNegOneF64 {
         self.alpha
     }
 }
 
 __impl_node_weight_rule! {GaussLaguerre, GaussLaguerreNodes, GaussLaguerreWeights, GaussLaguerreIter, GaussLaguerreIntoIter}
-
-/// The error returned by [`GaussLaguerre::new`] if given a degree, `deg`, less than 2 and/or an `alpha` of -1 or less.
-#[derive(Debug)]
-pub struct GaussLaguerreError {
-    reason: GaussLaguerreErrorReason,
-    backtrace: Backtrace,
-}
-
-use core::fmt;
-impl fmt::Display for GaussLaguerreError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        const DEGREE_LIMIT: &str = "degree must be at least 2";
-        const ALPHA_LIMIT: &str = "alpha must be larger than -1.0";
-        match self.reason() {
-            GaussLaguerreErrorReason::Degree => write!(f, "{DEGREE_LIMIT}"),
-            GaussLaguerreErrorReason::Alpha => write!(f, "{ALPHA_LIMIT}"),
-            GaussLaguerreErrorReason::DegreeAlpha => write!(f, "{DEGREE_LIMIT}, and {ALPHA_LIMIT}"),
-        }
-    }
-}
-
-impl GaussLaguerreError {
-    /// Captures a backtrace and creates a new error with the given reason.
-    #[inline]
-    pub(crate) fn new(reason: GaussLaguerreErrorReason) -> Self {
-        Self {
-            reason,
-            backtrace: Backtrace::capture(),
-        }
-    }
-
-    /// Returns the reason for the error.
-    #[inline]
-    pub fn reason(&self) -> GaussLaguerreErrorReason {
-        self.reason
-    }
-
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
-    #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.backtrace
-    }
-}
-
-impl std::error::Error for GaussLaguerreError {}
-
-/// The reason for the `GaussLaguerreError`, returned by the [`GaussLaguerreError::reason`] function.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum GaussLaguerreErrorReason {
-    /// The given degree was less than 2.
-    Degree,
-    /// The given `alpha` exponent was less than or equal to -1.
-    Alpha,
-    /// The given degree was less than 2 and the given `alpha` exponent was less than or equal to -1.
-    DegreeAlpha,
-}
-
-impl GaussLaguerreErrorReason {
-    /// Returns true if the given degree, `deg`, was bad.
-    #[inline]
-    pub fn was_bad_degree(&self) -> bool {
-        matches!(self, Self::Degree | Self::DegreeAlpha)
-    }
-
-    /// Returns true if the given `alpha` was bad.
-    #[inline]
-    pub fn was_bad_alpha(&self) -> bool {
-        matches!(self, Self::Alpha | Self::DegreeAlpha)
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -238,8 +154,37 @@ mod tests {
     use core::f64::consts::PI;
 
     #[test]
+    fn check_sorted() {
+        for deg in (2..100).step_by(10) {
+            for alpha in [-0.9, -0.5, 0.0, 0.5] {
+                let rule = GaussLaguerre::new(deg.try_into().unwrap(), alpha.try_into().unwrap());
+                assert!(rule.as_node_weight_pairs().is_sorted());
+            }
+        }
+    }
+
+    #[test]
+    fn check_degree_1() {
+        let rule = GaussLaguerre::new(1.try_into().unwrap(), 0.0.try_into().unwrap());
+
+        for constant in (0..100).step_by(10).map(f64::from) {
+            assert_abs_diff_eq!(rule.integrate(|x| constant * x), constant, epsilon = 1e-13);
+        }
+    }
+
+    #[test]
+    fn sanity_check_alpha_accessor() {
+        let alpha = FiniteAboveNegOneF64::new(1.0).unwrap();
+        let rule = GaussLaguerre::new(10.try_into().unwrap(), alpha);
+        assert_eq!(rule.alpha(), alpha);
+    }
+
+    #[test]
     fn golub_welsch_2_alpha_5() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(2, 5.0).unwrap().into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) =
+            GaussLaguerre::new(2.try_into().unwrap(), 5.0.try_into().unwrap())
+                .into_iter()
+                .unzip();
         let x_should = [4.354_248_688_935_409, 9.645_751_311_064_59];
         let w_should = [82.677_868_380_553_63, 37.322_131_619_446_37];
         for (i, x_val) in x_should.iter().enumerate() {
@@ -252,7 +197,10 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_0() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 0.0).unwrap().into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) =
+            GaussLaguerre::new(3.try_into().unwrap(), 0.0.try_into().unwrap())
+                .into_iter()
+                .unzip();
         let x_should = [
             0.415_774_556_783_479_1,
             2.294_280_360_279_042,
@@ -273,7 +221,10 @@ mod tests {
 
     #[test]
     fn golub_welsch_3_alpha_1_5() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(3, 1.5).unwrap().into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) =
+            GaussLaguerre::new(3.try_into().unwrap(), 1.5.try_into().unwrap())
+                .into_iter()
+                .unzip();
         let x_should = [
             1.220_402_317_558_883_8,
             3.808_880_721_467_068,
@@ -294,7 +245,10 @@ mod tests {
 
     #[test]
     fn golub_welsch_5_alpha_negative() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussLaguerre::new(5, -0.9).unwrap().into_iter().unzip();
+        let (x, w): (Vec<_>, Vec<_>) =
+            GaussLaguerre::new(5.try_into().unwrap(), (-0.9).try_into().unwrap())
+                .into_iter()
+                .unzip();
         let x_should = [
             0.020_777_151_319_288_104,
             0.808_997_536_134_602_1,
@@ -318,84 +272,17 @@ mod tests {
     }
 
     #[test]
-    fn check_laguerre_error() {
-        // test error kinds, and if print outputs are as expected
-        let laguerre_rule = GaussLaguerre::new(0, -0.25);
-        assert!(laguerre_rule
-            .as_ref()
-            .is_err_and(|x| x.reason() == GaussLaguerreErrorReason::Degree));
-        assert_eq!(
-            format!("{}", laguerre_rule.err().unwrap()),
-            "degree must be at least 2"
-        );
-        assert_eq!(
-            GaussLaguerre::new(0, -0.25).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::Degree)
-        );
-
-        assert_eq!(
-            GaussLaguerre::new(1, -0.25).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::Degree)
-        );
-
-        let laguerre_rule = GaussLaguerre::new(5, -1.0);
-        assert!(laguerre_rule
-            .as_ref()
-            .is_err_and(|x| x.reason() == GaussLaguerreErrorReason::Alpha));
-        assert_eq!(
-            format!("{}", laguerre_rule.err().unwrap()),
-            "alpha must be larger than -1.0"
-        );
-
-        assert_eq!(
-            GaussLaguerre::new(5, -1.0).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::Alpha)
-        );
-        assert_eq!(
-            GaussLaguerre::new(5, -2.0).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::Alpha)
-        );
-
-        let laguerre_rule = GaussLaguerre::new(0, -1.0);
-        assert!(laguerre_rule
-            .as_ref()
-            .is_err_and(|x| x.reason() == GaussLaguerreErrorReason::DegreeAlpha));
-        assert_eq!(
-            format!("{}", laguerre_rule.err().unwrap()),
-            "degree must be at least 2, and alpha must be larger than -1.0"
-        );
-
-        assert_eq!(
-            GaussLaguerre::new(0, -1.0).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::DegreeAlpha)
-        );
-
-        assert_eq!(
-            GaussLaguerre::new(0, -2.0).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::DegreeAlpha)
-        );
-        assert_eq!(
-            GaussLaguerre::new(1, -1.0).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::DegreeAlpha)
-        );
-        assert_eq!(
-            GaussLaguerre::new(1, -2.0).map_err(|e| e.reason()),
-            Err(GaussLaguerreErrorReason::DegreeAlpha)
-        );
-    }
-
-    #[test]
     fn check_derives() {
-        let quad = GaussLaguerre::new(10, 1.0).unwrap();
+        let quad = GaussLaguerre::new(10.try_into().unwrap(), 1.0.try_into().unwrap());
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = GaussLaguerre::new(10, 2.0).unwrap();
+        let other_quad = GaussLaguerre::new(10.try_into().unwrap(), 2.0.try_into().unwrap());
         assert_ne!(quad, other_quad);
     }
 
     #[test]
     fn check_iterators() {
-        let rule = GaussLaguerre::new(3, 0.5).unwrap();
+        let rule = GaussLaguerre::new(3.try_into().unwrap(), 0.5.try_into().unwrap());
 
         let ans = 15.0 / 8.0 * core::f64::consts::PI.sqrt();
 
@@ -422,7 +309,7 @@ mod tests {
 
     #[test]
     fn check_some_integrals() {
-        let rule = GaussLaguerre::new(10, -0.5).unwrap();
+        let rule = GaussLaguerre::new(10.try_into().unwrap(), (-0.5).try_into().unwrap());
 
         assert_abs_diff_eq!(
             rule.integrate(|x| x * x),
@@ -440,7 +327,7 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_check_some_integrals() {
-        let rule = GaussLaguerre::new(10, -0.5).unwrap();
+        let rule = GaussLaguerre::new(10.try_into().unwrap(), (-0.5).try_into().unwrap());
 
         assert_abs_diff_eq!(
             rule.par_integrate(|x| x * x),

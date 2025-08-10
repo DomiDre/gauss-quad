@@ -15,15 +15,13 @@
 //!
 //! ```
 //! use gauss_quad::simpson::Simpson;
-//! # use gauss_quad::simpson::SimpsonError;
 //! use approx::assert_abs_diff_eq;
 //!
 //! use core::f64::consts::PI;
 //!
 //! let eps = 0.001;
 //!
-//! let n = 10;
-//! let quad = Simpson::new(n)?;
+//! let quad = Simpson::new(10.try_into().unwrap());
 //!
 //! // integrate some functions
 //! let integrate_euler = quad.integrate(0.0, 1.0, |x| x.exp());
@@ -31,48 +29,35 @@
 //!
 //! let integrate_sin = quad.integrate(-PI, PI, |x| x.sin());
 //! assert_abs_diff_eq!(integrate_sin, 0.0, epsilon = eps);
-//! # Ok::<(), SimpsonError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
-use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use crate::{Node, __impl_node_rule};
+use crate::__impl_node_rule;
 
-use std::backtrace::Backtrace;
+use core::num::NonZeroU32;
 
 /// A Simpson's rule.
 ///
 /// ```
-/// # use gauss_quad::simpson::{Simpson, SimpsonError};
+/// # use gauss_quad::simpson::Simpson;
 /// // initialize a Simpson rule with 100 subintervals
-/// let quad: Simpson = Simpson::new(100)?;
+/// let quad: Simpson = Simpson::new(100.try_into().unwrap());
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the Simpson rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
-/// # Ok::<(), SimpsonError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Simpson {
-    /// The dimensionless Simpsons nodes.
-    nodes: Vec<Node>,
+    degree: NonZeroU32,
 }
 
 impl Simpson {
     /// Initialize a new Simpson rule with `degree` being the number of intervals.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if given a degree of zero.
-    pub fn new(degree: usize) -> Result<Self, SimpsonError> {
-        if degree >= 1 {
-            Ok(Self {
-                nodes: (0..degree).map(|d| d as f64).collect(),
-            })
-        } else {
-            Err(SimpsonError::new())
-        }
+    pub const fn new(degree: NonZeroU32) -> Self {
+        Self { degree }
     }
 
     /// Integrate over the domain [a, b].
@@ -80,25 +65,23 @@ impl Simpson {
     where
         F: FnMut(f64) -> f64,
     {
-        let n = self.nodes.len() as f64;
+        let n = self.iter().count() as f64;
 
         let h = (b - a) / n;
 
         // first sum over the interval edges. Skips first index to sum 1..n-1
         let sum_over_interval_edges: f64 = self
-            .nodes
             .iter()
             .skip(1)
-            .map(|&node| integrand(a + node * h))
+            .map(|node| integrand(a + node * h))
             .sum();
 
         // sum over the midpoints f( (x_{k-1} + x_k)/2 ), as node N is not included,
         // add it in the final result
         let sum_over_midpoints: f64 = self
-            .nodes
             .iter()
             .skip(1)
-            .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+            .map(|node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
             .sum();
 
         h / 6.0
@@ -115,23 +98,21 @@ impl Simpson {
     where
         F: Fn(f64) -> f64 + Sync,
     {
-        let n = self.nodes.len() as f64;
+        let n = f64::from(self.degree().get());
 
         let h = (b - a) / n;
 
         let (sum_over_interval_edges, sum_over_midpoints): (f64, f64) = rayon::join(
             || {
-                self.nodes
-                    .par_iter()
-                    .skip(1)
-                    .map(|&node| integrand(a + node * h))
+                (1..self.degree().get())
+                    .into_par_iter()
+                    .map(|node| integrand(a + f64::from(node) * h))
                     .sum::<f64>()
             },
             || {
-                self.nodes
-                    .par_iter()
-                    .skip(1)
-                    .map(|&node| integrand(a + (2.0 * node - 1.0) * h / 2.0))
+                (1..self.degree().get())
+                    .into_par_iter()
+                    .map(|node| integrand(a + (2.0 * f64::from(node) - 1.0) * h / 2.0))
                     .sum::<f64>()
             },
         );
@@ -143,37 +124,21 @@ impl Simpson {
                 + integrand(a)
                 + integrand(b))
     }
-}
 
-__impl_node_rule! {Simpson, SimpsonIter, SimpsonIntoIter}
-
-/// The error returned by [`Simpson::new`] if given a degree of 0.
-#[derive(Debug)]
-pub struct SimpsonError(Backtrace);
-
-use core::fmt;
-impl fmt::Display for SimpsonError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "the degree of the Simpson rule must be at least 1.")
+    /// Sets the degree of the Simpson rule to a new value.
+    pub fn change_degree(&mut self, new_degree: NonZeroU32) {
+        self.degree = new_degree;
     }
 }
 
-impl SimpsonError {
-    /// Calls [`Backtrace::capture`] and wraps the result in a `SimpsonError` struct.
-    fn new() -> Self {
-        Self(Backtrace::capture())
-    }
+__impl_node_rule! {Simpson, SimpsonIter}
 
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
+impl From<NonZeroU32> for Simpson {
     #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.0
+    fn from(degree: NonZeroU32) -> Self {
+        Self { degree }
     }
 }
-
-impl std::error::Error for SimpsonError {}
 
 #[cfg(test)]
 mod tests {
@@ -181,7 +146,7 @@ mod tests {
 
     #[test]
     fn check_simpson_integration() {
-        let quad = Simpson::new(2).unwrap();
+        let quad = Simpson::new(2.try_into().unwrap());
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
@@ -189,27 +154,31 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_check_simpson_integration() {
-        let quad = Simpson::new(2).unwrap();
+        let quad = Simpson::new(2.try_into().unwrap());
         let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
         approx::assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
-    fn check_simpson_error() {
-        let simpson_rule = Simpson::new(0);
-        assert!(simpson_rule.is_err());
-        assert_eq!(
-            format!("{}", simpson_rule.err().unwrap()),
-            "the degree of the Simpson rule must be at least 1."
-        );
+    fn check_derives() {
+        let quad = Simpson::new(10.try_into().unwrap());
+        let quad_clone = quad.clone();
+        assert_eq!(quad, quad_clone);
+        let other_quad = Simpson::new(3.try_into().unwrap());
+        assert_ne!(quad, other_quad);
     }
 
     #[test]
-    fn check_derives() {
-        let quad = Simpson::new(10).unwrap();
-        let quad_clone = quad.clone();
-        assert_eq!(quad, quad_clone);
-        let other_quad = Simpson::new(3).unwrap();
-        assert_ne!(quad, other_quad);
+    fn verify_from_equivalence() {
+        let new = Simpson::new(100.try_into().unwrap());
+        let from = Simpson::from(NonZeroU32::new(100).unwrap());
+        assert_eq!(new, from);
+    }
+
+    #[test]
+    fn test_change_degree() {
+        let mut quad = Simpson::new(1000.try_into().unwrap());
+        quad.change_degree(2000.try_into().unwrap());
+        assert_eq!(quad.degree(), 2000.try_into().unwrap());
     }
 }

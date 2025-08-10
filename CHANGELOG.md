@@ -2,6 +2,32 @@
 
 This document contains all changes to the crate since version 0.1.8.
 
+## 0.3.0 (unreleased)
+
+### Breaking changes
+
+- Made all quadrature rules store their nodes and weights sorted in ascending order by node.
+ This means that all functions that return some view of the nodes (and weights) now return them in this sorted order.
+ This affects the Gauss-Legendre, Gauss-Hermite and Gauss-Chebyshev rules.
+ The affected functions are `QuadratureRule::iter()`, `QuadratureRule::into_iter()`, `QuadratureRule::nodes()`,
+ `QuadratureRule::weights()`, `QuadratureRule::as_node_weight_pairs()` and `QuadratureRule::into_node_weight_pairs()`.
+- Made the `Simpson` and `Midpoint` rules not allocate any memory.
+ This removes all the functions on those types that access some view of the nodes.
+- Made the different rules capable of working also at a degree of 1.
+ As a result their constructors take a `NonZeroUsize` for a degree.
+- Made the constructors take types that ensure that the inputs uphold the correct invariants.
+ As a result all constructors just return the rule itself, no `Result` or `Option`.
+- Made the quadrature rule structs that store a `Vec` of nodes and weights instead store a boxed slice.
+ This makes them take up less space on the stack.
+ This affects the `QuadratureRule::into_node_weight_pairs()` functions.
+ Call `.into_vec()` on the boxed slice to get it as a `Vec`.
+
+### Other changes
+
+- Made the constructors of `Simpson` and `Midpoint` into `const` functions.
+- Added the trapezoidal rule.
+- Update dependencies.
+
 ## 0.2.3
 
 - Make the `QuadratureRule::integrate` functions take a `FnMut` instead of a `Fn`.

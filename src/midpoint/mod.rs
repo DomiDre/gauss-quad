@@ -8,15 +8,14 @@
 //!    value at the midpoint.
 //!
 //! ```
-//! use gauss_quad::midpoint::{Midpoint, MidpointError};
+//! use gauss_quad::midpoint::Midpoint;
 //! use approx::assert_abs_diff_eq;
 //!
 //! use core::f64::consts::PI;
 //!
 //! let eps = 0.001;
 //!
-//! let n = 30;
-//! let quad = Midpoint::new(n)?;
+//! let quad = Midpoint::new(30.try_into().unwrap());
 //!
 //! // integrate some functions
 //! let two_thirds = quad.integrate(-1.0, 1.0, |x| x * x);
@@ -26,8 +25,7 @@
 //! assert_abs_diff_eq!(estimate_sin, 0.0, epsilon = eps);
 //!
 //! // some functions need more steps than others
-//! let m = 100;
-//! let better_quad = Midpoint::new(m)?;
+//! let better_quad = Midpoint::new(100.try_into().unwrap());
 //!
 //! let piecewise = better_quad.integrate(-5.0, 5.0, |x|
 //!     if x > 1.0 && x < 2.0 {
@@ -38,49 +36,36 @@
 //! );
 //!
 //! assert_abs_diff_eq!(0.135257, piecewise, epsilon = eps);
-//! # Ok::<(), MidpointError>(())
 //! ```
 
 #[cfg(feature = "rayon")]
-use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
+use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use crate::{Node, __impl_node_rule};
+use crate::__impl_node_rule;
 
-use std::backtrace::Backtrace;
+use core::num::NonZeroU32;
 
 /// A midpoint rule.
 /// ```
-/// # use gauss_quad::midpoint::{Midpoint, MidpointError};
+/// # use gauss_quad::midpoint::Midpoint;
 /// // initialize a midpoint rule with 100 cells
-/// let quad: Midpoint = Midpoint::new(100)?;
+/// let quad: Midpoint = Midpoint::new(100.try_into().unwrap());
 ///
 /// // numerically integrate a function from -1.0 to 1.0 using the midpoint rule
 /// let approx = quad.integrate(-1.0, 1.0, |x| x * x);
-/// # Ok::<(), MidpointError>(())
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Midpoint {
-    /// The dimensionless midpoints
-    nodes: Vec<Node>,
+    degree: NonZeroU32,
 }
 
 impl Midpoint {
     /// Initialize a new midpoint rule with `degree` number of cells. The nodes are evenly spaced.
     // -- code based on Luca Palmieri's "Scientific computing: a Rust adventure [Part 2 - Array1]"
     //    <https://www.lpalmieri.com/posts/2019-04-07-scientific-computing-a-rust-adventure-part-2-array1/>
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if `degree` is less than 1.
-    pub fn new(degree: usize) -> Result<Self, MidpointError> {
-        if degree > 0 {
-            Ok(Self {
-                nodes: (0..degree).map(|d| d as f64).collect(),
-            })
-        } else {
-            Err(MidpointError::new())
-        }
+    pub const fn new(degree: NonZeroU32) -> Self {
+        Self { degree }
     }
 
     /// Integrate over the domain [a, b].
@@ -88,12 +73,11 @@ impl Midpoint {
     where
         F: FnMut(f64) -> f64,
     {
-        let rect_width = (b - a) / self.nodes.len() as f64;
+        let rect_width = (b - a) / f64::from(self.degree().get());
 
         let sum: f64 = self
-            .nodes
             .iter()
-            .map(|&node| integrand(a + rect_width * (0.5 + node)))
+            .map(|node| integrand(a + rect_width * (0.5 + node)))
             .sum();
 
         sum * rect_width
@@ -105,47 +89,30 @@ impl Midpoint {
     where
         F: Fn(f64) -> f64 + Sync,
     {
-        let rect_width = (b - a) / self.nodes.len() as f64;
+        let rect_width = (b - a) / f64::from(self.degree().get());
 
-        let sum: f64 = self
-            .nodes
-            .par_iter()
-            .map(|&node| integrand(a + rect_width * (0.5 + node)))
+        let sum: f64 = (0..self.degree().get())
+            .into_par_iter()
+            .map(|node| integrand(a + rect_width * (0.5 + f64::from(node))))
             .sum();
 
         sum * rect_width
     }
-}
 
-__impl_node_rule! {Midpoint, MidpointIter, MidpointIntoIter}
-
-/// The error returned by [`Midpoint::new`] if given a degree of 0.
-#[derive(Debug)]
-pub struct MidpointError(Backtrace);
-
-use core::fmt;
-impl fmt::Display for MidpointError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "the degree of the midpoint rule needs to be at least 1")
+    /// Sets the degree of the midpoint rule to a new value.
+    pub fn change_degree(&mut self, new_degree: NonZeroU32) {
+        self.degree = new_degree;
     }
 }
 
-impl MidpointError {
-    /// Calls [`Backtrace::capture`] and wraps the result in a `MidpointError` struct.
-    fn new() -> Self {
-        Self(Backtrace::capture())
-    }
+__impl_node_rule! {Midpoint, MidpointIter}
 
-    /// Returns a [`Backtrace`] to where the error was created.
-    ///
-    /// This backtrace is captured with [`Backtrace::capture`], see it for more information about how to make it display information when printed.
+impl From<NonZeroU32> for Midpoint {
     #[inline]
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.0
+    fn from(degree: NonZeroU32) -> Self {
+        Self { degree }
     }
 }
-
-impl std::error::Error for MidpointError {}
 
 #[cfg(test)]
 mod tests {
@@ -155,7 +122,7 @@ mod tests {
 
     #[test]
     fn check_midpoint_integration() {
-        let quad = Midpoint::new(100).unwrap();
+        let quad = Midpoint::new(100.try_into().unwrap());
         let integral = quad.integrate(0.0, 1.0, |x| x * x);
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
@@ -163,37 +130,27 @@ mod tests {
     #[cfg(feature = "rayon")]
     #[test]
     fn par_check_midpoint_integration() {
-        let quad = Midpoint::new(100).unwrap();
+        let quad = Midpoint::new(100.try_into().unwrap());
         let integral = quad.par_integrate(0.0, 1.0, |x| x * x);
         assert_abs_diff_eq!(integral, 1.0 / 3.0, epsilon = 0.0001);
     }
 
     #[test]
-    fn check_midpoint_error() {
-        let midpoint_rule = Midpoint::new(0);
-        assert!(midpoint_rule.is_err());
-        assert_eq!(
-            format!("{}", midpoint_rule.err().unwrap()),
-            "the degree of the midpoint rule needs to be at least 1"
-        );
-    }
-
-    #[test]
     fn check_derives() {
-        let quad = Midpoint::new(10).unwrap();
+        let quad = Midpoint::new(10.try_into().unwrap());
         let quad_clone = quad.clone();
         assert_eq!(quad, quad_clone);
-        let other_quad = Midpoint::new(3).unwrap();
+        let other_quad = Midpoint::new(3.try_into().unwrap());
         assert_ne!(quad, other_quad);
     }
 
     #[test]
     fn check_iterators() {
-        let rule = Midpoint::new(100).unwrap();
+        let rule = Midpoint::new(100.try_into().unwrap());
         let a = 0.0;
         let b = 1.0;
         let ans = 1.0 / 3.0;
-        let rect_width = (b - a) / rule.degree() as f64;
+        let rect_width = (b - a) / rule.degree().get() as f64;
 
         assert_abs_diff_eq!(
             ans,
@@ -212,5 +169,19 @@ mod tests {
             }) * rect_width,
             epsilon = 1e-4
         );
+    }
+
+    #[test]
+    fn verify_from_equivalence() {
+        let new = Midpoint::new(100.try_into().unwrap());
+        let from = Midpoint::from(NonZeroU32::new(100).unwrap());
+        assert_eq!(new, from);
+    }
+
+    #[test]
+    fn test_change_degree() {
+        let mut quad = Midpoint::new(1000.try_into().unwrap());
+        quad.change_degree(2000.try_into().unwrap());
+        assert_eq!(quad.degree(), 2000.try_into().unwrap());
     }
 }
