@@ -2,6 +2,16 @@
 
 This document contains all changes to the crate since version 0.1.8.
 
+## 0.2.4
+
+- Upgrade nalgebra & rayon packages. 
+- Add a CI job that mimics the doc generation on docs.rs. 
+- Run the test job on multiple operating systems. 
+- Add license info to readme. 
+- Add a badge that takes you to the repo when clicked. 
+- Update transitive dependencies. 
+
+
 ## 0.2.3
 
 - Make the `QuadratureRule::integrate` functions take a `FnMut` instead of a `Fn`.
