@@ -30,6 +30,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - name: cargo clippy -- -D warnings
         run: cargo clippy --all-features -- -D warnings
         
@@ -38,6 +40,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
       - name: Format
         run: cargo fmt --check
         
