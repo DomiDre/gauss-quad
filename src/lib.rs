@@ -174,7 +174,7 @@
 // The config in Cargo.toml means that this is defined when we are on docs.rs (which uses the nightly compiler)
 // or if the environment variable RUSTDOCFLAGS is set as `RUSTDOCFLAGS="--cfg docsrs"`.
 // This lets us get a tag on docs.rs that says "Available on crate feature ... only".
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 
