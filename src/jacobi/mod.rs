@@ -67,10 +67,6 @@ impl GaussJacobi {
     pub fn new(deg: NonZeroUsize, alpha: FiniteAboveNegOneF64, beta: FiniteAboveNegOneF64) -> Self {
         // Delegate the computation of nodes and weights when they have special values
         // that are equivalent to other rules that have faster implementations.
-        //
-        // UNWRAP: We have already verified that the degree is 1 or larger above.
-        // Since that is the only possible error cause for these quadrature rules
-        // this code can not fail, so we just `unwrap` the result.
         match (alpha.get(), beta.get()) {
             (0.0, 0.0) => return GaussLegendre::new(deg).into(),
             (-0.5, -0.5) => return GaussChebyshevFirstKind::new(deg).into(),
