@@ -2,7 +2,7 @@
 
 This document contains all changes to the crate since version 0.1.8.
 
-## 0.3.0 (unreleased)
+## [Unreleased: 0.3.0]
 
 ### Breaking changes
 
@@ -27,8 +27,9 @@ This document contains all changes to the crate since version 0.1.8.
 - Made the constructors of `Simpson` and `Midpoint` into `const` functions.
 - Added the trapezoidal rule.
 - Update dependencies.
+- Add dates to the releases in this log.
 
-## 0.2.4
+## [0.2.4] - 2025-08-23
 
 - Upgrade nalgebra & rayon packages. 
 - Add a CI job that mimics the doc generation on docs.rs. 
@@ -38,7 +39,7 @@ This document contains all changes to the crate since version 0.1.8.
 - Update transitive dependencies. 
 
 
-## 0.2.3
+## [0.2.3] - 2025-04-20
 
 - Make the `QuadratureRule::integrate` functions take a `FnMut` instead of a `Fn`.
 - Documentation improvements.
@@ -46,17 +47,17 @@ This document contains all changes to the crate since version 0.1.8.
 - Updated dependencies.
 - Implemented `Iterator::last` by calling `DoubleEndedIterator::next_back` where applicable.
 
-## 0.2.2
+## [0.2.2] - 2024-12-29
 
 - Add Gauss-Chebyshev quadrature of the first and second kinds.
 
-## 0.2.1
+## [0.2.1] - 2024-08-24
 
 - Add the `rayon` feature that enables certain calculations to be done in parallel.
 - Add the function `par_integrate` to every quadrature rule struct which can be used when the `rayon` feature is enabled to perform integration in parallel.
 - Add the function `par_new` to `GaussLegendre` to initialize it in parallel. This function is also behind the `rayon` feature.
 
-## 0.2.0
+## [0.2.0] - 2024-07-29
 
 This update is mostly about changing the API to adhere to the [Rust API guidelines](https://rust-lang.github.io/api-guidelines/about.html).
 
@@ -76,6 +77,6 @@ This update is mostly about changing the API to adhere to the [Rust API guidelin
 - The quadrature rule structs now store the nodes and weights together in a single allocation. This slightly speeds up integration, and removes one intermediate allocation during creation.
 - Fixed a sign error in the documentation for `GaussJacobi`.
 
-## 0.1.9
+## [0.1.9] - 2024-06-30
 
 - Update `nalgebra` dependency to 0.33.0.
