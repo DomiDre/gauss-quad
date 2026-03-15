@@ -719,6 +719,13 @@ mod tests {
         assert!(value.checked_div(0.0).is_none());
         assert!(value.checked_div(0.0).is_none());
         assert!(value.checked_div(f64::NAN).is_none());
+        assert_eq!(value.checked_pow(2.0).unwrap().get(), 0.25);
+        assert!(
+            FiniteAboveNegOneF64::new(2.0)
+                .unwrap()
+                .checked_pow(f64::INFINITY)
+                .is_none()
+        );
     }
 
     #[test]
