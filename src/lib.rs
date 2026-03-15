@@ -158,7 +158,7 @@
 //! let integral_x_cubed = quad.integrate(left_bound, right_bound, x_cubed);
 //! assert_abs_diff_eq!(integral_x_cubed, 1.0 / 4.0);
 //! ```
-//! The parallel `par_integrate` functions instead take a function that can't modify any state, [`Fn(f64) -> f64`](Fn), and is [`Sync`] to enable parallel evaluation.
+//! The parallel `par_integrate` methods instead take a function that can't modify any state, [`Fn(f64) -> f64`](Fn), and is [`Sync`] to enable parallel evaluation.
 //!
 //! ## Double integrals
 //!
