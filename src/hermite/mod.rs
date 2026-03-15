@@ -99,8 +99,7 @@ impl GaussHermite {
             .collect();
 
         // sort the nodes and weights by the nodes
-        node_weight_pairs
-            .sort_unstable_by(|(node1, _), (node2, _)| node1.total_cmp(node2));
+        node_weight_pairs.sort_unstable_by(|(node1, _), (node2, _)| node1.total_cmp(node2));
 
         GaussHermite { node_weight_pairs }
     }
