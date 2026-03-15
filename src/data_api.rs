@@ -69,7 +69,7 @@ impl FiniteAboveNegOneF64 {
     pub const fn new_unchecked(value: f64) -> Self {
         debug_assert!(
             Self::new(value).is_some(),
-            "value must be greater than -1.0 and finite and not NAN"
+            "value must be greater than -1.0, finite, and not NAN"
         );
         Self(value)
     }
