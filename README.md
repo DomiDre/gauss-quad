@@ -33,9 +33,10 @@ The general call structure is to first initialize the n-point quadrature rule se
 where QUADRATURE_RULE can currently be set to calculate either:
 
 | QUADRATURE_RULE | Integral                                                        |
-| --------------- | --------------------------------------------------------------- |
+|-----------------| --------------------------------------------------------------- |
 | Midpoint        | $$\int_a^b f(x) \mathrm{d}x$$                                   |
 | Simpson         | $$\int_a^b f(x) \mathrm{d}x$$                                   |
+| Trapezoid       | $$\int_a^b f(x) \mathrm{d}x$$                                   |
 | GaussLegendre   | $$\int_a^b f(x) \mathrm{d}x$$                                   |
 | GaussJacobi     | $$\int_a^b f(x)(1-x)^\alpha (1+x)^\beta \mathrm{d}x$$           |
 | GaussLaguerre   | $$\int_{0}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$             |
