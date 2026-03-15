@@ -191,6 +191,7 @@
 // or if the environment variable RUSTDOCFLAGS is set as `RUSTDOCFLAGS="--cfg docsrs"`.
 // This lets us get a tag on docs.rs that says "Available on crate feature ... only".
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![forbid(unsafe_code)]
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 
