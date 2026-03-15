@@ -222,7 +222,7 @@ macro_rules! __impl_node_weight_rule {
             type Item = ($crate::Node, $crate::Weight);
             #[inline]
             fn into_iter(self) -> Self::IntoIter {
-                $quadrature_rule_into_iter::new(self.node_weight_pairs.into_vec().into_iter())
+                $quadrature_rule_into_iter::new(self.node_weight_pairs.into_iter())
             }
         }
 
