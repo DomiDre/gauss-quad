@@ -24,7 +24,7 @@ pub type Weight = f64;
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-/// A wrapper around an [`f64`] value that ensures the value is greater than -1.0.
+/// A wrapper around an [`f64`] that ensures the value is greater than -1.0, finite, and not [`NAN`](f64::NAN).
 pub struct FiniteAboveNegOneF64(f64);
 
 impl fmt::Display for FiniteAboveNegOneF64 {
