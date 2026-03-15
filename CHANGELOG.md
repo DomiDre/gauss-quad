@@ -6,7 +6,7 @@ This document contains all changes to the crate since version 0.1.8.
 
 ### Breaking changes
 
-- Made all quadrature rules store their nodes and weights sorted in ascending order by node.
+- Made all quadrature rules store their nodes and weights sorted in ascending order by node (according to the `f64::total_cmp` function).
  This means that all functions that return some view of the nodes (and weights) now return them in this sorted order.
  This affects the Gauss-Legendre, Gauss-Hermite and Gauss-Chebyshev rules.
  The affected functions are `QuadratureRule::iter()`, `QuadratureRule::into_iter()`, `QuadratureRule::nodes()`,
