@@ -2,7 +2,7 @@
 
 This document contains all changes to the crate since version 0.1.8.
 
-## 0.3.0 (unreleased)
+## [Unreleased: 0.3.0]
 
 ### Breaking changes
 
