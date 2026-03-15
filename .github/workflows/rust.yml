@@ -63,6 +63,23 @@ jobs:
       - name: Test all feature combinations
         run: cargo test-all-features
 
+  no_std:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [ thumbv7m-none-eabi, aarch64-unknown-none ]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          target: ${{ matrix.target }}
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Check
+        run: cargo check --target ${{ matrix.target }}
+      - name: Build
+        run: cargo build --target ${{ matrix.target }}
+
   doc:
     runs-on: ubuntu-latest
     env:
