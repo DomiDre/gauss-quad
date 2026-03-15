@@ -34,7 +34,7 @@ mod bogaert;
 
 use bogaert::NodeWeightPair;
 
-use crate::{Node, Weight, __impl_node_weight_rule};
+use crate::{__impl_node_weight_rule, Node, Weight};
 
 use core::num::NonZeroUsize;
 

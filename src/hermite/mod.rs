@@ -26,7 +26,7 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{DMatrixf64, Node, Weight, __impl_node_weight_rule};
+use crate::{__impl_node_weight_rule, DMatrixf64, Node, Weight};
 
 use core::{f64::consts::PI, num::NonZeroUsize};
 
