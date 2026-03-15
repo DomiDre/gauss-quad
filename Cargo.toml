@@ -35,7 +35,7 @@ serde = ["dep:serde"]
 rayon = ["dep:rayon"]
 # Link the standard library and use it as the math backend.
 # When this feature is disabled the crate is `no_std` compatible.
-std = ["serde/std", "nalgebra/std"]
+std = ["serde?/std", "nalgebra/std"]
 
 [package.metadata.docs.rs]
 # Document all features
