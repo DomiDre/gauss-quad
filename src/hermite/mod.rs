@@ -29,6 +29,7 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 use crate::{__impl_node_weight_rule, DMatrixf64, Node, Weight};
 
 use core::{f64::consts::PI, num::NonZeroUsize};
+use alloc::boxed::Box;
 
 /// A Gauss-Hermite quadrature scheme.
 ///
@@ -71,6 +72,7 @@ impl GaussHermite {
     /// see Gil, Segura, Temme - Numerical Methods for Special Functions
     pub fn new(deg: NonZeroUsize) -> Self {
         let mut companion_matrix = DMatrixf64::from_element(deg.get(), deg.get(), 0.0);
+
         // Initialize symmetric companion matrix
         for idx in 0..deg.get() - 1 {
             let idx_f64 = 1.0 + idx as f64;

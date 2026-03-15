@@ -31,6 +31,7 @@ use crate::{
 };
 
 use core::num::NonZeroUsize;
+use alloc::boxed::Box;
 
 /// A Gauss-Jacobi quadrature scheme.
 ///

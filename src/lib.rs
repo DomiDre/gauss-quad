@@ -192,6 +192,9 @@
 // This lets us get a tag on docs.rs that says "Available on crate feature ... only".
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![forbid(unsafe_code)]
+#![no_std]
+
+extern crate alloc;
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 

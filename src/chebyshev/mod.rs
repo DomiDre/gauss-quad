@@ -9,6 +9,7 @@
 use crate::{__impl_node_weight_rule, Node, Weight};
 
 use core::{f64::consts::PI, num::NonZeroUsize};
+use alloc::boxed::Box;
 
 #[cfg(feature = "rayon")]
 use rayon::iter::{
