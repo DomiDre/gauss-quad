@@ -11,6 +11,7 @@ use core::f64::consts::{E, PI};
 compile_error!("one of the `libm` or `std` features must be enabled");
 
 /// Calculates the sine of the argument.
+#[inline]
 pub(crate) fn sin(x: f64) -> f64 {
     #[cfg(feature = "std")]
     {
@@ -29,6 +30,7 @@ pub(crate) fn sin(x: f64) -> f64 {
 }
 
 /// Calculates the cosine of the argument.
+#[inline]
 pub(crate) fn cos(x: f64) -> f64 {
     #[cfg(feature = "std")]
     {
@@ -47,6 +49,7 @@ pub(crate) fn cos(x: f64) -> f64 {
 }
 
 /// Calculates `x` to the power of `y`.
+#[inline]
 pub(crate) fn pow(x: f64, y: f64) -> f64 {
     #[cfg(feature = "std")]
     {
@@ -65,6 +68,7 @@ pub(crate) fn pow(x: f64, y: f64) -> f64 {
 }
 
 /// Calculates the square root of the argument.
+#[inline]
 pub(crate) fn sqrt(x: f64) -> f64 {
     #[cfg(feature = "std")]
     {
