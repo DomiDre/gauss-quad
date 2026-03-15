@@ -132,7 +132,7 @@
 //!
 //! The `integrate` method takes any integrand that implements the [`FnMut(f64) -> f64`](FnMut) trait, i.e. functions of
 //! one `f64` parameter that can modify internal state.
-//! The parallel `par_integrate` functions take a [`Fn(f64) -> f64`](Fn) which is [`Sync`] to enable parallel evaluation.
+//! The parallel `par_integrate` functions take a function that can't modify any state, [`Fn(f64) -> f64`](Fn), and is [`Sync`] to enable parallel evaluation.
 //!
 //! ```
 //! # use gauss_quad::legendre::GaussLegendre;
