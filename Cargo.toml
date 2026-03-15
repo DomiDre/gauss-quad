@@ -3,7 +3,7 @@ name = "gauss-quad"
 version = "0.3.0"
 authors = ["DomiDre <dominiquedresen@gmail.com>", "Johanna Sörngård <jsorngard@gmail.com>"]
 keywords = ["gaussian", "quadrature", "numerics", "integration"]
-categories = ["mathematics"]
+categories = ["mathematics", "no-std"]
 edition = "2024"
 description = "Library for applying Gaussian quadrature to integrate a function"
 license = "MIT OR Apache-2.0"
@@ -14,24 +14,35 @@ rust-version = "1.87.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nalgebra = { version = "0.34", default-features = false, features = ["std"] }
+nalgebra = { version = "0.34", default-features = false, features = ["alloc"] }
 serde = { version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true }
-rayon = { version = "1.11.0", optional = true }
+rayon = { version = "1.11.0", optional = true, default-features = false }
+libm = { version = "0.2.16", default-features = false, optional = true }
 
 [dev-dependencies]
 approx = "0.5.1"
 criterion = { version = "0.8", features = ["html_reports"] }
 
 [features]
+default = ["libm"]
+# Depends on the [`libm`](https://crates.io/crates/libm) crate and uses it as the math backend.
+# Does nothing if the `std` feature is enabled.
+libm = ["dep:libm", "nalgebra/libm"]
 # Implements the `Serialize` and `Deserialize` traits from the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 serde = ["dep:serde"]
 # Enables a parallel version of the `integrate` function on the quadrature rule structs through the [`rayon`](https://crates.io/crates/serde) crate.
 # Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
 rayon = ["dep:rayon"]
+# Link the standard library and use it as the math backend.
+# When this feature is disabled the crate is `no_std` compatible.
+std = ["serde/std", "nalgebra/std"]
 
 [package.metadata.docs.rs]
 # Document all features
 all-features = true
+
+[package.metadata.cargo-all-features]
+always_include_features = ["libm"]
 
 [[bench]]
 name = "legendre"

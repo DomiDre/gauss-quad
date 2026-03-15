@@ -36,6 +36,7 @@ use bogaert::NodeWeightPair;
 
 use crate::{__impl_node_weight_rule, Node, Weight};
 
+use alloc::boxed::Box;
 use core::num::NonZeroUsize;
 
 /// A Gauss-Legendre quadrature scheme.

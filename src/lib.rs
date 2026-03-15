@@ -184,6 +184,14 @@
 //! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 //!
 //! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
+//!
+//! One of the below features must be enabled:
+//!
+//! `libm` (*enabled by default*): depends on the [`libm`](https://docs.rs/libm/latest/libm/) crate and uses it as the math backend.
+//! Does nothing if the `std` feature is enabled.
+//!
+//! `std`: links the standard library and uses it as the math backend.
+//! When this feature is disabled the crate is `no_std` compatible.
 
 // Only enable the nighlty `doc_cfg` feature when
 // the `docsrs` configuration attribute is defined.
@@ -192,6 +200,11 @@
 // This lets us get a tag on docs.rs that says "Available on crate feature ... only".
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![forbid(unsafe_code)]
+#![no_std]
+
+extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 
@@ -199,11 +212,11 @@ type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 
 pub mod chebyshev;
 mod data_api;
-mod gamma;
 pub mod hermite;
 pub mod jacobi;
 pub mod laguerre;
 pub mod legendre;
+mod math;
 pub mod midpoint;
 pub mod simpson;
 pub mod trapezoid;

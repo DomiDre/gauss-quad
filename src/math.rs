@@ -1,13 +1,90 @@
-// Copyright 2019-2024 Dominique Dresen
-// Copyright 2023-2026 Johanna Sörngård
-// SPDX-License-Identifier: MIT OR Apache-2.0
-
-//! The gamma function provided in this module is copied directly from stats.rs:
-//! <https://docs.rs/statrs/latest/src/statrs/function/gamma.rs.html>
+//! This module contains our own implementations of various math functions.
+//! In most cases this is to abstract over different backends, either `libm` or the standard library.
 //!
+//! The gamma function provided in this module is copied directly from stats.rs:
+//! <https://docs.rs/statrs/latest/src/statrs/function/gamma.rs.html>.
 //! The reason for this is the reduction of dependencies.
 
 use core::f64::consts::{E, PI};
+
+#[cfg(not(any(feature = "std", feature = "libm")))]
+compile_error!("one of the `libm` or `std` features must be enabled");
+
+/// Calculates the sine of the argument.
+#[inline]
+pub(crate) fn sin(x: f64) -> f64 {
+    #[cfg(feature = "std")]
+    {
+        x.sin()
+    }
+
+    #[cfg(all(feature = "libm", not(feature = "std")))]
+    {
+        libm::sin(x)
+    }
+
+    #[cfg(not(any(feature = "std", feature = "libm")))]
+    {
+        panic!("can not compute sin({x}) without a math backend");
+    }
+}
+
+/// Calculates the cosine of the argument.
+#[inline]
+pub(crate) fn cos(x: f64) -> f64 {
+    #[cfg(feature = "std")]
+    {
+        x.cos()
+    }
+
+    #[cfg(all(feature = "libm", not(feature = "std")))]
+    {
+        libm::cos(x)
+    }
+
+    #[cfg(not(any(feature = "std", feature = "libm")))]
+    {
+        panic!("can not compute cos({x}) without a math backend");
+    }
+}
+
+/// Calculates `x` to the power of `y`.
+#[inline]
+pub(crate) fn pow(x: f64, y: f64) -> f64 {
+    #[cfg(feature = "std")]
+    {
+        x.powf(y)
+    }
+
+    #[cfg(all(feature = "libm", not(feature = "std")))]
+    {
+        libm::pow(x, y)
+    }
+
+    #[cfg(not(any(feature = "std", feature = "libm")))]
+    {
+        panic!("can not compute {x}^{y} without a math backend");
+    }
+}
+
+/// Calculates the square root of the argument.
+#[inline]
+pub(crate) fn sqrt(x: f64) -> f64 {
+    #[cfg(feature = "std")]
+    {
+        x.sqrt()
+    }
+
+    #[cfg(all(feature = "libm", not(feature = "std")))]
+    {
+        libm::sqrt(x)
+    }
+
+    #[cfg(not(any(feature = "std", feature = "libm")))]
+    {
+        panic!("can not compute sqrt({x}) without a math backend");
+    }
+}
 
 /// Constant value for `2 * sqrt(e / pi)`
 const TWO_SQRT_E_OVER_PI: f64 = 1.860_382_734_205_265_7;
@@ -42,7 +119,7 @@ pub(crate) fn gamma(x: f64) -> f64 {
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
-        PI / ((PI * x).sin() * s * TWO_SQRT_E_OVER_PI * ((0.5 - x + GAMMA_R) / E).powf(0.5 - x))
+        PI / (sin(PI * x) * s * TWO_SQRT_E_OVER_PI * pow((0.5 - x + GAMMA_R) / E, 0.5 - x))
     } else {
         let s = GAMMA_DK
             .iter()
@@ -50,7 +127,7 @@ pub(crate) fn gamma(x: f64) -> f64 {
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
-        s * TWO_SQRT_E_OVER_PI * ((x - 0.5 + GAMMA_R) / E).powf(x - 0.5)
+        s * TWO_SQRT_E_OVER_PI * pow((x - 0.5 + GAMMA_R) / E, x - 0.5)
     }
 }
 

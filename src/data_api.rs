@@ -13,6 +13,8 @@
 // the caller of the macro doesn't have to import anything into the module in order for the macro to compile,
 // and makes it compile even if the user has made custom types whose names shadow types used by the macro.
 
+use crate::math::pow;
+
 use core::{fmt, num::ParseFloatError, str::FromStr};
 
 /// A node in a quadrature rule.
@@ -101,13 +103,8 @@ impl FiniteAboveNegOneF64 {
     }
 
     #[inline]
-    pub fn checked_powi(self, exp: i32) -> Option<Self> {
-        Self::new(self.0.powi(exp))
-    }
-
-    #[inline]
-    pub fn checked_powf(self, exp: f64) -> Option<Self> {
-        Self::new(self.0.powf(exp))
+    pub fn checked_pow(self, exp: f64) -> Option<Self> {
+        Self::new(pow(self.0, exp))
     }
 }
 
@@ -162,7 +159,7 @@ pub enum ParseFiniteAboveNegOneF64Error {
 }
 
 impl fmt::Display for ParseFiniteAboveNegOneF64Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             ParseFiniteAboveNegOneF64Error::ParseError(e) => write!(f, "{e}"),
             ParseFiniteAboveNegOneF64Error::InvalidValue(e) => write!(f, "{e}"),
@@ -274,7 +271,7 @@ macro_rules! __impl_node_weight_rule {
             /// This function just returns the underlying data without any computation or cloning.
             #[inline]
             #[must_use = "`self` will be dropped if the result is not used"]
-            pub fn into_node_weight_pairs(self) -> ::std::boxed::Box<[($crate::Node, $crate::Weight)]> {
+            pub fn into_node_weight_pairs(self) -> ::alloc::boxed::Box<[($crate::Node, $crate::Weight)]> {
                 self.node_weight_pairs
             }
 
@@ -293,7 +290,7 @@ macro_rules! __impl_node_weight_rule {
         pub struct $quadrature_rule_nodes<'a>(
             // This horrible type is just the fully qualified path of the type returned
             // by `slice.iter().map(|(x, _)| x)`.
-            ::std::iter::Map<
+            ::core::iter::Map<
                 ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                 fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
             >,
@@ -302,7 +299,7 @@ macro_rules! __impl_node_weight_rule {
         impl<'a> $quadrature_rule_nodes<'a> {
             #[inline]
             const fn new(
-                iter_map: ::std::iter::Map<
+                iter_map: ::core::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                     fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Node,
                 >,
@@ -322,7 +319,7 @@ macro_rules! __impl_node_weight_rule {
         #[must_use = "iterators are lazy and do nothing unless consumed"]
         pub struct $quadrature_rule_weights<'a>(
             // Same as the previous horrible type, but maps out the weight instead of the node.
-            ::std::iter::Map<
+            ::core::iter::Map<
                 ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                 fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
             >,
@@ -331,7 +328,7 @@ macro_rules! __impl_node_weight_rule {
         impl<'a> $quadrature_rule_weights<'a> {
             #[inline]
             const fn new(
-                iter_map: ::std::iter::Map<
+                iter_map: ::core::iter::Map<
                     ::core::slice::Iter<'a, ($crate::Node, $crate::Weight)>,
                     fn(&'a ($crate::Node, $crate::Weight)) -> &'a $crate::Weight,
                 >,
@@ -392,19 +389,19 @@ macro_rules! __impl_node_weight_rule {
         /// Created by the [`IntoIterator`] trait implementation of the quadrature rule struct.
         #[derive(::core::fmt::Debug, ::core::clone::Clone)]
         #[must_use = "iterators are lazy and do nothing unless consumed"]
-        pub struct $quadrature_rule_into_iter(::std::vec::IntoIter<($crate::Node, $crate::Weight)>);
+        pub struct $quadrature_rule_into_iter(::alloc::vec::IntoIter<($crate::Node, $crate::Weight)>);
 
         impl $quadrature_rule_into_iter {
             #[inline]
             const fn new(
-                node_weight_pairs: ::std::vec::IntoIter<($crate::Node, $crate::Weight)>,
+                node_weight_pairs: ::alloc::vec::IntoIter<($crate::Node, $crate::Weight)>,
             ) -> Self {
                 Self(node_weight_pairs)
             }
 
             /// Views the underlying data as a subslice of the original data.
             ///
-            /// See [`std::vec::IntoIter::as_slice`] for more information.
+            /// See [`alloc::vec::IntoIter::as_slice`] for more information.
             #[inline]
             pub fn as_slice(&self) -> &[($crate::Node, $crate::Weight)] {
                 self.0.as_slice()
@@ -565,6 +562,7 @@ macro_rules! __impl_node_rule {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::{boxed::Box, vec::Vec};
     use core::f64;
     use core::num::NonZeroUsize;
 
@@ -719,10 +717,15 @@ mod tests {
         assert!(value.checked_add(f64::NAN).is_none());
         assert_eq!(value.checked_mul(2.0).unwrap().get(), 1.0);
         assert!(value.checked_div(0.0).is_none());
-        assert!(value.checked_powi(2).is_some());
-        assert!(value.checked_powf(2.0).is_some());
         assert!(value.checked_div(0.0).is_none());
         assert!(value.checked_div(f64::NAN).is_none());
+        assert_eq!(value.checked_pow(2.0).unwrap().get(), 0.25);
+        assert!(
+            FiniteAboveNegOneF64::new(2.0)
+                .unwrap()
+                .checked_pow(f64::INFINITY)
+                .is_none()
+        );
     }
 
     #[test]

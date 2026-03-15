@@ -30,6 +30,8 @@ This document contains all changes to the crate since version 0.1.8.
 - Add dates to the releases in this log.
 - Document the MSRV of the crate.
 - Remove all usage of `unsafe`, add `#![forbid(unsafe_code)]` to the crate root.
+- Make the crate `no_std` compatible. 
+ The standard library can optionally be enabled through the `std` feature for a potential performance gain.
 
 ## [0.2.4] - 2025-08-23
 
