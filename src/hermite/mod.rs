@@ -160,18 +160,18 @@ mod tests {
 
     #[test]
     fn golub_welsch_3() {
-        let (x, w): (Vec<_>, Vec<_>) = GaussHermite::new(3.try_into().unwrap()).into_iter().unzip();
+        let rule = GaussHermite::new(3.try_into().unwrap());
         let x_should = [-1.224_744_871_391_589, 0.0, 1.224_744_871_391_589];
         let w_should = [
             0.295_408_975_150_919_35,
             1.181_635_900_603_677_4,
             0.295_408_975_150_919_35,
         ];
-        for (i, x_val) in x_should.iter().enumerate() {
-            assert_abs_diff_eq!(*x_val, x[i], epsilon = 1e-15);
-        }
-        for (i, w_val) in w_should.iter().enumerate() {
-            assert_abs_diff_eq!(*w_val, w[i], epsilon = 1e-15);
+        for ((correct_node, correct_weight), (computed_node, computed_weight)) in
+            x_should.into_iter().zip(w_should).zip(rule)
+        {
+            assert_abs_diff_eq!(correct_node, computed_node, epsilon = 1e-15);
+            assert_abs_diff_eq!(correct_weight, computed_weight, epsilon = 1e-15);
         }
     }
 
