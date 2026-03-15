@@ -23,11 +23,10 @@
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
 //! ```
 
-use libm::sqrt;
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{__impl_node_weight_rule, DMatrixf64, Node, Weight};
+use crate::{__impl_node_weight_rule, DMatrixf64, Node, Weight, math::sqrt};
 
 use alloc::boxed::Box;
 use core::{f64::consts::PI, num::NonZeroUsize};

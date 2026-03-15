@@ -195,6 +195,8 @@
 #![no_std]
 
 extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
 
 use nalgebra::{Dyn, Matrix, VecStorage};
 
@@ -202,11 +204,11 @@ type DMatrixf64 = Matrix<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>;
 
 pub mod chebyshev;
 mod data_api;
-mod gamma;
 pub mod hermite;
 pub mod jacobi;
 pub mod laguerre;
 pub mod legendre;
+mod math;
 pub mod midpoint;
 pub mod simpson;
 pub mod trapezoid;

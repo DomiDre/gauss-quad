@@ -21,14 +21,13 @@
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
 //! ```
 
-use libm::{pow, sqrt};
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::gamma::gamma;
 use crate::{
     __impl_node_weight_rule, DMatrixf64, FiniteAboveNegOneF64, GaussChebyshevFirstKind,
     GaussChebyshevSecondKind, GaussLegendre, Node, Weight,
+    math::{gamma, pow, sqrt},
 };
 
 use alloc::boxed::Box;

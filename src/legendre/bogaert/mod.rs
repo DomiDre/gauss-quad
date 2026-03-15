@@ -15,7 +15,7 @@
 #[rustfmt::skip]
 mod data;
 
-use libm::{cos, sin};
+use crate::math::{cos, sin};
 
 use core::{cmp::Ordering, f64::consts::PI};
 use data::{CL, EVEN_THETA_ZEROS, EVEN_WEIGHTS, J1, JZ, ODD_THETA_ZEROS, ODD_WEIGHTS};

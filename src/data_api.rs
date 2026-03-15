@@ -13,7 +13,7 @@
 // the caller of the macro doesn't have to import anything into the module in order for the macro to compile,
 // and makes it compile even if the user has made custom types whose names shadow types used by the macro.
 
-use libm::pow;
+use crate::math::pow;
 
 use core::{fmt, num::ParseFloatError, str::FromStr};
 

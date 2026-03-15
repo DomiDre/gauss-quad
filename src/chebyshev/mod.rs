@@ -6,12 +6,14 @@
 //!
 //! This rule can integrate formulas on the form f(x) * (1 - x^2)^`a` on finite intervals, where `a` is either -1/2 or 1/2.
 
-use crate::{__impl_node_weight_rule, Node, Weight};
+use crate::{
+    __impl_node_weight_rule, Node, Weight,
+    math::{cos, sin},
+};
 
 use alloc::boxed::Box;
 use core::{f64::consts::PI, num::NonZeroUsize};
 
-use libm::{cos, sin};
 #[cfg(feature = "rayon")]
 use rayon::iter::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
@@ -227,8 +229,8 @@ __impl_node_weight_rule! {GaussChebyshevSecondKind, GaussChebyshevSecondKindNode
 
 #[cfg(test)]
 mod test {
+    use crate::math::{cos, sin};
     use approx::assert_abs_diff_eq;
-    use libm::{cos, sin};
 
     use super::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
 
