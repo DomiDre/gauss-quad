@@ -194,7 +194,7 @@
 //! `std`: links the standard library and uses it as the math backend.
 //! When this feature is disabled the crate is `no_std` compatible.
 
-// Only enable the nighlty `doc_cfg` feature when
+// Only enable the nightly `doc_cfg` feature when
 // the `docsrs` configuration attribute is defined.
 // The config in Cargo.toml means that this is defined when we are on docs.rs (which uses the nightly compiler)
 // or if the environment variable RUSTDOCFLAGS is set as `RUSTDOCFLAGS="--cfg docsrs"`.
