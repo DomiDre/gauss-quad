@@ -201,6 +201,8 @@
 // This lets us get a tag on docs.rs that says "Available on crate feature ... only".
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![forbid(unsafe_code)]
+#![forbid(clippy::unwrap_used)]
+#![forbid(clippy::expect_used)]
 #![no_std]
 
 extern crate alloc;
