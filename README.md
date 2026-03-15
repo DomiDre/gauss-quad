@@ -10,7 +10,7 @@ The `gauss-quad` crate is a small library to approximate integrals as
 
 $$\int_a^b f(x) \mathrm{d}x \approx \sum_{i=1}^nw_if(x_i)$$
 
-using [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature).
+through [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature).
 
 Here $f(x)$ is a user supplied function, $x_i$ are specific x-values called nodes,
 and $w_i$ are weights.
