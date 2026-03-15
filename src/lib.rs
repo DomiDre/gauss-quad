@@ -184,6 +184,14 @@
 //! the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 //!
 //! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
+//!
+//! One of the below features must be enabled:
+//!
+//! `libm` (*enabled by default*): depends on the `libm` crate and uses it as the math backend.
+//! Does nothing if the `std` feature is enabled.
+//!
+//! `std`: links the standard library and uses it as the math backend.
+//! When this feature is disabled the crate is `no_std` compatible.
 
 // Only enable the nighlty `doc_cfg` feature when
 // the `docsrs` configuration attribute is defined.
