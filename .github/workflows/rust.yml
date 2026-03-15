@@ -56,6 +56,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
+      - uses: Swatinem/rust-cache@v2.8.0
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-all-features
