@@ -104,6 +104,14 @@ impl FiniteAboveNegOneF64 {
     }
 }
 
+impl Default for FiniteAboveNegOneF64 {
+    /// Gives a `FiniteAboveNegOneF64` that represents zero.
+    #[inline]
+    fn default() -> Self {
+        Self(0.0)
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// The error that that is returned when trying to convert a [`f64`] value that is less than or equal to -1.0
 /// into an [`FiniteAboveNegOneF64`] with the [`TryFrom`] trait.
