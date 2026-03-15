@@ -74,6 +74,18 @@ jobs:
     - name: Generate documentation
       run: cargo +nightly doc --all-features
 
+  verify_msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-msrv
+      - name: Verify MSRV
+        run: cargo msrv verify
+
   semver_checks:
     runs-on: ubuntu-latest
     steps:
