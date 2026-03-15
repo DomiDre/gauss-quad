@@ -23,6 +23,7 @@
 //! assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
 //! ```
 
+use libm::sqrt;
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
@@ -76,7 +77,7 @@ impl GaussHermite {
         // Initialize symmetric companion matrix
         for idx in 0..deg.get() - 1 {
             let idx_f64 = 1.0 + idx as f64;
-            let element = (idx_f64 * 0.5).sqrt();
+            let element = sqrt(idx_f64 * 0.5);
             companion_matrix[(idx, idx + 1)] = element;
             companion_matrix[(idx + 1, idx)] = element;
         }
@@ -92,7 +93,7 @@ impl GaussHermite {
                 eigen
                     .eigenvectors
                     .row(0)
-                    .map(|x| x * x * PI.sqrt())
+                    .map(|x| x * x * sqrt(PI))
                     .iter()
                     .copied(),
             )
@@ -152,7 +153,7 @@ mod tests {
     #[test]
     fn check_degree_1() {
         let rule = GaussHermite::new(1.try_into().unwrap());
-        assert_eq!(rule.as_node_weight_pairs(), &[(0.0, PI.sqrt())]);
+        assert_eq!(rule.as_node_weight_pairs(), &[(0.0, sqrt(PI))]);
         for constant in (1..100).step_by(10) {
             assert_abs_diff_eq!(rule.integrate(|x| f64::from(constant) * x), 0.0);
         }
@@ -187,7 +188,7 @@ mod tests {
     #[test]
     fn check_iterators() {
         let rule = GaussHermite::new(3.try_into().unwrap());
-        let ans = core::f64::consts::PI.sqrt() / 2.0;
+        let ans = sqrt(PI) / 2.0;
 
         assert_abs_diff_eq!(
             ans,
@@ -214,7 +215,7 @@ mod tests {
     fn integrate_one() {
         let quad = GaussHermite::new(5.try_into().unwrap());
         let integral = quad.integrate(|_x| 1.0);
-        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-14);
+        assert_abs_diff_eq!(integral, sqrt(PI), epsilon = 1e-14);
     }
 
     #[cfg(feature = "rayon")]
@@ -222,6 +223,6 @@ mod tests {
     fn par_integrate_one() {
         let quad = GaussHermite::new(5.try_into().unwrap());
         let integral = quad.par_integrate(|_x| 1.0);
-        assert_abs_diff_eq!(integral, PI.sqrt(), epsilon = 1e-15);
+        assert_abs_diff_eq!(integral, sqrt(PI), epsilon = 1e-15);
     }
 }

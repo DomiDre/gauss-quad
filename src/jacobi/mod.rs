@@ -21,6 +21,7 @@
 //! assert_abs_diff_eq!(integral, -0.4207987746500829, epsilon = 1e-14);
 //! ```
 
+use libm::{pow, sqrt};
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
@@ -82,7 +83,7 @@ impl GaussJacobi {
         if deg.get() == 1 {
             // Special case for degree 1, since the nodes and weights are known.
             let node = (beta.get() - alpha.get()) / (alpha.get() + beta.get() + 2.0);
-            let weight = f64::powf(2.0, alpha.get() + beta.get() + 1.0)
+            let weight = pow(2.0, alpha.get() + beta.get() + 1.0)
                 * gamma(alpha.get() + 1.0)
                 * gamma(beta.get() + 1.0)
                 / gamma(alpha.get() + beta.get() + 2.0);
@@ -102,12 +103,13 @@ impl GaussJacobi {
             let idx_p1 = idx_f64 + 1.0;
             let denom_sum = 2.0 * idx_p1 + alpha.get() + beta.get();
             let off_diag = 2.0 / denom_sum
-                * (idx_p1
-                    * (idx_p1 + alpha.get())
-                    * (idx_p1 + beta.get())
-                    * (idx_p1 + alpha.get() + beta.get())
-                    / ((denom_sum + 1.0) * (denom_sum - 1.0)))
-                    .sqrt();
+                * sqrt(
+                    idx_p1
+                        * (idx_p1 + alpha.get())
+                        * (idx_p1 + beta.get())
+                        * (idx_p1 + alpha.get() + beta.get())
+                        / ((denom_sum + 1.0) * (denom_sum - 1.0)),
+                );
             companion_matrix[(idx, idx)] = diag;
             companion_matrix[(idx, idx + 1)] = off_diag;
             companion_matrix[(idx + 1, idx)] = off_diag;
@@ -118,7 +120,7 @@ impl GaussJacobi {
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 
-        let scale_factor = (2.0f64).powf(alpha.get() + beta.get() + 1.0)
+        let scale_factor = pow(2.0f64, alpha.get() + beta.get() + 1.0)
             * gamma(alpha.get() + 1.0)
             * gamma(beta.get() + 1.0)
             / gamma(alpha.get() + beta.get() + 1.0)

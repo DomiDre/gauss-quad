@@ -11,6 +11,7 @@ use crate::{__impl_node_weight_rule, Node, Weight};
 use alloc::boxed::Box;
 use core::{f64::consts::PI, num::NonZeroUsize};
 
+use libm::{cos, sin};
 #[cfg(feature = "rayon")]
 use rayon::iter::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
@@ -45,7 +46,7 @@ impl GaussChebyshevFirstKind {
         Self {
             node_weight_pairs: (1..degree.get() + 1)
                 .rev()
-                .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
+                .map(|i| (cos(PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)), PI / n))
                 .collect(),
         }
     }
@@ -67,7 +68,7 @@ impl GaussChebyshevFirstKind {
             node_weight_pairs: (1..degree.get() + 1)
                 .into_par_iter()
                 .rev()
-                .map(|i| ((PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)).cos(), PI / n))
+                .map(|i| (cos(PI * (2.0 * (i as f64) - 1.0) / (2.0 * n)), PI / n))
                 .collect(),
         }
     }
@@ -144,9 +145,9 @@ impl GaussChebyshevSecondKind {
                 .rev()
                 .map(|i| {
                     let over_n_plus_1 = 1.0 / (n + 1.0);
-                    let sin_val = (PI * i as f64 * over_n_plus_1).sin();
+                    let sin_val = sin(PI * i as f64 * over_n_plus_1);
                     (
-                        (PI * i as f64 * over_n_plus_1).cos(),
+                        cos(PI * i as f64 * over_n_plus_1),
                         PI * over_n_plus_1 * sin_val * sin_val,
                     )
                 })
@@ -165,9 +166,9 @@ impl GaussChebyshevSecondKind {
                 .rev()
                 .map(|i| {
                     let over_n_plus_1 = 1.0 / (n + 1.0);
-                    let sin_val = (PI * i as f64 * over_n_plus_1).sin();
+                    let sin_val = sin(PI * i as f64 * over_n_plus_1);
                     (
-                        (PI * i as f64 * over_n_plus_1).cos(),
+                        cos(PI * i as f64 * over_n_plus_1),
                         PI * over_n_plus_1 * sin_val * sin_val,
                     )
                 })
@@ -227,6 +228,7 @@ __impl_node_weight_rule! {GaussChebyshevSecondKind, GaussChebyshevSecondKindNode
 #[cfg(test)]
 mod test {
     use approx::assert_abs_diff_eq;
+    use libm::{cos, sin};
 
     use super::{GaussChebyshevFirstKind, GaussChebyshevSecondKind};
 
@@ -309,8 +311,8 @@ mod test {
         for (i, (x, w)) in rule.into_iter().enumerate() {
             // Source: https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature
             let ii = deg - i as f64;
-            let x_should = (ii * PI / (deg + 1.0)).cos();
-            let w_should = PI / (deg + 1.0) * (ii * PI / (deg + 1.0)).sin().powi(2);
+            let x_should = cos(ii * PI / (deg + 1.0));
+            let w_should = PI / (deg + 1.0) * sin(ii * PI / (deg + 1.0)).powi(2);
 
             assert_abs_diff_eq!(x, x_should);
             assert_abs_diff_eq!(w, w_should);

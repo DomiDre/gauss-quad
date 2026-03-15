@@ -13,6 +13,8 @@
 // the caller of the macro doesn't have to import anything into the module in order for the macro to compile,
 // and makes it compile even if the user has made custom types whose names shadow types used by the macro.
 
+use libm::pow;
+
 use core::{fmt, num::ParseFloatError, str::FromStr};
 
 /// A node in a quadrature rule.
@@ -101,13 +103,8 @@ impl FiniteAboveNegOneF64 {
     }
 
     #[inline]
-    pub fn checked_powi(self, exp: i32) -> Option<Self> {
-        Self::new(self.0.powi(exp))
-    }
-
-    #[inline]
-    pub fn checked_powf(self, exp: f64) -> Option<Self> {
-        Self::new(self.0.powf(exp))
+    pub fn checked_pow(self, exp: f64) -> Option<Self> {
+        Self::new(pow(self.0, exp))
     }
 }
 
@@ -720,8 +717,6 @@ mod tests {
         assert!(value.checked_add(f64::NAN).is_none());
         assert_eq!(value.checked_mul(2.0).unwrap().get(), 1.0);
         assert!(value.checked_div(0.0).is_none());
-        assert!(value.checked_powi(2).is_some());
-        assert!(value.checked_powf(2.0).is_some());
         assert!(value.checked_div(0.0).is_none());
         assert!(value.checked_div(f64::NAN).is_none());
     }

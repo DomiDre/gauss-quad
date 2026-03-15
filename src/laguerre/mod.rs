@@ -21,6 +21,7 @@
 //! assert_abs_diff_eq!(integral, 6.0, epsilon = 1e-14);
 //! ```
 
+use libm::sqrt;
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
@@ -77,7 +78,7 @@ impl GaussLaguerre {
         // Initialize symmetric companion matrix
         for idx in 0..degree.get() - 1 {
             let idx_f64 = 1.0 + idx as f64;
-            let off_diag = (idx_f64 * (idx_f64 + alpha.get())).sqrt();
+            let off_diag = sqrt(idx_f64 * (idx_f64 + alpha.get()));
             companion_matrix[(idx, idx)] = diag;
             companion_matrix[(idx, idx + 1)] = off_diag;
             companion_matrix[(idx + 1, idx)] = off_diag;

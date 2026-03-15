@@ -7,6 +7,8 @@
 //!
 //! The reason for this is the reduction of dependencies.
 
+use libm::{pow, sin};
+
 use core::f64::consts::{E, PI};
 
 /// Constant value for `2 * sqrt(e / pi)`
@@ -42,7 +44,7 @@ pub(crate) fn gamma(x: f64) -> f64 {
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (t.0 as f64 - x));
 
-        PI / ((PI * x).sin() * s * TWO_SQRT_E_OVER_PI * ((0.5 - x + GAMMA_R) / E).powf(0.5 - x))
+        PI / (sin(PI * x) * s * TWO_SQRT_E_OVER_PI * pow((0.5 - x + GAMMA_R) / E, 0.5 - x))
     } else {
         let s = GAMMA_DK
             .iter()
@@ -50,7 +52,7 @@ pub(crate) fn gamma(x: f64) -> f64 {
             .skip(1)
             .fold(GAMMA_DK[0], |s, t| s + t.1 / (x + t.0 as f64 - 1.0));
 
-        s * TWO_SQRT_E_OVER_PI * ((x - 0.5 + GAMMA_R) / E).powf(x - 0.5)
+        s * TWO_SQRT_E_OVER_PI * pow((x - 0.5 + GAMMA_R) / E, x - 0.5)
     }
 }
 
