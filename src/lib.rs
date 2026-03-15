@@ -187,7 +187,7 @@
 //!
 //! One of the below features must be enabled:
 //!
-//! `libm` (*enabled by default*): depends on the `libm` crate and uses it as the math backend.
+//! `libm` (*enabled by default*): depends on the [`libm`](https://docs.rs/libm/latest/libm/) crate and uses it as the math backend.
 //! Does nothing if the `std` feature is enabled.
 //!
 //! `std`: links the standard library and uses it as the math backend.
