@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! This module contains our own implementations of various math functions.
 //! In most cases this is to abstract over different backends, either `libm` or the standard library.
 //!
