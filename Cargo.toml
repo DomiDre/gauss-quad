@@ -41,6 +41,9 @@ std = ["serde/std", "nalgebra/std"]
 # Document all features
 all-features = true
 
+[package.metadata.cargo-all-features]
+always_include_features = ["libm"]
+
 [[bench]]
 name = "legendre"
 harness = false
