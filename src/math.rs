@@ -1,4 +1,4 @@
-//! This function contains our own implementation of various math functions.
+//! This function contains our own implementations of various math functions.
 //! In most cases this is to abstract over different backends, either `libm` or the standard library.
 //!
 //! The gamma function provided in this module is copied directly from stats.rs:
