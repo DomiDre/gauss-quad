@@ -77,16 +77,12 @@ impl GaussLaguerre {
         for idx in 0..degree.get() - 1 {
             let idx_f64 = 1.0 + idx as f64;
             let off_diag = (idx_f64 * (idx_f64 + alpha.get())).sqrt();
-            unsafe {
-                *companion_matrix.get_unchecked_mut((idx, idx)) = diag;
-                *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;
-                *companion_matrix.get_unchecked_mut((idx + 1, idx)) = off_diag;
-            }
+            companion_matrix[(idx, idx)] = diag;
+            companion_matrix[(idx, idx + 1)] = off_diag;
+            companion_matrix[(idx + 1, idx)] = off_diag;
             diag += 2.0;
         }
-        unsafe {
-            *companion_matrix.get_unchecked_mut((degree.get() - 1, degree.get() - 1)) = diag;
-        }
+        companion_matrix[(degree.get() - 1, degree.get() - 1)] = diag;
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 

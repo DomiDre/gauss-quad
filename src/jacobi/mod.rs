@@ -107,17 +107,13 @@ impl GaussJacobi {
                     * (idx_p1 + alpha.get() + beta.get())
                     / ((denom_sum + 1.0) * (denom_sum - 1.0)))
                     .sqrt();
-            unsafe {
-                *companion_matrix.get_unchecked_mut((idx, idx)) = diag;
-                *companion_matrix.get_unchecked_mut((idx, idx + 1)) = off_diag;
-                *companion_matrix.get_unchecked_mut((idx + 1, idx)) = off_diag;
-            }
+            companion_matrix[(idx, idx)] = diag;
+            companion_matrix[(idx, idx + 1)] = off_diag;
+            companion_matrix[(idx + 1, idx)] = off_diag;
             diag = (beta.get() * beta.get() - alpha.get() * alpha.get())
                 / (denom_sum * (denom_sum + 2.0));
         }
-        unsafe {
-            *companion_matrix.get_unchecked_mut((deg.get() - 1, deg.get() - 1)) = diag;
-        }
+        companion_matrix[(deg.get() - 1, deg.get() - 1)] = diag;
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();
 

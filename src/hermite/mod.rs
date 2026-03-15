@@ -75,10 +75,8 @@ impl GaussHermite {
         for idx in 0..deg.get() - 1 {
             let idx_f64 = 1.0 + idx as f64;
             let element = (idx_f64 * 0.5).sqrt();
-            unsafe {
-                *companion_matrix.get_unchecked_mut((idx, idx + 1)) = element;
-                *companion_matrix.get_unchecked_mut((idx + 1, idx)) = element;
-            }
+            companion_matrix[(idx, idx + 1)] = element;
+            companion_matrix[(idx + 1, idx)] = element;
         }
         // calculate eigenvalues & vectors
         let eigen = companion_matrix.symmetric_eigen();

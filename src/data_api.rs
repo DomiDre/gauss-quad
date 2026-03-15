@@ -59,14 +59,17 @@ impl FiniteAboveNegOneF64 {
 
     /// Creates a new `FiniteAboveNegOneF64` without checking the value.
     ///
-    /// # Safety
-    ///
     /// The caller must ensure that the value is finite and greater than -1.0 as well as not [`NAN`](f64::NAN).
+    /// If these requirements are not met this crate will produce invalid results, and may crash.
+    ///
+    /// # Panics
+    ///
+    /// Panics in debug mode if given an input that is infinite, NAN, or less than or equal to -1.
     #[inline]
-    pub const unsafe fn new_unchecked(value: f64) -> Self {
+    pub const fn new_unchecked(value: f64) -> Self {
         debug_assert!(
             Self::new(value).is_some(),
-            "value must be greater than -1.0 and finite and not NAN"
+            "value must be greater than -1.0, finite, and not NAN"
         );
         Self(value)
     }
@@ -663,10 +666,8 @@ mod tests {
         assert!(FiniteAboveNegOneF64::new(f64::INFINITY).is_none());
         assert!(FiniteAboveNegOneF64::new(f64::NEG_INFINITY).is_none());
 
-        unsafe {
-            assert_eq!(FiniteAboveNegOneF64::new_unchecked(0.0).get(), 0.0);
-            assert_eq!(FiniteAboveNegOneF64::new_unchecked(-0.5).get(), -0.5);
-        }
+        assert_eq!(FiniteAboveNegOneF64::new_unchecked(0.0).get(), 0.0);
+        assert_eq!(FiniteAboveNegOneF64::new_unchecked(-0.5).get(), -0.5);
     }
 
     #[test]
