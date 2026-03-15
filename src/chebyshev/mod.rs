@@ -6,7 +6,7 @@
 //!
 //! This rule can integrate formulas on the form f(x) * (1 - x^2)^`a` on finite intervals, where `a` is either -1/2 or 1/2.
 
-use crate::{Node, Weight, __impl_node_weight_rule};
+use crate::{__impl_node_weight_rule, Node, Weight};
 
 use core::{f64::consts::PI, num::NonZeroUsize};
 

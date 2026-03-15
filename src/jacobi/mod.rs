@@ -26,8 +26,8 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::gamma::gamma;
 use crate::{
-    DMatrixf64, FiniteAboveNegOneF64, GaussChebyshevFirstKind, GaussChebyshevSecondKind,
-    GaussLegendre, Node, Weight, __impl_node_weight_rule,
+    __impl_node_weight_rule, DMatrixf64, FiniteAboveNegOneF64, GaussChebyshevFirstKind,
+    GaussChebyshevSecondKind, GaussLegendre, Node, Weight,
 };
 
 use core::num::NonZeroUsize;

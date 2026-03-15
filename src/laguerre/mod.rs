@@ -25,7 +25,7 @@
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::gamma::gamma;
-use crate::{DMatrixf64, FiniteAboveNegOneF64, Node, Weight, __impl_node_weight_rule};
+use crate::{__impl_node_weight_rule, DMatrixf64, FiniteAboveNegOneF64, Node, Weight};
 
 use core::num::NonZeroUsize;
 
