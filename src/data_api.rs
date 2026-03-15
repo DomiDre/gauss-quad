@@ -61,6 +61,10 @@ impl FiniteAboveNegOneF64 {
     ///
     /// The caller must ensure that the value is finite and greater than -1.0 as well as not [`NAN`](f64::NAN).
     /// If these requirements are not met this crate will produce invalid results, and may crash.
+    ///
+    /// # Panics
+    ///
+    /// Panics in debug mode if given an input that is infinite, NAN, or less than or equal to -1.
     #[inline]
     pub const fn new_unchecked(value: f64) -> Self {
         debug_assert!(
