@@ -733,4 +733,10 @@ mod tests {
         let value_from_invalid: Result<FiniteAboveNegOneF64, _> = (-1.0f64).try_into();
         assert!(value_from_invalid.is_err());
     }
+
+    #[test]
+    fn test_default() {
+        let value = FiniteAboveNegOneF64::default();
+        assert_eq!(value.get(), 0.0);
+    }
 }
