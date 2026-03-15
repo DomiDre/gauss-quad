@@ -24,7 +24,7 @@ pub type Weight = f64;
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-/// A wrapper around a [`f64`] value that ensures the value is greater than -1.0, finite, and not [`NAN`](f64::NAN).
+/// A wrapper around an [`f64`] that ensures the value is greater than -1.0, finite, and not [`NAN`](f64::NAN).
 pub struct FiniteAboveNegOneF64(f64);
 
 impl fmt::Display for FiniteAboveNegOneF64 {
@@ -66,28 +66,28 @@ impl FiniteAboveNegOneF64 {
     }
 
     #[inline]
-    pub fn checked_add(self, rhs: f64) -> Option<Self> {
-        Self::new(self.0 + rhs)
+    pub const fn checked_add(self, other: f64) -> Option<Self> {
+        Self::new(self.get() + other)
     }
 
     #[inline]
-    pub fn checked_sub(self, rhs: f64) -> Option<Self> {
-        Self::new(self.0 - rhs)
+    pub const fn checked_sub(self, other: f64) -> Option<Self> {
+        Self::new(self.get() - other)
     }
 
     #[inline]
-    pub fn checked_mul(self, rhs: f64) -> Option<Self> {
-        Self::new(self.0 * rhs)
+    pub const fn checked_mul(self, other: f64) -> Option<Self> {
+        Self::new(self.get() * other)
     }
 
     #[inline]
-    pub fn checked_div(self, rhs: f64) -> Option<Self> {
-        Self::new(self.0 / rhs)
+    pub const fn checked_div(self, denominator: f64) -> Option<Self> {
+        Self::new(self.get() / denominator)
     }
 
     #[inline]
     pub fn checked_pow(self, exp: f64) -> Option<Self> {
-        Self::new(pow(self.0, exp))
+        Self::new(pow(self.get(), exp))
     }
 }
 
