@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use core::hint::black_box;
 use criterion::{criterion_group, criterion_main, Criterion};
 use gauss_quad::GaussHermite;

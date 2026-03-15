@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! Numerical integration using a Simpson's rule.
 //!
 //! A popular quadrature rule (also known as Kepler's barrel rule). It can be derived

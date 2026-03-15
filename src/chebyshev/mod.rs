@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! Numerical integration using the Gauss-Chebyshev quadrature rule.
 //!
 //! This rule can integrate formulas on the form f(x) * (1 - x^2)^`a` on finite intervals, where `a` is either -1/2 or 1/2.
