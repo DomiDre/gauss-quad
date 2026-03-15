@@ -27,8 +27,8 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 use crate::gamma::gamma;
 use crate::{__impl_node_weight_rule, DMatrixf64, FiniteAboveNegOneF64, Node, Weight};
 
-use core::num::NonZeroUsize;
 use alloc::boxed::Box;
+use core::num::NonZeroUsize;
 
 /// A Gauss-Laguerre quadrature scheme.
 ///

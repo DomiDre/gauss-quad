@@ -565,9 +565,9 @@ macro_rules! __impl_node_rule {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::{boxed::Box, vec::Vec};
     use core::f64;
     use core::num::NonZeroUsize;
-    use alloc::{boxed::Box, vec::Vec};
 
     #[derive(Debug, Clone, PartialEq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

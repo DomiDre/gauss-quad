@@ -30,8 +30,8 @@ use crate::{
     GaussChebyshevSecondKind, GaussLegendre, Node, Weight,
 };
 
-use core::num::NonZeroUsize;
 use alloc::boxed::Box;
+use core::num::NonZeroUsize;
 
 /// A Gauss-Jacobi quadrature scheme.
 ///

@@ -28,8 +28,8 @@ use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{__impl_node_weight_rule, DMatrixf64, Node, Weight};
 
-use core::{f64::consts::PI, num::NonZeroUsize};
 use alloc::boxed::Box;
+use core::{f64::consts::PI, num::NonZeroUsize};
 
 /// A Gauss-Hermite quadrature scheme.
 ///
