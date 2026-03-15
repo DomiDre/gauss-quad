@@ -104,7 +104,7 @@ impl GaussLaguerre {
             .collect();
 
         node_weight_pairs
-            .sort_unstable_by(|(node1, _), (node2, _)| node1.partial_cmp(node2).unwrap());
+            .sort_unstable_by(|(node1, _), (node2, _)| node1.total_cmp(node2));
 
         GaussLaguerre {
             node_weight_pairs,
