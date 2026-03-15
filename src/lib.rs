@@ -132,7 +132,6 @@
 //!
 //! The `integrate` method takes any integrand that implements the [`FnMut(f64) -> f64`](FnMut) trait, i.e. functions of
 //! one `f64` parameter that can modify internal state.
-//! The parallel `par_integrate` functions take a function that can't modify any state, [`Fn(f64) -> f64`](Fn), and is [`Sync`] to enable parallel evaluation.
 //!
 //! ```
 //! # use gauss_quad::legendre::GaussLegendre;
@@ -159,6 +158,7 @@
 //! let integral_x_cubed = quad.integrate(left_bound, right_bound, x_cubed);
 //! assert_abs_diff_eq!(integral_x_cubed, 1.0 / 4.0);
 //! ```
+//! The parallel `par_integrate` functions instead take a function that can't modify any state, [`Fn(f64) -> f64`](Fn), and is [`Sync`] to enable parallel evaluation.
 //!
 //! ## Double integrals
 //!
