@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! The gamma function provided in this module is copied directly from stats.rs:
 //! <https://docs.rs/statrs/latest/src/statrs/function/gamma.rs.html>
 //!

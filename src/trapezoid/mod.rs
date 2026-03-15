@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! Numerical integration using the trapezoid rule.
 //!
 //! This method approximates the integral of a function by dividing the area under the curve into trapezoids

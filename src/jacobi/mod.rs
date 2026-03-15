@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! Numerical integration using the Gauss-Jacobi quadrature rule.
 //!
 //! This rule can integrate expressions of the form (1 - x)^alpha * (1 + x)^beta * f(x),

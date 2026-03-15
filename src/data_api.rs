@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! The macros in this module define the common API for accessing the data that underlies the quadrature rules.
 //! The [`__impl_node_weight_rule!`] macro implements the API for a struct with both nodes and weights.
 //! It should be called in the module that defines the quadrature rule struct.

@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! # gauss-quad
 //!
 //! **gauss-quad** is a [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature) library for numerical integration.

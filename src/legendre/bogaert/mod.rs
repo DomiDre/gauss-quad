@@ -1,3 +1,7 @@
+// Copyright 2019-2024 Dominique Dresen
+// Copyright 2023-2026 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! This algorithm is based on an expansion of Legendre polynomials in terms of Bessel functions
 //! where for large degrees only the first terms in the expansion matter. This means that
 //! the zeros of the Legendre polynomials (the nodes in the quadrature rules) can be approximated
