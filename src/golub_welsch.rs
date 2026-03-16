@@ -1,0 +1,57 @@
+//! Contains an implementation of the Golub-Welsch algorithm for the computation of nodes and weights of Gaussian quadrature.
+
+use crate::{Node, Weight};
+
+use alloc::boxed::Box;
+use core::num::NonZeroUsize;
+use nalgebra::{Dyn, Matrix, VecStorage};
+
+/// Applies the Golub-Welsh algorithm to determine nodes and weights of Gaussian quadrature nodes.
+///
+/// Given how to construct the diagonal and off-diagonal elements of the companion matrix, this function
+/// computes the nodes and weights by solving the eigenvalue problem.
+/// See Gil, Segura, Temme - Numerical Methods for Special Functions.
+///
+/// The elements of the first row of the eigenvalue matrix is multiplied by x^2*`scale_factor`.
+///
+/// The node-weight pairs are sorted by the node.
+pub fn golub_welsch<D, O>(
+    degree: NonZeroUsize,
+    mut diag: D,
+    mut off_diag: O,
+    scale_factor: f64,
+) -> Box<[(Node, Weight)]>
+where
+    D: FnMut(usize) -> f64,
+    O: FnMut(usize) -> f64,
+{
+    let mut companion_matrix =
+        Matrix::<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>::zeros(degree.get(), degree.get());
+
+    for idx in 0..degree.get() - 1 {
+        let elem = off_diag(idx);
+        companion_matrix[(idx, idx)] = diag(idx);
+        companion_matrix[(idx, idx + 1)] = elem;
+        companion_matrix[(idx + 1, idx)] = elem;
+    }
+    companion_matrix[(degree.get() - 1, degree.get() - 1)] = diag(degree.get() - 1);
+
+    let eigen = companion_matrix.symmetric_eigen();
+
+    let mut node_weight_pairs: Box<[(Node, Weight)]> = eigen
+        .eigenvalues
+        .iter()
+        .copied()
+        .zip(
+            eigen
+                .eigenvectors
+                .row(0)
+                .iter()
+                .map(|&x| x * x * scale_factor),
+        )
+        .collect();
+
+    node_weight_pairs.sort_unstable_by(|(node1, _), (node2, _)| node1.total_cmp(node2));
+
+    node_weight_pairs
+}

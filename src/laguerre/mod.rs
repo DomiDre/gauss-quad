@@ -25,10 +25,11 @@
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{
-    __impl_node_weight_rule, DMatrixf64, FiniteAboveNegOneF64, Node, Weight,
+    __impl_node_weight_rule, FiniteAboveNegOneF64, Node, Weight,
     math::{gamma, sqrt},
 };
 
+use crate::golub_welsch::golub_welsch;
 use alloc::boxed::Box;
 use core::num::NonZeroUsize;
 
@@ -65,45 +66,17 @@ impl GaussLaguerre {
     ///
     /// A rule of degree n can integrate polynomials of degree 2n-1 exactly.
     ///
-    /// Applies the Golub-Welsch algorithm to determine Gauss-Laguerre nodes & weights.
-    /// Constructs the companion matrix A for the Laguerre Polynomial using the relation:
-    /// -n L_{n-1} + (2n+1) L_{n} -(n+1) L_{n+1} = x L_n
-    /// The constructed matrix is symmetric and tridiagonal with
-    /// (2n+1) on the diagonal & -(n+1) on the off-diagonal (n = row number).
-    /// Root & weight finding are equivalent to eigenvalue problem.
-    /// see Gil, Segura, Temme - Numerical Methods for Special Functions
+    /// Uses the Golub-Welsch algorithm.
     pub fn new(degree: NonZeroUsize, alpha: FiniteAboveNegOneF64) -> Self {
-        let mut companion_matrix = DMatrixf64::from_element(degree.get(), degree.get(), 0.0);
-
-        let mut diag = alpha.get() + 1.0;
-        // Initialize symmetric companion matrix
-        for idx in 0..degree.get() - 1 {
-            let idx_f64 = 1.0 + idx as f64;
-            let off_diag = sqrt(idx_f64 * (idx_f64 + alpha.get()));
-            companion_matrix[(idx, idx)] = diag;
-            companion_matrix[(idx, idx + 1)] = off_diag;
-            companion_matrix[(idx + 1, idx)] = off_diag;
-            diag += 2.0;
-        }
-        companion_matrix[(degree.get() - 1, degree.get() - 1)] = diag;
-        // calculate eigenvalues & vectors
-        let eigen = companion_matrix.symmetric_eigen();
-
-        let scale_factor = gamma(alpha.get() + 1.0);
-
-        // zip together the iterator over nodes with the one over weights and return as Box<[(f64, f64)]>
-        let mut node_weight_pairs: Box<[(f64, f64)]> = eigen
-            .eigenvalues
-            .into_iter()
-            .copied()
-            .zip(
-                (eigen.eigenvectors.row(0).map(|x| x * x) * scale_factor)
-                    .into_iter()
-                    .copied(),
-            )
-            .collect();
-
-        node_weight_pairs.sort_unstable_by(|(node1, _), (node2, _)| node1.total_cmp(node2));
+        let node_weight_pairs = golub_welsch(
+            degree,
+            |idx| alpha.get() + 1.0 + 2.0 * (idx as f64),
+            |idx| {
+                let idx_f64_p1 = 1.0 + (idx as f64);
+                sqrt(idx_f64_p1 * (idx_f64_p1 + alpha.get()))
+            },
+            gamma(alpha.get() + 1.0),
+        );
 
         GaussLaguerre {
             node_weight_pairs,
