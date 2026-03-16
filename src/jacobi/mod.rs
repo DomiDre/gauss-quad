@@ -25,11 +25,12 @@
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{
-    __impl_node_weight_rule, DMatrixf64, FiniteAboveNegOneF64, GaussChebyshevFirstKind,
+    __impl_node_weight_rule, FiniteAboveNegOneF64, GaussChebyshevFirstKind,
     GaussChebyshevSecondKind, GaussLegendre, Node, Weight,
     math::{gamma, pow, sqrt},
 };
 
+use crate::golub_welsch::golub_welsch;
 use alloc::boxed::Box;
 use core::num::NonZeroUsize;
 
@@ -67,8 +68,7 @@ impl GaussJacobi {
     ///
     /// A rule of degree n can integrate polynomials of degree 2n-1 exactly.
     ///
-    /// Applies the Golub-Welsch algorithm to determine Gauss-Jacobi nodes & weights.
-    /// See Gil, Segura, Temme - Numerical Methods for Special Functions
+    /// Uses the Golub-Welsch algorithm.
     pub fn new(deg: NonZeroUsize, alpha: FiniteAboveNegOneF64, beta: FiniteAboveNegOneF64) -> Self {
         // Delegate the computation of nodes and weights when they have special values
         // that are equivalent to other rules that have faster implementations.
@@ -93,53 +93,36 @@ impl GaussJacobi {
             };
         }
 
-        let mut companion_matrix = DMatrixf64::from_element(deg.get(), deg.get(), 0.0);
-
-        let mut diag = (beta.get() - alpha.get()) / (2.0 + beta.get() + alpha.get());
-        // Initialize symmetric companion matrix
-        for idx in 0..deg.get() - 1 {
-            let idx_f64 = idx as f64;
-            let idx_p1 = idx_f64 + 1.0;
-            let denom_sum = 2.0 * idx_p1 + alpha.get() + beta.get();
-            let off_diag = 2.0 / denom_sum
-                * sqrt(
-                    idx_p1
-                        * (idx_p1 + alpha.get())
-                        * (idx_p1 + beta.get())
-                        * (idx_p1 + alpha.get() + beta.get())
-                        / ((denom_sum + 1.0) * (denom_sum - 1.0)),
-                );
-            companion_matrix[(idx, idx)] = diag;
-            companion_matrix[(idx, idx + 1)] = off_diag;
-            companion_matrix[(idx + 1, idx)] = off_diag;
-            diag = (beta.get() * beta.get() - alpha.get() * alpha.get())
-                / (denom_sum * (denom_sum + 2.0));
-        }
-        companion_matrix[(deg.get() - 1, deg.get() - 1)] = diag;
-        // calculate eigenvalues & vectors
-        let eigen = companion_matrix.symmetric_eigen();
-
-        let scale_factor = pow(2.0f64, alpha.get() + beta.get() + 1.0)
-            * gamma(alpha.get() + 1.0)
-            * gamma(beta.get() + 1.0)
-            / gamma(alpha.get() + beta.get() + 1.0)
-            / (alpha.get() + beta.get() + 1.0);
-
-        // zip together the iterator over nodes with the one over weights and return as Box<[(f64, f64)]>
-        let mut node_weight_pairs: Box<[(f64, f64)]> = eigen
-            .eigenvalues
-            .iter()
-            .copied()
-            .zip(
-                eigen
-                    .eigenvectors
-                    .row(0)
-                    .iter()
-                    .map(|x| x * x * scale_factor),
-            )
-            .collect();
-
-        node_weight_pairs.sort_unstable_by(|(node1, _), (node2, _)| node1.total_cmp(node2));
+        let mut node_weight_pairs = golub_welsch(
+            deg,
+            |idx| {
+                if idx == 0 {
+                    (beta.get() - alpha.get()) / (2.0 + beta.get() + alpha.get())
+                } else {
+                    let denom_sum = 2.0 * (idx as f64) + alpha.get() + beta.get();
+                    (beta.get() * beta.get() - alpha.get() * alpha.get())
+                        / (denom_sum * (denom_sum + 2.0))
+                }
+            },
+            |idx| {
+                let idx_f64 = idx as f64;
+                let idx_p1 = idx_f64 + 1.0;
+                let denom_sum = 2.0 * idx_p1 + alpha.get() + beta.get();
+                2.0 / denom_sum
+                    * sqrt(
+                        idx_p1
+                            * (idx_p1 + alpha.get())
+                            * (idx_p1 + beta.get())
+                            * (idx_p1 + alpha.get() + beta.get())
+                            / ((denom_sum + 1.0) * (denom_sum - 1.0)),
+                    )
+            },
+            pow(2.0f64, alpha.get() + beta.get() + 1.0)
+                * gamma(alpha.get() + 1.0)
+                * gamma(beta.get() + 1.0)
+                / gamma(alpha.get() + beta.get() + 1.0)
+                / (alpha.get() + beta.get() + 1.0),
+        );
 
         // TO FIX: implement correction
         // eigenvalue algorithm has problem to get the zero eigenvalue for odd degrees

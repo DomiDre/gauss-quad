@@ -26,7 +26,7 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use crate::{__impl_node_weight_rule, DMatrixf64, Node, Weight, math::sqrt};
+use crate::{__impl_node_weight_rule, Node, Weight, golub_welsch::golub_welsch, math::sqrt};
 
 use alloc::boxed::Box;
 use core::{f64::consts::PI, num::NonZeroUsize};
@@ -62,44 +62,10 @@ impl GaussHermite {
     ///
     /// A rule of degree n can integrate polynomials of degree 2n-1 exactly.
     ///
-    /// Applies the Golub-Welsch algorithm to determine Gauss-Hermite nodes & weights.
-    /// Constructs the companion matrix A for the Hermite Polynomial using the relation:
-    /// 1/2 H_{n+1} + n H_{n-1} = x H_n
-    /// A similar matrix that is symmetrized is constructed by D A D^{-1}
-    /// Resulting in a symmetric tridiagonal matrix with
-    /// 0 on the diagonal & sqrt(n/2) on the off-diagonal
-    /// root & weight finding are equivalent to eigenvalue problem
-    /// see Gil, Segura, Temme - Numerical Methods for Special Functions
+    /// Uses the Golub-Welsch algorithm.
     pub fn new(deg: NonZeroUsize) -> Self {
-        let mut companion_matrix = DMatrixf64::from_element(deg.get(), deg.get(), 0.0);
-
-        // Initialize symmetric companion matrix
-        for idx in 0..deg.get() - 1 {
-            let idx_f64 = 1.0 + idx as f64;
-            let element = sqrt(idx_f64 * 0.5);
-            companion_matrix[(idx, idx + 1)] = element;
-            companion_matrix[(idx + 1, idx)] = element;
-        }
-        // calculate eigenvalues & vectors
-        let eigen = companion_matrix.symmetric_eigen();
-
-        // zip together the iterator over nodes with the one over weights and collect into a Box<[(f64, f64)]>
-        let mut node_weight_pairs: Box<[(Node, Weight)]> = eigen
-            .eigenvalues
-            .iter()
-            .copied()
-            .zip(
-                eigen
-                    .eigenvectors
-                    .row(0)
-                    .map(|x| x * x * sqrt(PI))
-                    .iter()
-                    .copied(),
-            )
-            .collect();
-
-        // sort the nodes and weights by the nodes
-        node_weight_pairs.sort_unstable_by(|(node1, _), (node2, _)| node1.total_cmp(node2));
+        let node_weight_pairs =
+            golub_welsch(deg, |_| 0.0, |idx| sqrt((1.0 + idx as f64) * 0.5), sqrt(PI));
 
         GaussHermite { node_weight_pairs }
     }
