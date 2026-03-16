@@ -4,7 +4,7 @@ use crate::{Node, Weight};
 
 use alloc::boxed::Box;
 use core::num::NonZeroUsize;
-use nalgebra::{Dyn, Matrix, VecStorage};
+use nalgebra::{Dyn, SquareMatrix, VecStorage};
 
 /// Applies the Golub-Welsh algorithm to determine nodes and weights of Gaussian quadrature nodes.
 ///
@@ -22,21 +22,21 @@ use nalgebra::{Dyn, Matrix, VecStorage};
 pub fn golub_welsch<D, O>(
     degree: NonZeroUsize,
     mut diag: D,
-    mut off_diag: O,
+    off_diag: O,
     scale_factor: f64,
 ) -> Box<[(Node, Weight)]>
 where
     D: FnMut(usize) -> f64,
-    O: FnMut(usize) -> f64,
+    O: Fn(usize) -> f64,
 {
     let mut companion_matrix =
-        Matrix::<f64, Dyn, Dyn, VecStorage<f64, Dyn, Dyn>>::zeros(degree.get(), degree.get());
+        SquareMatrix::<f64, Dyn, VecStorage<f64, Dyn, Dyn>>::zeros(degree.get(), degree.get());
 
     for idx in 0..degree.get() - 1 {
-        let elem = off_diag(idx);
         companion_matrix[(idx, idx)] = diag(idx);
-        companion_matrix[(idx, idx + 1)] = elem;
-        companion_matrix[(idx + 1, idx)] = elem;
+        let off_diag_elem = off_diag(idx);
+        companion_matrix[(idx, idx + 1)] = off_diag_elem;
+        companion_matrix[(idx + 1, idx)] = off_diag_elem;
     }
     companion_matrix[(degree.get() - 1, degree.get() - 1)] = diag(degree.get() - 1);
 

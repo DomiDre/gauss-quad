@@ -33,7 +33,7 @@ serde = ["dep:serde"]
 # Enables a parallel version of the `integrate` function on the quadrature rule structs through the [`rayon`](https://crates.io/crates/serde) crate.
 # Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
 # `rayon` depends on the standard library, so this also enables the `std` feature.
-rayon = ["dep:rayon", "std"]
+rayon = ["dep:rayon", "std", "nalgebra/rayon"]
 # Link the standard library and use it as the math backend.
 # When this feature is disabled the crate is `no_std` compatible.
 std = ["serde?/std", "nalgebra/std"]
