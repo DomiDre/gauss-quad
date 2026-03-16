@@ -93,16 +93,16 @@ impl GaussJacobi {
             };
         }
 
-        let mut diag = (beta.get() - alpha.get()) / (2.0 + beta.get() + alpha.get());
-
         let mut node_weight_pairs = golub_welsch(
             deg,
             |idx| {
-                let denom_sum = 2.0 * (idx as f64 + 1.0) + alpha.get() + beta.get();
-                let out = diag;
-                diag = (beta.get() * beta.get() - alpha.get() * alpha.get())
-                    / (denom_sum * (denom_sum + 2.0));
-                out
+                if idx == 0 {
+                    (beta.get() - alpha.get()) / (2.0 + beta.get() + alpha.get())
+                } else {
+                    let denom_sum = 2.0 * (idx as f64) + alpha.get() + beta.get();
+                    (beta.get() * beta.get() - alpha.get() * alpha.get())
+                        / (denom_sum * (denom_sum + 2.0))
+                }
             },
             |idx| {
                 let idx_f64 = idx as f64;

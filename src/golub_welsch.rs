@@ -21,12 +21,12 @@ use nalgebra::{Dyn, SquareMatrix, VecStorage};
 /// The node-weight pairs are sorted by the node.
 pub fn golub_welsch<D, O>(
     degree: NonZeroUsize,
-    mut diag: D,
+    diag: D,
     off_diag: O,
     scale_factor: f64,
 ) -> Box<[(Node, Weight)]>
 where
-    D: FnMut(usize) -> f64,
+    D: Fn(usize) -> f64,
     O: Fn(usize) -> f64,
 {
     let mut companion_matrix =
