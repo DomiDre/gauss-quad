@@ -12,7 +12,11 @@ use nalgebra::{Dyn, Matrix, VecStorage};
 /// computes the nodes and weights by solving the eigenvalue problem.
 /// See Gil, Segura, Temme - Numerical Methods for Special Functions.
 ///
-/// The elements of the first row of the eigenvalue matrix is multiplied by x^2*`scale_factor`.
+/// The functions that compute the elements are given the index of the element along the diagonal.
+/// The `diag` function is given the index in the range `0..degree`, while the `off_diag` function
+/// if given the index in the range `0..degree - 1`.
+///
+/// The elements of the first row of the resulting eigenvalue matrix is multiplied by x^2*`scale_factor`.
 ///
 /// The node-weight pairs are sorted by the node.
 pub fn golub_welsch<D, O>(
