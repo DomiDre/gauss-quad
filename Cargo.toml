@@ -16,6 +16,7 @@ rust-version = "1.87.0"
 [dependencies]
 nalgebra = { version = "0.34", default-features = false, features = ["alloc"] }
 serde = { version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true }
+rkyv = { version = "0.8.15", default-features = false, features = ["alloc"], optional = true }
 rayon = { version = "1.11.0", default-features = false, optional = true }
 libm = { version = "0.2.16", default-features = false, optional = true }
 zerocopy = { version = "0.8.42", default-features = false, optional = true, features = ["derive"] }
@@ -31,6 +32,8 @@ default = ["libm"]
 libm = ["dep:libm", "nalgebra/libm"]
 # Implements the `Serialize` and `Deserialize` traits from the [`serde`](https://crates.io/crates/serde) crate for the quadrature rule structs.
 serde = ["dep:serde"]
+# Implements the `Serialize`, `Deserialize` and `Archuve` traits from the [`rkyv`](https://crates.io/crates/rkyv) crate for the quadrature rule structs.
+rkyv = ["dep:rkyv"]
 # Enables a parallel version of the `integrate` function on the quadrature rule structs through the [`rayon`](https://crates.io/crates/serde) crate.
 # Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
 # `rayon` depends on the standard library, so this also enables the `std` feature.
