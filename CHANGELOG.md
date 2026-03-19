@@ -5,6 +5,7 @@ This document contains all changes to the crate since version 0.1.8.
 ## [Unreleased: 0.3.1]
 
 - Internal code structure improvements.
+- Add the `rkyv` feature that derives the (de)serialization traits from the [`rkyv`](https://crates.io/crates/rkyv) crate for the quadrature rule structs.
 
 ## [0.3.0] - 2026-03-15
 
