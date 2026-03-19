@@ -101,7 +101,7 @@ impl Default for FiniteAboveNegOneF64 {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// The error that that is returned when trying to convert a [`f64`] value that is less than or equal to -1.0
-/// into an [`FiniteAboveNegOneF64`] with the [`TryFrom`] trait.
+/// into a [`FiniteAboveNegOneF64`] with the [`TryFrom`] trait.
 pub struct InfNanNegOneOrLessError;
 
 impl fmt::Display for InfNanNegOneOrLessError {
@@ -118,7 +118,7 @@ impl core::error::Error for InfNanNegOneOrLessError {}
 impl TryFrom<f64> for FiniteAboveNegOneF64 {
     type Error = InfNanNegOneOrLessError;
 
-    /// Tries to convert a `f64` into an `FiniteAboveNegOneF64`.
+    /// Tries to convert a `f64` into a `FiniteAboveNegOneF64`.
     ///
     /// Returns an error if the value is less than or equal to -1.0.
     #[inline]
@@ -135,7 +135,7 @@ impl From<FiniteAboveNegOneF64> for f64 {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-/// An error that can occur when parsing a `&str` into an [`FiniteAboveNegOneF64`].
+/// An error that can occur when parsing a `&str` into a [`FiniteAboveNegOneF64`].
 pub enum ParseFiniteAboveNegOneF64Error {
     ParseError(ParseFloatError),
     InvalidValue(InfNanNegOneOrLessError),
