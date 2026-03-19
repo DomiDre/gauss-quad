@@ -57,6 +57,7 @@ use core::{f64::consts::PI, num::NonZeroUsize};
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
+#[cfg_attr(feature = "zerocopy", derive(zerocopy::KnownLayout))]
 pub struct GaussHermite {
     node_weight_pairs: Box<[(Node, Weight)]>,
 }

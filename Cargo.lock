@@ -222,6 +222,7 @@ dependencies = [
  "rayon",
  "rkyv",
  "serde",
+ "zerocopy",
 ]
 
 [[package]]

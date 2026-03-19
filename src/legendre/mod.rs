@@ -77,6 +77,7 @@ use core::num::NonZeroUsize;
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
+#[cfg_attr(feature = "zerocopy", derive(zerocopy::KnownLayout))]
 pub struct GaussLegendre {
     node_weight_pairs: Box<[(Node, Weight)]>,
 }

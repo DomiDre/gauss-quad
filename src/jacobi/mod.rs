@@ -59,6 +59,7 @@ use core::num::NonZeroUsize;
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
+#[cfg_attr(feature = "zerocopy", derive(zerocopy::KnownLayout))]
 pub struct GaussJacobi {
     node_weight_pairs: Box<[(Node, Weight)]>,
     alpha: FiniteAboveNegOneF64,

@@ -40,6 +40,7 @@ use rayon::iter::{
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
 )]
+#[cfg_attr(feature = "zerocopy", derive(zerocopy::KnownLayout))]
 pub struct GaussChebyshevFirstKind {
     node_weight_pairs: Box<[(Node, Weight)]>,
 }
@@ -137,6 +138,7 @@ __impl_node_weight_rule! {GaussChebyshevFirstKind, GaussChebyshevFirstKindNodes,
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "zerocopy", derive(zerocopy::KnownLayout))]
 pub struct GaussChebyshevSecondKind {
     node_weight_pairs: Box<[(Node, Weight)]>,
 }
