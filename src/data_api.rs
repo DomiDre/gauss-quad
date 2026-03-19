@@ -104,11 +104,6 @@ impl Default for FiniteAboveNegOneF64 {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "rkyv",
-    derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize)
-)]
 /// The error that that is returned when trying to convert a [`f64`] value that is less than or equal to -1.0
 /// into a [`FiniteAboveNegOneF64`] with the [`TryFrom`] trait.
 pub struct InfNanNegOneOrLessError;
