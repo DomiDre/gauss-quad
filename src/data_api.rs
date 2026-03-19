@@ -24,6 +24,15 @@ pub type Weight = f64;
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "zerocopy",
+    derive(
+        zerocopy::KnownLayout,
+        zerocopy::Immutable,
+        zerocopy::FromZeros,
+        zerocopy::IntoBytes
+    )
+)]
 /// A wrapper around an [`f64`] that ensures the value is greater than -1.0, finite, and not [`NAN`](f64::NAN).
 pub struct FiniteAboveNegOneF64(f64);
 
