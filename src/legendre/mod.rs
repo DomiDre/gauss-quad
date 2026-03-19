@@ -73,6 +73,7 @@ use core::num::NonZeroUsize;
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "zerocopy", derive(zerocopy::KnownLayout))]
 pub struct GaussLegendre {
     node_weight_pairs: Box<[(Node, Weight)]>,
 }

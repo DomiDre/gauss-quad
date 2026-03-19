@@ -18,6 +18,7 @@ nalgebra = { version = "0.34", default-features = false, features = ["alloc"] }
 serde = { version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true }
 rayon = { version = "1.11.0", default-features = false, optional = true }
 libm = { version = "0.2.16", default-features = false, optional = true }
+zerocopy = { version = "0.8.42", default-features = false, optional = true, features = ["alloc", "derive"] }
 
 [dev-dependencies]
 approx = "0.5.1"
@@ -36,7 +37,9 @@ serde = ["dep:serde"]
 rayon = ["dep:rayon", "std", "nalgebra/rayon"]
 # Link the standard library and use it as the math backend.
 # When this feature is disabled the crate is `no_std` compatible.
-std = ["serde?/std", "nalgebra/std"]
+std = ["serde?/std", "nalgebra/std", "zerocopy/std"]
+# Derives relevant traits from the [`zerocopy`](https://crates.io/crates/zerocopy) crate.
+zerocopy = ["dep:zerocopy"]
 
 [package.metadata.docs.rs]
 # Document all features

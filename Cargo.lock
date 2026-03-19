@@ -221,6 +221,7 @@ dependencies = [
  "nalgebra",
  "rayon",
  "serde",
+ "zerocopy",
 ]
 
 [[package]]
