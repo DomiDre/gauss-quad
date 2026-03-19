@@ -188,7 +188,7 @@
 //! `rayon`: enables a parallel version of the `integrate` function on the quadrature rule structs. Can speed up integration if evaluating the integrand is expensive (takes ≫100 µs).
 //! The [`rayon`] crate depends on the standard library, so this also enables the `std` feature.
 //!
-//! `zerocopy`: imlements the `KnownLayout` trait from the [`zerocopy`] crate for the quadrature rule structs.
+//! `zerocopy`: imlements the [`KnownLayout`](zerocopy::KnownLayout) trait from the [`zerocopy`] crate for the quadrature rule structs.
 //!
 //! One of the below features must be enabled:
 //!
