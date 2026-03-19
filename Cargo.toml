@@ -37,7 +37,7 @@ serde = ["dep:serde"]
 rayon = ["dep:rayon", "std", "nalgebra/rayon"]
 # Link the standard library and use it as the math backend.
 # When this feature is disabled the crate is `no_std` compatible.
-std = ["serde?/std", "nalgebra/std"]
+std = ["nalgebra/std"]
 # Derives relevant traits from the [`zerocopy`](https://crates.io/crates/zerocopy) crate.
 zerocopy = ["dep:zerocopy"]
 
