@@ -6,78 +6,83 @@
 [![Build Status](https://github.com/domidre/gauss-quad/actions/workflows/rust.yml/badge.svg)](https://github.com/domidre/gauss-quad/actions/workflows/rust.yml)
 [![codecov](https://codecov.io/gh/DomiDre/gauss-quad/graph/badge.svg?token=YUP5Y77ER2)](https://codecov.io/gh/DomiDre/gauss-quad)
 
-The `gauss-quad` crate is a small library to approximate integrals as
+This crate lets you integrate functions quickly with [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature).
 
-$$\int_a^b f(x) \mathrm{d}x \approx \sum_{i=1}^nw_if(x_i)$$
+Gaussian quadrature approximates an integral by only evaluating the integrand at a few carefully chosen points (called nodes),
+multiplying the results with carefully chosen weights and summing the results.
 
-through [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature).
+Through different techniques for choosing the nodes and weights, different types of functions can be integrated while evaluating them
+a very small number of times. 
 
-Here $f(x)$ is a user supplied function, $x_i$ are specific x-values called nodes,
-and $w_i$ are weights.
-This library can compute the weights and nodes for several different common quadrature rules.
-Gaussian quadrature is interesting because a rule of degree n can exactly integrate
-all polynomials of degree 2n-1 or less while evaluating them at only n points.
+This enables fast and efficient integration of functions.
+A quadrature rule with n nodes can perfectly integrate a polynomial of degree 2n-1 or less,
+and other functions are integrated well if they are well-approximated by a polynomial.
 
-To use the crate, the desired quadrature rule has to be included in the program, e.g. for a Gauss-Legendre rule
+
+The crate currently supports the following Gaussian quadrature rules:
+
+
+- [Gauss-Legendre](https://en.wikipedia.org/wiki/Gauss%E2%80%93Legendre_quadrature)
+- [Gauss-Jacobi](https://en.wikipedia.org/wiki/Gauss%E2%80%93Jacobi_quadrature)
+- [Gauss-Laguerre](https://en.wikipedia.org/wiki/Gauss%E2%80%93Laguerre_quadrature) (generalized)
+- [Gauss-Hermite](https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature)
+- [Gauss-Chebyshev](https://en.wikipedia.org/wiki/Chebyshev%E2%80%93Gauss_quadrature) of the first and second kinds
+
+as well as the following [Newton-Cotes formulas](https://en.wikipedia.org/wiki/Newton%E2%80%93Cotes_formulas):
+
+- [Midpoint](https://en.wikipedia.org/wiki/Riemann_sum#Midpoint_rule)
+- [Trapezoid](https://en.wikipedia.org/wiki/Trapezoidal_rule)
+- [Simpsons](https://en.wikipedia.org/wiki/Simpson%27s_rule)
+
+The crate is `no_std` compatible (but needs an allocator due to its use of the `alloc` crate).
+
+## Examples
+
+Integrate x^2 from 0 to 1 with Gauss-Legendre quadrature:
 
 ```rust
- use gauss_quad::GaussLegendre;
+use gauss_quad::GaussLegendre;
+use core::num::NonZeroUsize;
+use approx::assert_abs_diff_eq;
+
+let integrator = GaussLegendre::new(2.try_into()?);
+
+let integral = integrator.integrate(0.0, 1.0, |x| x * x);
+
+assert_abs_diff_eq!(integral, 1.0/3.0);
+# Ok::<Result<(), Box<dyn core::error::Error>>>(())
 ```
 
-The general call structure is to first initialize the n-point quadrature rule setting the degree n via
+Integrate x^2 * e^(-x^2) over the whole real line:
 
 ```rust
- let quad = QUADRATURE_RULE::new(n);
-```
+use gauss_quad::GaussHermite;
+use approx::assert_abs_diff_eq;
 
-where QUADRATURE_RULE can currently be set to calculate either:
+let quad = GaussHermite::new(10.try_into().unwrap());
 
-| QUADRATURE_RULE | Integral                                              |
-|-----------------|-------------------------------------------------------|
-| Midpoint        | $$\int_a^b f(x) \mathrm{d}x$$                         |
-| Simpson         | $$\int_a^b f(x) \mathrm{d}x$$                         |
-| Trapezoid       | $$\int_a^b f(x) \mathrm{d}x$$                         |
-| GaussLegendre   | $$\int_a^b f(x) \mathrm{d}x$$                         |
-| GaussJacobi     | $$\int_a^b f(x)(1-x)^\alpha (1+x)^\beta \mathrm{d}x$$ |
-| GaussLaguerre   | $$\int_{0}^\infty f(x)x^\alpha e^{-x} \mathrm{d}x$$   |
-| GaussHermite    | $$\int_{-\infty}^\infty f(x) e^{-x^2} \mathrm{d}x$$   |
-| GaussChebyshev  | $$\int_a^b f(x)(1-x^2)^{\pm\frac{1}{2}}$$             |
+let integral = quad.integrate(|x| x.powi(2));
 
-For the quadrature rules that take an additional parameter, such as Gauss-Laguerre and Gauss-Jacobi, the parameters have to be added to the initialization, e.g.
-
-```rust
- let quad = GaussLaguerre::new(n, alpha);
-```
-
-Then to calculate the integral of a function call
-
-```rust
-let integral = quad.integrate(a, b, f(x));
-```
-
-where `a` and `b` (both `f64`) are the integral bounds and `f(x)` is the integrand which implements the trait `FnMut(f64) -> f64`.
-For example to integrate a parabola from 0 to 1 one can use a lambda expression as integrand and call:
-
-```rust
-let integral = quad.integrate(0.0, 1.0, |x| x * x);
-```
-
-If the integral is improper, as in the case of Gauss-Laguerre and Gauss-Hermite integrals, no integral bounds should be passed and the call simplifies to
-
-```rust
-let integral = quad.integrate(f(x));
+assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
 ```
 
 Rules can be nested into double and higher integrals:
 
 ```rust
-let double_integral = quad.integrate(a, b, |x| quad.integrate(c(x), d(x), |y| f(x, y)));
+let double_integral = integrator.integrate(a, b, |x| integrator.integrate(c(x), d(x), |y| f(x, y)));
 ```
 
-If the computation time for the evaluation of the integrand is large (≫100 µs), the `rayon` feature can be used to parallelize the computation on multiple cores (for quicker to compute integrands any gain is overshadowed by the overhead from parallelization)
+If it takes a long time to evaluate the integrand (≫100 µs), the `rayon` feature can be used to parallelize the computation on multiple cores:
 
 ```rust
-let slow_integral = quad.par_integrate(a, b, |x| f(x));
+let slow_integral = integrator.par_integrate(a, b, |x| f(x));
+```
+
+This can also be nested with other rules to integrate double and higher integrals in parallel,
+and the quadrature rules can be different as well:
+
+```rust
+let slow_double_integral = legendre_integrator.par_integrate(a, b, |x| hermite_integrator.integrate(|y| f(x, y)))
 ```
 
 <br>
