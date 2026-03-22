@@ -42,7 +42,6 @@ Integrate x^2 from 0 to 1 with Gauss-Legendre quadrature:
 
 ```rust
 use gauss_quad::GaussLegendre;
-use core::num::NonZeroUsize;
 use approx::assert_abs_diff_eq;
 
 let integrator = GaussLegendre::new(2.try_into()?);
@@ -50,7 +49,6 @@ let integrator = GaussLegendre::new(2.try_into()?);
 let integral = integrator.integrate(0.0, 1.0, |x| x * x);
 
 assert_abs_diff_eq!(integral, 1.0/3.0);
-# Ok::<Result<(), Box<dyn core::error::Error>>>(())
 ```
 
 Integrate x^2 * e^(-x^2) over the whole real line:
