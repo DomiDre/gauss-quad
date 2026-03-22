@@ -2,7 +2,7 @@
 name = "gauss-quad"
 version = "0.3.1"
 authors = ["DomiDre <dominiquedresen@gmail.com>", "Johanna Sörngård <jsorngard@gmail.com>"]
-keywords = ["gaussian", "quadrature", "numerics", "integration"]
+keywords = ["gaussian", "quadrature", "integrate", "integration"]
 categories = ["mathematics", "no-std"]
 edition = "2024"
 description = "Library for applying Gaussian quadrature to integrate a function"
