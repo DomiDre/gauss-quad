@@ -57,11 +57,29 @@ Integrate x^2 * e^(-x^2) over the whole real line:
 use gauss_quad::GaussHermite;
 use approx::assert_abs_diff_eq;
 
-let quad = GaussHermite::new(10.try_into().unwrap());
+let integrator = GaussHermite::new(10.try_into()?);
 
-let integral = quad.integrate(|x| x.powi(2));
+let integral = integrator.integrate(|x| x.powi(2));
 
 assert_abs_diff_eq!(integral, core::f64::consts::PI.sqrt() / 2.0, epsilon = 1e-14);
+```
+
+Quadrature rules can be re-used, which means that the weights and nodes only have to be computed once:
+
+```rust
+use gauss_quad::GaussLegendre;
+use approx::assert_abs_diff_eq;
+
+let integrator = GaussLegendre::new(1000.try_into()?);
+
+let a = 0.0;
+let b = core::f64::consts::PI;
+
+let integral_1 = integrator.integrate(a, b, |x| x.sin());
+let integral_2 = integrator.integrate(a, b, |x| (x*x).sin());
+
+assert_abs_diff_eq!(integral_1, 2.0);
+assert_abs_diff_eq!(integral_2, 0.77265171269006565320);
 ```
 
 Rules can be nested into double and higher integrals:
