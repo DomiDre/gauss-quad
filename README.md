@@ -72,14 +72,11 @@ use approx::assert_abs_diff_eq;
 
 let integrator = GaussLegendre::new(1000.try_into()?);
 
-let a = 0.0;
-let b = core::f64::consts::PI;
+let integral_1 = integrator.integrate(0, 1, |x| x.sin());
+let integral_2 = integrator.integrate(0, core::f64::consts::PI, |x| (x*x).sin());
 
-let integral_1 = integrator.integrate(a, b, |x| x.sin());
-let integral_2 = integrator.integrate(a, b, |x| (x*x).sin());
-
-assert_abs_diff_eq!(integral_1, 2.0);
-assert_abs_diff_eq!(integral_2, 0.77265171269006565320);
+assert_abs_diff_eq!(integral_1, 0.459697694131860);
+assert_abs_diff_eq!(integral_2, 0.772651712690066);
 ```
 
 Rules can be nested into double and higher integrals:
