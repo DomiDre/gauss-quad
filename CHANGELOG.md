@@ -8,6 +8,7 @@ This document contains all changes to the crate since version 0.1.8.
 - Add the `zerocopy` feature that derives the `KnownLayout` trait from the [`zerocopy`](https://crates.io/crates/zerocopy) crate for the quadrature rule structs.
 - Add the `rkyv` feature that derives the (de)serialization traits from the [`rkyv`](https://crates.io/crates/rkyv) crate for the quadrature rule structs.
 - Update transitive dependencies.
+- Rewrite the readme to have full functionality also when the host can't render LaTeX.
 
 ## [0.3.0] - 2026-03-15
 
