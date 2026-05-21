@@ -16,7 +16,7 @@ rust-version = "1.87.0"
 [dependencies]
 nalgebra = { version = "0.34", default-features = false, features = ["alloc"] }
 serde = { version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true }
-rkyv = { version = "0.8.15", default-features = false, features = ["alloc"], optional = true }
+rkyv = { version = "0.8.16", default-features = false, features = ["alloc"], optional = true }
 rayon = { version = "1.11.0", default-features = false, optional = true }
 libm = { version = "0.2.16", default-features = false, optional = true }
 zerocopy = { version = "0.8.42", default-features = false, optional = true, features = ["derive"] }
