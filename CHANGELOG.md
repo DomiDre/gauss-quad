@@ -2,6 +2,10 @@
 
 This document contains all changes to the crate since version 0.1.8.
 
+## [Unreleased]
+
+- Update dependencies.
+
 ## [0.3.1] - 2026-03-28
 
 - Internal code structure improvements.
