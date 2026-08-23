@@ -9,12 +9,12 @@ description = "Integrate functions with Gaussian quadrature"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/domidre/gauss-quad"
 exclude = ["CHANGELOG.md", ".gitignore", "benches"]
-rust-version = "1.87.0"
+rust-version = "1.88.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nalgebra = { version = "0.34", default-features = false, features = ["alloc"] }
+nalgebra = { version = "0.35", default-features = false, features = ["alloc"] }
 serde = { version = "1.0.204", default-features = false, features = ["alloc", "derive"], optional = true }
 rkyv = { version = "0.8.16", default-features = false, features = ["alloc"], optional = true }
 rayon = { version = "1.11.0", default-features = false, optional = true }
