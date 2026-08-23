@@ -2,7 +2,7 @@
 
 This document contains all changes to the crate since version 0.1.8.
 
-## [Unreleased]
+## [0.3.2] - 2026-07-23
 
 - Update dependencies.
 - Bump MSRV to 1.88.
