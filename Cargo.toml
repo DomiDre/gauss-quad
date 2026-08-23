@@ -9,7 +9,7 @@ description = "Integrate functions with Gaussian quadrature"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/domidre/gauss-quad"
 exclude = ["CHANGELOG.md", ".gitignore", "benches"]
-rust-version = "1.88.0"
+rust-version = "1.89.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
